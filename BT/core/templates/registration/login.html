@@ -1,0 +1,35 @@
+{% extends "base/base.html" %}
+
+
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block template %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+    <div class="row" style="padding-bottom:20%; margin-bottom:10%">
+        <div class="col-md-12">
+            <div class="wrapper">
+                <div class="logo">
+                    <img src="{% static 'img/Beauty-Time.png' %}" alt="">
+                </div>
+                <div class="text-center mt-4 name"> <hr> Ingreso Usuarios
+                </div>
+                <form id="login" method="POST" class="p-3 mt-3">
+                    {% csrf_token %}
+                    {{form | crispy}} 
+                    <button type="submit" class="btn mt-3">Iniciar sesion</button>
+                </form>
+              
+                <div class="text-center fs-6">
+                    ¿No tienes una cuenta? <a href="{% url 'register' %}">Registrate</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock template %}
