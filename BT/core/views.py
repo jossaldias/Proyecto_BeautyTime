@@ -130,3 +130,9 @@ def eliminarUsuario(request):
         users.delete()
 
     return redirect("usuarios")
+
+
+def servicios(request):
+    print(request.session.session_key)
+
+    return render(request, "tienda/servicios.html", {"servicios": servicios})
