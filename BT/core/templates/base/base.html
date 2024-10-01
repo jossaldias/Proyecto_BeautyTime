@@ -11,7 +11,9 @@
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="static/css/btnwsp.css">
+  
   {% block css %}
   {% endblock %}
 
@@ -35,7 +37,7 @@
             <a class="nav-link {% if request.path == home %} active {% endif %}" aria-current="page"
               href="{% url 'home' %}">Inicio</a>
           </li>
-         <li class="nav-item dropdown">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Tienda
             </a>
@@ -54,27 +56,26 @@
             <a class="nav-link" href="#">Marcas</a>
           </li>
           &nbsp;
-        {% if request.user.is_authenticated %}
-        <ul class="navbar-nav">
-          <li class="nav-item dropdown" style="color:white">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="{{ user.picture.url }}" style="border-radius: 25px; background:white;" height="36" width="36" alt="Avatar" />
-              &nbsp;&nbsp;
-              <strong style="text-decoration: underline;">{{ user.first_name|capfirst }}, bienvenido</strong>
-            </a>
-            <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item text-grey" href="{% url 'perfil' %}">Perfil</a></li>
-              <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
-              <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
-            </ul>
+          {% if request.user.is_authenticated %}
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown" style="color:white">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ user.picture.url }}" style="border-radius: 25px; background:white;" height="36" width="36" alt="Avatar" />
+                &nbsp;&nbsp;
+                <strong style="text-decoration: underline;">{{ user.first_name|capfirst }}, bienvenido</strong>
+              </a>
+              <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item text-grey" href="{% url 'perfil' %}">Perfil</a></li>
+                <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
+                <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
+              </ul>
+            </li>
+          </ul>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Mi Cuenta</a>
           </li>
-        </ul>
-      {%else%}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Mi Cuenta</a>
-          </li>
-      {% endif %}
-
+          {% endif %}
         </div>
       </div>
     </div>
@@ -92,12 +93,13 @@
             <p>Martes - Jueves: 9am - 5pm</p>
             <p>Viernes: 9am - 7pm / Sáb: 8am - 4pm</p>
             <p>Dom - Lun: Cerrado</p>
-            <p>Correo electrónico: contacto@beautytime.cl</p>
           </div>
         </div>
         <div class="col-md-6 mt-3">
           <div class="footer-content">
-            <h3>Visitanos o Llámanos hoy</h3>
+            <h3>Contáctanos</h3>
+            <p>Correo electrónico: <a href="mailto:contacto@beautytime.cl" class="text-white">contacto@beautytime.cl</a></p>
+            <p>Teléfono: <a href="tel:+56998027818" class="text-white">+56 9 9802 7818</a></p>
             <div class="subscribe-form">
               <input type="text" id="nombre" class="form-control" placeholder="Nombre"><br>
               <input type="email" id="subscribe-email" class="form-control" placeholder="Correo electrónico"><br>
@@ -131,6 +133,9 @@
     crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
+  <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20mas%20informacion" class="float pulse" target="_blank">
+    <i class="fa fa-whatsapp my-float"></i>
+  </a>
 
 </body>
 
