@@ -1,0 +1,61 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+{% block template %}
+<style>
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 10px;
+    position: relative;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: justify;
+    background-color: red;
+    padding: 10px;
+  }
+
+  .card-content {
+
+    height: 150px
+  }
+</style>
+<main>
+  <h1 class="card borders" style="text-align: center; background-color:darkblue; color:#FFFFFF;">TIENDA
+  </h1>
+  <section class="card-container">
+    {% for accesorio in productos %}
+    <article class="card">
+      <h3 style="height:30px">{{servicio.nombre}}</h3>
+      {% if accesorio.picture%}
+      <a title="VerDetalle" href="{% url 'verDetalle'  producto_id=servicio.id %}"><img src="{{servicio.picture.url}}"
+          style="height:300px" alt="..."></a>
+      <p> Click para ver más [+]</p>
+
+      {%endif%}
+      <br>
+      <strong class="text-white">Descripción</strong><br>
+      <div class="card-content">
+        <p>{{ servicio.descripcion|truncatechars:100 }}</p>
+
+        <h5 class="text-white"> <strong>Precio</strong>$ {{servicio.costo}}</h5>
+      </div>
+
+      <form method="post" action="{% url 'add' servicio.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="cantidad" class="form-control" required="" id="id_cantidad" value="1">
+        <a style="background: green" onmouseover="this.style.background='darkgreen';"
+          onmouseout="this.style.background='green';" href="#" onClick="javascript:this.parentNode.submit()"><i
+            class="bi bi-bag-fill" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50"
+            data-tippy-arrow="true" data-tippy-theme="sharpborder"></i>&nbsp;Añadir al Carrito</a>
+      </form>
+
+    </article>
+    {% endfor %}
+  </section>
+</main>
+
+{% endblock %}
