@@ -31,7 +31,7 @@
     <article class="card">
       <h3 style="height:30px">{{servicio.nombre}}</h3>
       {% if accesorio.picture%}
-      <a title="VerDetalle" href="{% url 'verDetalle'  producto_id=servicio.id %}"><img src="{{servicio.picture.url}}"
+      <a title="verDetalle" href="{% url 'verDetalle'  producto_id=servicio.id %}"><img src="{{servicio.picture.url}}"
           style="height:300px" alt="..."></a>
       <p> Click para ver más [+]</p>
 

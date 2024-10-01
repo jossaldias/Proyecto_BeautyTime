@@ -21,7 +21,7 @@
               <strong>Descripción</strong><br>
               <p style="text-align: justify;">{{servicio.descripcion}}</p>
               <h5><strong>Precio</strong>$ {{servicio.costo}}</h5>
-              <p>TIPO PRODUCTO: {{servicio.tipo_producto}}</p>
+              <p>TIPO SERVICIO: {{servicio.tipo_servicio}}</p>
 
               {% if servicio.tipo_producto == 'Código Digital' %}
               <form method="post" action="{% url 'add' servicio.id %}">
