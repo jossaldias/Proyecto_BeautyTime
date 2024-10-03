@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
 
+from django.db.models import Q
 from .models import *
 from .forms import *
 
@@ -132,7 +133,32 @@ def eliminarUsuario(request):
     return redirect("usuarios")
 
 
-def servicios(request):
-    print(request.session.session_key)
+def servicios(request):    
+    servicios = Item.objects.filter(
+                                    Q(tipo='servicio') & 
+                                    (Q(categoria='Manicure y Pedicure') | 
+                                     Q(categoria='Masajes') | 
+                                     Q(categoria='Maquillaje para eventos') | 
+                                     Q(categoria='Depilación') | 
+                                     Q(categoria='Tratamientos Faciales') | 
+                                     Q(categoria='Colorimetría'))
+                                    )
+    context = {
+        'servicios': servicios
+    }
+    return render(request, 'tienda/servicios.html', context)
 
-    return render(request, "tienda/servicios.html", {"servicios": servicios})
+def productos(request):    
+    productos = Item.objects.filter(
+                                    Q(tipo='producto') & 
+                                    (Q(categoria='Coloración') | 
+                                     Q(categoria='Tratamientos') | 
+                                     Q(categoria='Línea Rubias') | 
+                                     Q(categoria='Shampoo & Acondicionadores') | 
+                                     Q(categoria='Styling & Aftercare') | 
+                                     Q(categoria='Herramientas'))
+                                    )
+    context = {
+        'productos': productos
+    }
+    return render(request, 'tienda/productos.html', context)

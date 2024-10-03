@@ -3,28 +3,28 @@
 {% block template %}
 <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 <main>
-  <h1 class="card borders page-title">SERVICIOS</h1>
+  <h1 class="card borders page-title">PRODUCTOS</h1>
   <section class="card-container">
-    {% for servicio in servicios %}
+    {% for producto in productos %}
     <article class="card">
       <div class="card-title">
-        <h3 class="product-title">{{servicio.nombre}}</h3>
+        <h3 class="product-title">{{producto.nombre}}</h3>
       </div>
       <div class="image-container">
         <a title="verDetalle" href="#">
-          <img src="{{servicio.picture.url}}" alt="...">
+          <img src="{{producto.picture.url}}" alt="...">
         </a>
-        {% comment %} <a title="verDetalle" href="{% url 'verDetalle'  servicio=servicio.id %}">
-          <img src="{{servicio.picture.url}}" alt="...">
+        {% comment %} <a title="verDetalle" href="{% url 'verDetalle'  producto_id=producto.id %}">
+          <img src="{{producto.picture.url}}" alt="...">
         </a> {% endcomment %}
       </div>
       <br>
       <strong>Descripción</strong><br>
       <div class="card-content">
-        <p>{{ servicio.descripcion|truncatechars:100 }}</p>
-        <h5> <strong>Precio</strong> ${{servicio.costo}}</h5>
+        <p>{{ producto.descripcion|truncatechars:100 }}</p>
+        <h5> <strong>Precio</strong> ${{producto.costo}}</h5>
       </div>
-      {% comment %} <form method="post" action="{% url 'add' servicio.id %}">
+      {% comment %} <form method="post" action="{% url 'add' producto.id %}">
         {% csrf_token %}
         <input type="hidden" name="cantidad" class="form-control" required="" id="id_cantidad" value="1">
         <a class="add-to-cart" href="#" onClick="javascript:this.parentNode.submit()">

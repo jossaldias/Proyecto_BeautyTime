@@ -1,4 +1,4 @@
-from .models import User
+from .models import User, Item
 from django.conf import settings
 from django import forms  
 from django.forms import TextInput
@@ -368,5 +368,55 @@ class editarPerfilForm(forms.ModelForm):
                                 
                     }
 
+
+class agregarProductoForm(forms.ModelForm):
+
+    CATEGORIA_PRODUCTO = [
+        ('Coloración', 'Coloración'),
+        ('Tratamientos', 'Tratamientos'),
+        ('Línea Rubias', 'Línea Rubias'),
+        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
+        ('Styling & Aftercare', 'Styling & Aftercare'),
+        ('Herramientas', 'Herramientas'),
+    ]
+
+    CATEGORIA_SERVICIO = [
+        ('Manicure y Pedicure', 'Manicure y Pedicure'),
+        ('Masajes', 'Masajes'),
+        ('Maquillaje para eventos', 'Maquillaje para eventos'),
+        ('Depilación', 'Depilación'),
+        ('Tratamientos Faciales', 'Tratamientos Faciales'),
+        ('Colorimetría', 'Colorimetría'),
+    ]
+
+    TIPO = [
+        ('producto', 'Producto'),
+        ('servicio', 'Servicio'),
+    ]
+
+    iditem = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
+    nombre = forms.CharField(max_length=45, label='Nombre')
+    categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
+    tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
+    costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
+    picture = forms.ImageField(required=False, label='Imagen')
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre']
+        if Item.objects.filter(nombre=nombre).exists():
+            raise ValidationError('El producto o servicio ya existe, revisa el inventario e intenta otra vez.')
+        return nombre
+
+    class Meta:
+        model = Item
+        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture']
+        labels = {
+            'nombre': 'Nombre',
+            'descripcion': 'Descripción',
+            'categoria': 'Categoría',
+            'tipo': 'Tipo',
+            'costo': 'Costo',
+            'picture': 'Imagen',
+        }
 
 

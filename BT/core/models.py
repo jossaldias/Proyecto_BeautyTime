@@ -104,3 +104,46 @@ class User(AbstractUser):
     telefono = models.BigIntegerField(null=True)
     fecha_nac = models.DateField(null=True)
     tipo_user = models.CharField(max_length=60, null=True, blank =True)
+
+from django.db import models
+
+class Item(models.Model):
+
+    CATEGORIA_PRODUCTO = [
+        ('Coloración', 'Coloración'),
+        ('Tratamientos', 'Tratamientos'),
+        ('Línea Rubias', 'Línea Rubias'),
+        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
+        ('Styling & Aftercare', 'Styling & Aftercare'),
+        ('Herramientas', 'Herramientas'),
+    ]
+
+    CATEGORIA_SERVICIO = [
+        ('Manicure y Pedicure', 'Manicure y Pedicure'),
+        ('Masajes', 'Masajes'),
+        ('Maquillaje para eventos', 'Maquillaje para eventos'),
+        ('Depilación', 'Depilación'),
+        ('Tratamientos Faciales', 'Tratamientos Faciales'),
+        ('Colorimetría', 'Colorimetría'),
+    ]
+
+    TIPO = [
+        ('producto', 'Producto'),
+        ('servicio', 'Servicio'),
+    ]
+
+    iditem = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=45, null=True, blank=True)
+    descripcion = models.CharField(max_length=255, null=True, blank=True)
+    categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, blank=True)
+    costo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    picture = models.ImageField(upload_to='media/items/', null=True, blank=True)
+    tipo = models.CharField(max_length=10, choices=TIPO)
+
+    class Meta:
+        verbose_name = 'item'
+        verbose_name_plural = 'items'
+        ordering = ['tipo']
+
+    def __str__(self):
+        return self.nombre or f"Item {self.iditem}"

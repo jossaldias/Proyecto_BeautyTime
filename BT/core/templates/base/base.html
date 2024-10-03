@@ -23,7 +23,7 @@
   {% url 'home' as home %}
   <nav class="navbar navbar-expand-lg navbar-light bg-white">
     <div class="container justify-content-center">
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="{% url 'home' %}">
         <img src="{% static 'img/Beauty-Time.png' %}" alt="Logo" class="img-fluid" style="max-height: 60px;">
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -42,7 +42,7 @@
               Tienda
             </a>
             <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item text-grey" href="#">Productos</a></li>
+              <li><a class="dropdown-item text-grey" href="{% url 'productos' %}">Productos</a></li>
               <li><a class="dropdown-item text-grey" href="{% url 'servicios' %}">Servicios</a></li>
             </ul>
           </li>
