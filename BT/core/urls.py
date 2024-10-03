@@ -20,4 +20,5 @@ urlpatterns = [
     path('paginas/agregarUsuario', views.agregarUsuario, name="agregarUsuario"),
     path('paginas/eliminarUsuario', views.eliminarUsuario, name="eliminarUsuario"),
     path('paginas/editarUsuario', views.editarUsuario, name="editarUsuario"),
+    path('paginas/carrito/', views.carrito, name='carrito'),
 ]

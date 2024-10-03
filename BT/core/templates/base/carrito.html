@@ -10,8 +10,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="static/css/btnwsp.css">
   
   {% block css %}
@@ -37,14 +35,8 @@
             <a class="nav-link {% if request.path == home %} active {% endif %}" aria-current="page"
               href="{% url 'home' %}">Inicio</a>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Tienda
-            </a>
-            <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item text-grey" href="#">Productos</a></li>
-              <li><a class="dropdown-item text-grey" href="#">Servicios</a></li>
-            </ul>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Tienda</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Novedades</a>
@@ -66,7 +58,7 @@
               </a>
               <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item text-grey" href="{% url 'perfil' %}">Perfil</a></li>
-                <li><a class="dropdown-item text-grey" href="{% url 'carrito' %}">Mi Carrito</a></li> <!-- Aquí se añade "Mi Carrito" -->
+                <li><a class="dropdown-item text-grey" href="{% url 'carrito' %}">Mi Carrito</a></li>
                 <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
                 <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
               </ul>
@@ -82,8 +74,73 @@
     </div>
   </nav>
 
-  {% block template %}
-  {% endblock %}
+  <div class="container mt-4">
+    <h2>Mi Carrito</h2>
+    <div class="card mb-4">
+      <div class="card-header">
+        Detalles del Carrito
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Cantidad</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Producto 1</td>
+              <td>$9999</td>
+              <td>
+                <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+              </td>
+              <td>$9999</td>
+              <td>
+                <button class="btn btn-danger">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Producto 2</td>
+              <td>$9999</td>
+              <td>
+                <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+              </td>
+              <td>$9999</td>
+              <td>
+                <button class="btn btn-danger">Eliminar</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Producto 3</td>
+              <td>$9999</td>
+              <td>
+                <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+              </td>
+              <td>$9999</td>
+              <td>
+                <button class="btn btn-danger">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-end"><strong>Total</strong></td>
+              <td colspan="2"><strong>$9999</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="text-center"> 
+          <button class="btn btn-success">Proceder a la Compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block template %} {% endblock %}
 
   <footer class="bg-dark text-center text-white">
     <div class="container">
@@ -126,14 +183,10 @@
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
-    crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
     crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-
+  
   <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20mas%20informacion" class="float pulse" target="_blank">
     <i class="fa fa-whatsapp my-float"></i>
   </a>

@@ -127,3 +127,9 @@ def eliminarUsuario(request):
         users.delete()    
   
     return redirect('usuarios')
+
+#CARRITO
+from django.shortcuts import render
+
+def carrito(request):
+    return render(request, 'base/carrito.html')  
