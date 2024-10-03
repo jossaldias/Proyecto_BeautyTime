@@ -209,10 +209,16 @@ class editarUsuarioForm(forms.ModelForm):
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
         tipo_user = forms.ChoiceField(choices=TIPO_USER)
+        password = forms.CharField(
+                label='Cambiar Contraseña',
+                widget=forms.PasswordInput,
+                required=False,  
+            )
+
 
         class Meta:
                     model = User
-                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion', 'telefono', 'fecha_nac','tipo_user',]
+                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion', 'telefono', 'fecha_nac','tipo_user', 'password']
                     labels = {
                                 'username':'Nombre de Usuario',
                                 'first_name':'Primer Nombre',
@@ -225,6 +231,7 @@ class editarUsuarioForm(forms.ModelForm):
                                 'telefono':'Teléfono',
                                 'fecha_nac':'Fecha de Nacimiento',
                                 'tipo_user': 'Tipo de Usuario',
+                                'password':'Cambiar Contraseña' 
                             
                     }
                     widgets = {
@@ -334,14 +341,17 @@ class editarPerfilForm(forms.ModelForm):
                 ('Yungay', 'Yungay'), ('Zapallar', 'Zapallar')
             ]
         
-
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
-
+        password = forms.CharField(
+                label='Cambiar Contraseña',
+                widget=forms.PasswordInput,
+                required=False,  
+            )
 
         class Meta:
                     model = User
-                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion','telefono', 'fecha_nac']
+                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion','telefono', 'fecha_nac', 'password']
                     labels = {
                                 'username':'Nombre de Usuario',
                                 'first_name':'Primer Nombre',
@@ -352,8 +362,8 @@ class editarPerfilForm(forms.ModelForm):
                                 'comuna':'Comuna',
                                 'direccion':'Dirección',
                                 'telefono':'Teléfono',
-                                'fecha_nac':'Fecha de Nacimiento'
-                            
+                                'fecha_nac':'Fecha de Nacimiento',
+                                'password':'Cambiar Contraseña'                          
                     }
                     widgets = {
                                 'username':forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),

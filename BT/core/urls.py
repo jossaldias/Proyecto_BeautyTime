@@ -19,5 +19,5 @@ urlpatterns = [
 
     path("paginas/servicios", views.servicios, name="servicios"),
     path("paginas/productos", views.productos, name="productos"),
-
+    path('verDetalle/<str:tipo>/<int:id>/', views.verDetalle, name='verDetalle'),
 ]

@@ -11,7 +11,7 @@ function eliminarProducto(id) {
     document.getElementById("id_producto_eliminar").value = id;
 }
 
-function editarPerfil(id, username, first_name, last_name, email, direccion, region, comuna, telefono, fecha_nac) {
+function editarPerfil(id, username, first_name, last_name, email, direccion, region, comuna, telefono, fecha_nac, password) {
     document.getElementById("id_perfil_editar").value = id;
     document.getElementById("username_editar").value = username;
     document.getElementById("nombre_editar").value = first_name;
@@ -22,9 +22,10 @@ function editarPerfil(id, username, first_name, last_name, email, direccion, reg
     document.getElementById("comuna_editar").value = comuna;
     document.getElementById("telefono_editar").value = telefono;
     document.getElementById("fecha_nac_editar").value = fecha_nac;
+    document.getElementById("password_editar").value = password;
 }
 
-function editarUsuario(id, username, first_name, last_name, email, direccion, region, comuna, telefono, fecha_nac, tipo_user) {
+function editarUsuario(id, username, first_name, last_name, email, direccion, region, comuna, telefono, fecha_nac, tipo_user, password) {
     document.getElementById("id_usuario_editar").value = id;
     document.getElementById("username_editar").value = username;
     document.getElementById("nombre_editar").value = first_name;
@@ -36,6 +37,8 @@ function editarUsuario(id, username, first_name, last_name, email, direccion, re
     document.getElementById("telefono_editar").value = telefono;
     document.getElementById("fecha_nac_editar").value = fecha_nac;
     document.getElementById("tipo_user_editar").value = tipo_user;
+    document.getElementById("password_editar").value = password;
+
 }
 
 function eliminarUsuario(id) {

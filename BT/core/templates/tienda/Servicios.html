@@ -11,12 +11,9 @@
         <h3 class="product-title">{{servicio.nombre}}</h3>
       </div>
       <div class="image-container">
-        <a title="verDetalle" href="#">
-          <img src="{{servicio.picture.url}}" alt="...">
+        <a title="verDetalle" href="{% url 'verDetalle' tipo='servicio' id=servicio.iditem %}">
+          <img src="{{ servicio.picture.url }}" alt="{{ servicio.nombre }}">
         </a>
-        {% comment %} <a title="verDetalle" href="{% url 'verDetalle'  servicio=servicio.id %}">
-          <img src="{{servicio.picture.url}}" alt="...">
-        </a> {% endcomment %}
       </div>
       <br>
       <strong>Descripción</strong><br>
