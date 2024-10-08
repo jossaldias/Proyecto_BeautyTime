@@ -133,12 +133,13 @@ class Item(models.Model):
     ]
 
     iditem = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=45, null=True, blank=True)
+    nombre = models.CharField(max_length=45, null=True)
     descripcion = models.CharField(max_length=255, null=True, blank=True)
-    categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, blank=True)
-    costo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    picture = models.ImageField(upload_to='media/items/', null=True, blank=True)
+    categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO)
+    costo = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    picture = models.ImageField(upload_to='media/items/', null=True)
     tipo = models.CharField(max_length=10, choices=TIPO)
+    cantidad = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = 'item'

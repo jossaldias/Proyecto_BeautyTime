@@ -1,9 +1,10 @@
-function editarProducto(id, id_producto, nombre, descripcion, costo, cantidad) {
+function editarProducto(id, nombre, descripcion, categoria, costo, tipo, cantidad) {
     document.getElementById("id_producto_editar").value = id;
-    document.getElementById("producto_editar").value = id_producto;
     document.getElementById("nombre_editar").value = nombre;
     document.getElementById("descripcion_editar").value = descripcion;
+    document.getElementById("categoria_editar").value = categoria;
     document.getElementById("costo_editar").value = costo;
+    document.getElementById("tipo_editar").value = tipo;
     document.getElementById("cantidad_editar").value = cantidad;
 }
 
@@ -58,18 +59,3 @@ function editarEnvio(id, estado_envio) {
 
 }
 
-const codigosOcultos = document.querySelectorAll(".codigo-oculto");
-
-codigosOcultos.forEach((codigo) => {
-    codigo.addEventListener("click", () => {
-        const codigoVisible = codigo.nextElementSibling;
-        codigo.style.display = "none";
-        codigoVisible.style.display = "inline";
-    });
-
-    codigo.nextElementSibling.addEventListener("click", (event) => {
-        event.stopPropagation();
-        codigo.style.display = "inline";
-        codigo.nextElementSibling.style.display = "none";
-    });
-});

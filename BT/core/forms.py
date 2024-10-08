@@ -410,6 +410,7 @@ class agregarProductoForm(forms.ModelForm):
     tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
     costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
     picture = forms.ImageField(required=False, label='Imagen')
+    cantidad = forms.IntegerField(initial=0, required=True, label='Cantidad')
 
     def clean_nombre(self):
         nombre = self.cleaned_data['nombre']
@@ -419,7 +420,7 @@ class agregarProductoForm(forms.ModelForm):
 
     class Meta:
         model = Item
-        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture']
+        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture', 'cantidad']
         labels = {
             'nombre': 'Nombre',
             'descripcion': 'Descripción',
@@ -427,6 +428,58 @@ class agregarProductoForm(forms.ModelForm):
             'tipo': 'Tipo',
             'costo': 'Costo',
             'picture': 'Imagen',
+            'cantidad':'Cantidad'
         }
 
 
+class editarProductoForm(forms.ModelForm):
+
+    CATEGORIA_PRODUCTO = [
+        ('Coloración', 'Coloración'),
+        ('Tratamientos', 'Tratamientos'),
+        ('Línea Rubias', 'Línea Rubias'),
+        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
+        ('Styling & Aftercare', 'Styling & Aftercare'),
+        ('Herramientas', 'Herramientas'),
+    ]
+
+    CATEGORIA_SERVICIO = [
+        ('Manicure y Pedicure', 'Manicure y Pedicure'),
+        ('Masajes', 'Masajes'),
+        ('Maquillaje para eventos', 'Maquillaje para eventos'),
+        ('Depilación', 'Depilación'),
+        ('Tratamientos Faciales', 'Tratamientos Faciales'),
+        ('Colorimetría', 'Colorimetría'),
+    ]
+
+    TIPO = [
+        ('producto', 'Producto'),
+        ('servicio', 'Servicio'),
+    ]
+
+    iditem = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
+    nombre = forms.CharField(max_length=45, label='Nombre')
+    categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
+    tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
+    costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
+    picture = forms.ImageField(required=False, label='Imagen')
+    cantidad = forms.IntegerField(initial=0, required=True, label='Cantidad')
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre']
+        if Item.objects.filter(nombre=nombre).exists():
+            raise ValidationError('El producto o servicio ya existe, revisa el inventario e intenta otra vez.')
+        return nombre
+
+    class Meta:
+        model = Item
+        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture', 'cantidad']
+        labels = {
+            'nombre': 'Nombre',
+            'descripcion': 'Descripción',
+            'categoria': 'Categoría',
+            'tipo': 'Tipo',
+            'costo': 'Costo',
+            'picture': 'Imagen',
+            'cantidad':'Cantidad',
+        }
