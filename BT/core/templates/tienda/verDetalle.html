@@ -1,76 +1,68 @@
 {% extends "base/base.html" %}
-
 {% load static %}
 {% block template %}
 
 <div class="container h-100" style="padding-top:5%;">
-  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style=" margin-bottom:20% ">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="margin-bottom:20%;">
     <div class="d-flex justify-content-center align-items-center">
-      <div class="card mb-3"
-        style="max-width: 1800px; margin-top:20px; background-color: rgba(255, 255, 255, 0);border: #ced4da00;">
+      <div class="card mb-3" style="max-width: 1800px; margin-top:20px; background-color: rgba(255, 255, 255, 0); border: #ced4da00;">
         <div class="row g-0">
-          {% for servicio in servicios %}
+          {% if tipo == 'producto' %}
           <div class="col-md-4">
-            <img src="{{servicio.picture.url}}" style="width:1900px;" class="img-fluid rounded-start" alt="...">
+            <img src="{{ item.picture.url }}" class="img-fluid rounded-start" alt="{{ item.nombre }}" style="width:100%; height:auto;">
           </div>
           <div class="col-md-8">
             <div class="card-body">
-              <h3>{{servicio.nombre}}</h3>
-              <h5>{{servicio.plataforma}}</h5>
-              <p style="color: rgba(0, 0, 0, 0.649);">SKU #{{servicio.id_producto}}</p>
+              <h3>{{ item.nombre }}</h3>
               <strong>Descripción</strong><br>
-              <p style="text-align: justify;">{{servicio.descripcion}}</p>
-              <h5><strong>Precio</strong>$ {{servicio.costo}}</h5>
-              <p>TIPO PRODUCTO: {{servicio.tipo_producto}}</p>
-
-              {% if servicio.tipo_producto == 'Código Digital' %}
-              <form method="post" action="{% url 'add' servicio.id %}">
+              <p style="text-align: justify;">{{ item.descripcion }}</p>
+              <h5><strong>Precio</strong> ${{ item.costo }}</h5>
+              {% comment %} <form method="post" action="{% url 'add' item.id %}">
                 {% csrf_token %}
                 <div class="d-flex flex-column align-items-start">
                   <div class="input-group input-group-sm mb-3">
                     <button type="button" class="btn btn-primary" onclick="decrementarCantidad(this)">-</button>
-                    <input type="number" name="cantidad" class="custom-width" required="" id="id_cantidad" value="1"
-                      min="1">
-                    <button type="button" class="btn btn-primary" onclick="incrementarCantidad(this)">+</button>
-                  </div>
-                  <button class="btn btn-primary btn-add" type="submit">
-                    <i class="bi bi-key-fill" data-tippy-inertia="true" data-tippy-animation="shift-away"
-                      data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="light-border"></i>&nbsp;Añadir al
-                    Carrito (Código Digital)
-                  </button>
-                </div>
-              </form>
-
-
-
-              {% else %}
-              <form method="post" action="{% url 'add' servicio.id %}">
-                {% csrf_token %}
-                <div class="d-flex flex-column align-items-start">
-                  <div class="input-group input-group-sm mb-3">
-                    <button type="button" class="btn btn-primary" onclick="decrementarCantidad(this)">-</button>
-                    <input type="number" name="cantidad" class="custom-width" required="" id="id_cantidad" value="1"
-                      min="1">
+                    <input type="number" name="cantidad" class="custom-width" required id="id_cantidad" value="1" min="1">
                     <button type="button" class="btn btn-primary" onclick="incrementarCantidad(this)">+</button>
                   </div>
                   <button class="btn btn-success btn-add" type="submit">
-                    <i class="bi bi-bag-fill" data-tippy-inertia="true" data-tippy-animation="shift-away"
-                      data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="light-border"></i>&nbsp;Añadir al
-                    Carrito
+                    <i class="bi bi-bag-fill" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="light-border"></i>&nbsp;Añadir al Carrito
                   </button>
                 </div>
-              </form>
-
-              {% endif %}
+              </form> {% endcomment %}
             </div>
           </div>
-          {% endfor %}
+          {% elif tipo == 'servicio' %}
+          <div class="col-md-4">
+            <img src="{{ item.picture.url }}" class="img-fluid rounded-start" alt="{{ item.nombre }}" style="width:100%; height:auto;">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h3>{{ item.nombre }}</h3>
+              <strong>Descripción</strong><br>
+              <p style="text-align: justify;">{{ item.descripcion }}</p>
+              <h5><strong>Precio</strong> ${{ item.costo }}</h5>
+              {% comment %} <form method="post" action="{% url 'add' item.id %}">
+                {% csrf_token %}
+                <div class="d-flex flex-column align-items-start">
+                  <div class="input-group input-group-sm mb-3">
+                    <button type="button" class="btn btn-primary" onclick="decrementarCantidad(this)">-</button>
+                    <input type="number" name="cantidad" class="custom-width" required id="id_cantidad" value="1" min="1">
+                    <button type="button" class="btn btn-primary" onclick="incrementarCantidad(this)">+</button>
+                  </div>
+                  <button class="btn btn-success btn-add" type="submit">
+                    <i class="bi bi-bag-fill" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="light-border"></i>&nbsp;Añadir al Carrito
+                  </button>
+                </div>
+              </form> {% endcomment %}
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 </div>
-
 
 <style>
   .custom-width {
@@ -80,20 +72,12 @@
     border-radius: 4px;
     border: 1px solid #ced4da;
   }
-
   .input-group-sm {
     display: flex;
     align-items: center;
   }
-
-  .image-left {
-    max-width: 150%;
-    height: auto;
-  }
 </style>
 
 <script src="{% static 'js/botones.js' %}"></script>
-
-
 
 {% endblock %}

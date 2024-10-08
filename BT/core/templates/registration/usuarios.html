@@ -30,7 +30,7 @@
                                 <th>User Name</th>
                                 <th>E-mail</th>
                                 <th>Dirección</th>
-                                <th>Región</th>                               
+                                <th>Región</th>
                                 <th>Comuna</th>
                                 <th>Teléfono</th>
                                 <th>Fecha de Nacimiento</th>
@@ -51,15 +51,15 @@
                                 <td class="table-dark">{{user.telefono}}</td>
                                 <td class="table-dark">{{user.fecha_nac}}</td>
                                 <td>
-                                     <button type="button"
+                                    <button type="button"
                                         onclick="editarUsuario('{{user.id}}','{{user.username}}', '{{user.first_name}}', '{{user.last_name}}',  '{{user.email}}', '{{user.direccion}}' , '{{user.region}}', '{{user.comuna}}', '{{user.telefono}}', '{{user.fecha_nac}}','{{user.tipo_user}}')"
                                         class="btn btn-primary" data-toggle="modal" href="#EditarPerfilModal">
                                         <i class="bi bi-pen-fill"></i>
                                     </button>
                                 </td>
                                 <td>
-                                    <button type="button" onclick="eliminarUsuario('{{user.id}}')" class="btn btn-danger"
-                                        data-toggle="modal" href="#EliminarUsuarioModal">
+                                    <button type="button" onclick="eliminarUsuario('{{user.id}}')"
+                                        class="btn btn-danger" data-toggle="modal" href="#EliminarUsuarioModal">
                                         <i class="bi bi-x-square-fill"></i>
                                     </button>
                                 </td>
@@ -68,54 +68,53 @@
                         </tbody>
                     </table>
                 </div>
-                    <div id="EliminarUsuarioModal" class="modal">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header bg-info">
-                                    <h3 class="modal-title text-dark">Eliminar Usuario</h3>
-                                </div>
-                                <div class="modal-body bg-dark text-white">
-                                    <p class="labelmodal">Estas seguro?</p>
-                                    <form method="POST" action="{% url 'eliminarUsuario'%}">{% csrf_token %}
-                                        <input type="hidden" id="id_usuario_eliminar" name="id_usuario_eliminar">
-                                </div>
-                                <div class="modal-footer bg-dark">
-                                    <button type="submit" class="btn btn-danger">
-                                        Eliminar
-                                    </button>
-                                    <button type="button" class="btn btn-primary" data-dismiss="modal">
-                                        Cerrar
-                                        <i class="bi bi-x-square-fill"></i>
-                                    </button>
+                <div id="EliminarUsuarioModal" class="modal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info">
+                                <h3 class="modal-title text-dark">Eliminar Usuario</h3>
+                            </div>
+                            <div class="modal-body bg-dark text-white">
+                                <p class="labelmodal">Estas seguro?</p>
+                                <form method="POST" action="{% url 'eliminarUsuario'%}">{% csrf_token %}
+                                    <input type="hidden" id="id_usuario_eliminar" name="id_usuario_eliminar">
+                            </div>
+                            <div class="modal-footer bg-dark">
+                                <button type="submit" class="btn btn-danger">
+                                    Eliminar
+                                </button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                    Cerrar
+                                    <i class="bi bi-x-square-fill"></i>
+                                </button>
                                 </form>
-                                </div>
                             </div>
                         </div>
                     </div>
-                    <div id="EditarPerfilModal" class="modal">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header bg-info">
-                                    <h3 class="modal-title text-dark">Editar Usuario</h3>
-                                </div>
-                                <div class="modal-body bg-dark text-white">
-                                    <form method="POST" action="{% url 'editarUsuario'%}"
-                                        enctype="multipart/form-data">{% csrf_token %}
-                                        <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
-                                        {% for field in form_editar %}
-                                        <p>{{field.label}}<br>
-                                            {{field|add_class:"form-control"}}</p>
-                                        {%endfor%}
-                                </div>
-                                <div class="modal-footer bg-dark text-white">
-                                    <button type="button" class="btn btn-primary" data-dismiss="modal">
-                                        Cerrar
-                                        <i class="bi bi-x-square-fill"></i>                                    </button>
-                                    <button type="submit" class="btn btn-success">
-                                        Guardar
-                                    </button>
-                                </form>   
-                                </div>
+                </div>
+                <div id="EditarPerfilModal" class="modal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info">
+                                <h3 class="modal-title text-dark">Editar Usuario</h3>
+                            </div>
+                            <div class="modal-body bg-dark text-white">
+                                <form method="POST" action="{% url 'editarUsuario'%}" enctype="multipart/form-data">{%
+                                    csrf_token %}
+                                    <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
+                                    {% for field in form_editar %}
+                                    <p>{{field.label}}<br>
+                                        {{field|add_class:"form-control"}}</p>
+                                    {%endfor%}
+                            </div>
+                            <div class="modal-footer bg-dark text-white">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                    Cerrar
+                                    <i class="bi bi-x-square-fill"></i> </button>
+                                <button type="submit" class="btn btn-success">
+                                    Guardar
+                                </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -123,6 +122,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 {% endblock %}
