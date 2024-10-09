@@ -1,11 +1,14 @@
 import os
 import requests
 
+from django.urls import reverse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
 from django.contrib.auth import update_session_auth_hash
 
 from django.db.models import Q
@@ -36,23 +39,17 @@ def login(request):
 
 # REGISTRARSE
 def register(request):
-    data = {"form": CustomUserCreationForm()}
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(request, user)  
+            return redirect('home')
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'registration/register.html', {'form': form})
 
-    if request.method == "POST":
-        user_creation_form = CustomUserCreationForm(data=request.POST)
-
-        if user_creation_form.is_valid():
-            user_creation_form.save()
-
-            user = authenticate(
-                username=user_creation_form.cleaned_data["username"],
-                password=user_creation_form.cleaned_data["password1"],
-            )
-            login(request, user)
-
-            return redirect("home")
-
-    return render(request, "registration/register.html", data)
 
 
 # VER PERFIL PROPIO
