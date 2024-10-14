@@ -1,0 +1,188 @@
+{% extends "base/base.html" %}
+
+{% block template %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+
+<div class="container mt-5">
+    <h2 class="text-center">Reservar una cita</h2>
+
+    <div class="row">
+        <!-- Formulario a la izquierda -->
+        <div class="col-md-4" id="form-container" style="margin-bottom: 40px;">
+            <form id="reservation-form" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ form.nombre.label_tag }} 
+                    {{ form.nombre }}
+                </div>
+                <div class="mb-3">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                </div>
+                <div class="mb-3">
+                    {{ form.contacto.label_tag }}
+                    {{ form.contacto }}
+                </div>
+                <div class="mb-3">
+                    {{ form.servicio.label_tag }}
+                    {{ form.servicio }}
+                </div>
+                <div class="mb-3">
+                    <label for="selected-date">Fecha seleccionada</label>
+                    <input type="text" id="selected-date" name="fecha" readonly class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="selected-time">Hora seleccionada</label>
+                    <input type="text" id="selected-time" name="hora" readonly class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Reservar</button>
+            </form>
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        <li>{{ field }}: {{ errors|striptags }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Calendario a la derecha -->
+        <div class="col-md-8" id="calendar-container">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var servicioSelect = document.querySelector('[name="servicio"]');
+        var fechaInput = document.getElementById('selected-date');
+        var horaInput = document.getElementById('selected-time');
+    
+        function cargarCalendarioConReservas(servicio) {
+            fetch('/obtener_reservas/?servicio=' + servicio)
+            .then(response => response.json())
+            .then(data => {
+                var events = data.reservas.map(reserva => ({
+                    title: 'Reservado',  // Mostrar solo "Reservado"
+                    start: reserva.fecha_inicio,  // Fecha y hora de inicio
+                    end: reserva.fecha_fin,  // Fecha y hora de fin
+                    color: 'red',  // Marcar las horas ocupadas en rojo
+                    displayEventTime: false  // No mostrar la hora en los eventos
+                }));
+        
+                var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                    locale: 'es',
+                    initialView: 'timeGridWeek',
+                    firstDay: 1,  // Comienza en lunes
+                    slotDuration: '01:00:00',
+                    allDaySlot: false,
+                    expandRows: true,
+                    height: 'auto',
+                    businessHours: [
+                        {
+                            daysOfWeek: [2, 3, 4], // Martes a Jueves
+                            startTime: '09:00',
+                            endTime: '17:00'
+                        },
+                        {
+                            daysOfWeek: [5], // Viernes
+                            startTime: '09:00',
+                            endTime: '19:00'
+                        },
+                        {
+                            daysOfWeek: [6], // Sábado
+                            startTime: '08:00',
+                            endTime: '16:00'
+                        }
+                    ],
+                    slotMinTime: '08:00:00',
+                    slotMaxTime: '19:00:00',
+                    scrollTime: '09:00:00',
+                    events: events,
+                    selectable: true,
+                    validRange: {
+                        start: new Date().toISOString().split('T')[0],  // Restringir fechas anteriores a la fecha actual
+                    },
+                    selectConstraint: 'businessHours',  // Restringir selección a las horas de negocio
+                    select: function(info) {
+                        var now = new Date();
+                        var selectedDateTime = new Date(info.start);
+    
+                        if (selectedDateTime >= now) {
+                            fechaInput.value = info.startStr.split("T")[0];  // Fecha
+                            horaInput.value = info.startStr.split("T")[1].substring(0, 5);  // Hora (HH:mm)
+                        } else {
+                            alert("No puedes agendar una cita en una fecha u hora pasada.");
+                        }
+                    },
+                    displayEventTime: false,  // Evitar mostrar las horas en los eventos reservados
+                    eventContent: function(arg) {
+                        return { html: '<div>Reservado</div>' };  // Forzar que el evento solo muestre "Reservado"
+                    }
+                });
+                
+                // Renderizar el calendario
+                calendar.render();
+            });
+        }
+    
+        // Escuchar cambios en la selección del servicio
+        servicioSelect.addEventListener('change', function() {
+            var servicio = servicioSelect.value;
+            if (servicio) {
+                cargarCalendarioConReservas(servicio);
+            }
+        });
+    
+        // Cargar reservas para el servicio seleccionado por defecto (si existe)
+        if (servicioSelect.value) {
+            cargarCalendarioConReservas(servicioSelect.value);
+        } else {
+            var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                locale: 'es',
+                initialView: 'timeGridWeek',
+                firstDay: 1,  // Comienza en lunes
+                slotDuration: '01:00:00',  // Intervalos de 1 hora
+                allDaySlot: false,
+                expandRows: true,
+                height: 'auto',
+                businessHours: [
+                    {
+                        daysOfWeek: [2, 3, 4], // Martes a Jueves
+                        startTime: '09:00',  
+                        endTime: '17:00'
+                    },
+                    {
+                        daysOfWeek: [5], // Viernes
+                        startTime: '09:00',
+                        endTime: '19:00'
+                    },
+                    {
+                        daysOfWeek: [6], // Sábado
+                        startTime: '08:00',
+                        endTime: '16:00'
+                    }
+                ],
+                validRange: {
+                    start: new Date().toISOString().split('T')[0],  // Evitar agendar fechas pasadas
+                },
+                selectConstraint: 'businessHours',  // Restringir la selección a las horas laborales
+                slotMinTime: '08:00:00',
+                slotMaxTime: '19:00:00',
+                scrollTime: '09:00:00',
+                selectable: true
+            });
+            calendar.render();
+        }
+    });    
+</script>
+{% endblock %}

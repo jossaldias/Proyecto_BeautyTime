@@ -1,0 +1,307 @@
+{% extends "base/base.html" %}
+
+{% block template %}
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<!-- Cargar la localización para español -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+
+<!-- Bootstrap para el modal -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Ajustes de estilo -->
+<style>
+    #calendar {
+        min-height: 500px;
+        margin-bottom: 30px;
+    }
+
+    /* Agregar espacio entre los botones y el selector de hora en el modal */
+    .modal-body .form-group {
+        margin-bottom: 15px;
+    }
+
+    .modal-footer {
+        margin-top: 15px;
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="text-center">Calendario de Citas Agendadas</h2>
+
+    <!-- Dropdown para filtrar por servicio -->
+    <div class="form-group mb-3">
+        <select id="filter-servicio" class="form-control">
+            <option value="">Todos los servicios</option>
+            <option value="Masaje">Masaje</option>
+            <option value="Corte de Pelo">Corte de Pelo</option>
+            <option value="Manicura">Manicura</option>
+            <option value="Tinturado">Tinturado</option>
+        </select>
+    </div>
+
+    <div id="calendar"></div>
+</div>
+
+<!-- Modal para editar/eliminar citas -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">Editar/Eliminar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editEventForm">
+                    <div class="form-group">
+                        <label for="editEventServicio">Servicio</label>
+                        <select id="editEventServicio" class="form-control">
+                            <!-- Opciones se llenarán dinámicamente con los servicios -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEventFecha">Fecha</label>
+                        <input type="date" id="editEventFecha" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEventHora">Hora</label>
+                        <input type="time" id="editEventHora" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEventNombre">Nombre del Cliente</label>
+                        <input type="text" id="editEventNombre" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEventEmail">Email del Cliente</label>
+                        <input type="email" id="editEventEmail" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEventContacto">Número de Contacto</label>
+                        <input type="text" id="editEventContacto" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <button id="whatsappBtn" class="btn btn-success" type="button">Enviar Mensaje por WhatsApp Web</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="notify-client">¿Notificar cambios al cliente por correo?</label>
+                        <input type="checkbox" id="notify-client">
+                    </div>                    
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="deleteEventBtn" class="btn btn-danger">Eliminar Cita</button>
+                <button id="saveEventBtn" class="btn btn-primary" onclick="editarCita(editEventId)">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarElement = document.getElementById('calendar');
+        var servicioSelect = document.getElementById('filter-servicio');
+        var deleteEventId = null;
+        var editEventId = null;
+        var calendar;
+    
+        // Función para cargar los servicios en el dropdown del modal de edición
+        function cargarServiciosDisponibles(servicioSeleccionado) {
+            fetch('/obtener_servicios/')
+            .then(response => response.json())
+            .then(data => {
+                var servicioSelect = document.getElementById('editEventServicio');
+                servicioSelect.innerHTML = '';  // Limpiar opciones actuales
+    
+                // Añadir las opciones al dropdown
+                data.servicios.forEach(function(servicio) {
+                    var option = document.createElement('option');
+                    option.value = servicio;
+                    option.text = servicio.charAt(0).toUpperCase() + servicio.slice(1);  // Convertir primera letra a mayúscula
+                    servicioSelect.appendChild(option);
+                });
+    
+                // Asignar el servicio seleccionado al campo del modal
+                servicioSelect.value = capitalizeFirstLetter(servicioSeleccionado.trim());
+            })
+            .catch(error => {
+                console.error('Error al cargar los servicios:', error);
+            });
+        }
+    
+        function cargarReservas(servicio) {
+            var url = '/obtener_reservas/';
+            if (servicio) {
+                url += '?servicio=' + servicio;
+            }
+    
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                var events = data.reservas.map(reserva => ({
+                    id: reserva.id,
+                    title: reserva.servicio.charAt(0).toUpperCase() + reserva.servicio.slice(1),  // Mayúscula inicial
+                    start: new Date(reserva.fecha_inicio),  // Convertir a la hora local correcta
+                    end: new Date(reserva.fecha_fin),
+                    color: 'blue'
+                }));
+    
+                if (calendar) {
+                    calendar.destroy();
+                }
+    
+                calendar = new FullCalendar.Calendar(calendarElement, {
+                    locale: 'es',
+                    initialView: 'dayGridMonth',
+                    timeZone: 'America/Santiago',
+                    headerToolbar: {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'today'
+                    },
+                    events: events,
+                    eventContent: function(arg) {
+                        var startTime = arg.event.start.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
+                        var endTime = arg.event.end.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
+                        return { html: `<div>${arg.event.title} - ${startTime} a ${endTime}</div>` };  // Servicio y rango de horas en formato 24 horas
+                    },
+                    eventClick: function(info) {
+                        var eventObj = info.event;
+                        editEventId = eventObj.id;  // Guardar el ID del evento
+                        
+                        // Llamar a la función para cargar los servicios en el dropdown
+                        fetch(`/obtener_reserva/${editEventId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Asignar el servicio seleccionado al modal
+                            cargarServiciosDisponibles(data.servicio);
+    
+                            // Usar directamente la fecha en formato yyyy-mm-dd para evitar desfases
+                            document.getElementById('editEventFecha').value = data.fecha;
+                            document.getElementById('editEventHora').value = data.hora.substring(0, 5);
+                            document.getElementById('editEventNombre').value = data.nombre;
+                            document.getElementById('editEventEmail').value = data.email;
+                            document.getElementById('editEventContacto').value = data.contacto;
+    
+                            // Mostrar el modal
+                            var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), {});
+                            eventModal.show();
+    
+                            // Configurar el botón de WhatsApp
+                            whatsappBtn.onclick = function() {
+                                var contacto = document.getElementById('editEventContacto').value.trim(); 
+                                var nombreCliente = document.getElementById('editEventNombre').value;
+                                var servicio = document.getElementById('editEventServicio').value;
+                                var fecha = document.getElementById('editEventFecha').value;
+                                var hora = document.getElementById('editEventHora').value;
+    
+                                // Limpiar el número de contacto
+                                contacto = contacto.replace(/\D/g, '');  // Eliminar cualquier carácter no numérico
+                                
+                                var mensaje = `Hola ${nombreCliente}, le recordamos que tiene una cita para ${servicio} el ${fecha} a las ${hora} en nuestro salón BeautyTime.`;
+    
+                                // Construir la URL de WhatsApp correctamente
+                                var url = `https://wa.me/${contacto}?text=${encodeURIComponent(mensaje)}`;
+                                window.open(url, '_blank');
+                            };
+                        })
+                        .catch(error => {
+                            console.error('Error al obtener los detalles de la reserva:', error);
+                        });
+                    }
+                });
+    
+                calendar.render();
+            });
+        }
+    
+        function eliminarCita(eventId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            if (!eventId) {
+                alert('No se pudo obtener el ID del evento a eliminar.');
+                return;
+            }
+            fetch(`/eliminar_cita/${eventId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cita eliminada correctamente.');
+                    cargarReservas();  // Refrescar el calendario después de eliminar
+                    alert('Se ha notificado al cliente sobre la cancelación.');
+                } else {
+                    alert('Error al eliminar la cita: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error al eliminar la cita:', error);
+            });
+        }
+    
+        function editarCita(eventId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const servicio = document.getElementById('editEventServicio').value;
+            const fecha = document.getElementById('editEventFecha').value;
+            const hora = document.getElementById('editEventHora').value;
+            const notifyClient = document.getElementById('notify-client').checked;
+
+            fetch(`/editar_cita/${eventId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    servicio: servicio,
+                    fecha: fecha,
+                    hora: hora,
+                    notifyClient: notifyClient
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cita actualizada correctamente.');
+                    cargarReservas();  // Refrescar el calendario después de editar
+
+                    // Si el administrador eligió notificar al cliente, mostramos una confirmación adicional
+                    if (notifyClient) {
+                        alert('Se ha notificado al cliente sobre los cambios.');
+                    }
+                } else {
+                    alert('Error al actualizar la cita: ' + data.message);
+                }
+            });
+        }
+    
+        // Filtrar reservas al seleccionar un servicio
+        servicioSelect.addEventListener('change', function() {
+            var servicio = servicioSelect.value;
+            cargarReservas(servicio);
+        });
+    
+        // Cargar todas las reservas por defecto al cargar la página
+        cargarReservas();
+
+        document.getElementById('deleteEventBtn').addEventListener('click', function() {
+            eliminarCita(editEventId);  // Llama a la función eliminar y pasa el ID del evento
+        });
+
+        // Añadir evento al botón de guardar cambios
+        document.getElementById('saveEventBtn').addEventListener('click', function() {
+            editarCita(editEventId);  // Llamar a la función y pasar el ID del evento al guardar
+        });
+    });    
+</script>
+{% endblock %}

@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'es'
+LANGUAGE_CODE = 'es-cl'
 
 TIME_ZONE = 'America/Santiago'
 
@@ -146,3 +146,14 @@ LOGOUT_REDIRECT_URL = 'home'
 PROVIDER_SESSION_ID = "provider"
 
 AUTH_USER_MODEL = 'core.User'
+
+
+# Enviar correos
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'beautytimeagenda@gmail.com'
+EMAIL_HOST_PASSWORD = 'cxas ipfs aknc eold'
+DEFAULT_FROM_EMAIL = 'beautytimeagenda@gmail.com'
+

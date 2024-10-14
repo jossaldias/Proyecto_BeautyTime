@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from datetime import datetime, timedelta
 
 #USUARIOS
 class User(AbstractUser):
@@ -105,46 +106,23 @@ class User(AbstractUser):
     fecha_nac = models.DateField(null=True)
     tipo_user = models.CharField(max_length=60, null=True, blank =True)
 
-from django.db import models
 
-class Item(models.Model):
-
-    CATEGORIA_PRODUCTO = [
-        ('Coloración', 'Coloración'),
-        ('Tratamientos', 'Tratamientos'),
-        ('Línea Rubias', 'Línea Rubias'),
-        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
-        ('Styling & Aftercare', 'Styling & Aftercare'),
-        ('Herramientas', 'Herramientas'),
-    ]
-
-    CATEGORIA_SERVICIO = [
-        ('Manicure y Pedicure', 'Manicure y Pedicure'),
-        ('Masajes', 'Masajes'),
-        ('Maquillaje para eventos', 'Maquillaje para eventos'),
-        ('Depilación', 'Depilación'),
-        ('Tratamientos Faciales', 'Tratamientos Faciales'),
-        ('Colorimetría', 'Colorimetría'),
-    ]
-
-    TIPO = [
-        ('producto', 'Producto'),
-        ('servicio', 'Servicio'),
-    ]
-
-    iditem = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=45, null=True)
-    descripcion = models.CharField(max_length=255, null=True, blank=True)
-    categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO)
-    costo = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    picture = models.ImageField(upload_to='media/items/', null=True)
-    tipo = models.CharField(max_length=10, choices=TIPO)
-    cantidad = models.IntegerField(default=0)
-
-    class Meta:
-        verbose_name = 'item'
-        verbose_name_plural = 'items'
-        ordering = ['tipo']
+# CREACIÓN EN BD DE RESERVAS
+class Reserva(models.Model):
+    nombre = models.CharField(max_length=100)
+    email = models.EmailField()
+    fecha = models.DateField()
+    hora = models.TimeField()
+    servicio = models.CharField(max_length=50)
+    contacto = models.CharField(max_length=13, null=True, blank=True)
+    
+    @property
+    def fecha_hora_inicio(self):
+        return datetime.combine(self.fecha, self.hora)
+    
+    @property
+    def fecha_hora_fin(self):
+        return self.fecha_hora_inicio + timedelta(hours=1)
 
     def __str__(self):
-        return self.nombre or f"Item {self.iditem}"
+        return f'Reserva de {self.nombre} para {self.servicio} el {self.fecha} a las {self.hora}'

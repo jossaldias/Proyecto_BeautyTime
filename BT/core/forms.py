@@ -1,4 +1,5 @@
-from .models import User, Item
+import re
+from .models import User, Reserva
 from django.conf import settings
 from django import forms  
 from django.forms import TextInput
@@ -209,16 +210,10 @@ class editarUsuarioForm(forms.ModelForm):
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
         tipo_user = forms.ChoiceField(choices=TIPO_USER)
-        password = forms.CharField(
-                label='Cambiar Contraseña',
-                widget=forms.PasswordInput,
-                required=False,  
-            )
-
 
         class Meta:
                     model = User
-                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion', 'telefono', 'fecha_nac','tipo_user', 'password']
+                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion', 'telefono', 'fecha_nac','tipo_user',]
                     labels = {
                                 'username':'Nombre de Usuario',
                                 'first_name':'Primer Nombre',
@@ -231,7 +226,6 @@ class editarUsuarioForm(forms.ModelForm):
                                 'telefono':'Teléfono',
                                 'fecha_nac':'Fecha de Nacimiento',
                                 'tipo_user': 'Tipo de Usuario',
-                                'password':'Cambiar Contraseña' 
                             
                     }
                     widgets = {
@@ -341,17 +335,14 @@ class editarPerfilForm(forms.ModelForm):
                 ('Yungay', 'Yungay'), ('Zapallar', 'Zapallar')
             ]
         
+
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
-        password = forms.CharField(
-                label='Cambiar Contraseña',
-                widget=forms.PasswordInput,
-                required=False,  
-            )
+
 
         class Meta:
                     model = User
-                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion','telefono', 'fecha_nac', 'password']
+                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion','telefono', 'fecha_nac']
                     labels = {
                                 'username':'Nombre de Usuario',
                                 'first_name':'Primer Nombre',
@@ -362,8 +353,8 @@ class editarPerfilForm(forms.ModelForm):
                                 'comuna':'Comuna',
                                 'direccion':'Dirección',
                                 'telefono':'Teléfono',
-                                'fecha_nac':'Fecha de Nacimiento',
-                                'password':'Cambiar Contraseña'                          
+                                'fecha_nac':'Fecha de Nacimiento'
+                            
                     }
                     widgets = {
                                 'username':forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
@@ -379,107 +370,40 @@ class editarPerfilForm(forms.ModelForm):
                     }
 
 
-class agregarProductoForm(forms.ModelForm):
 
-    CATEGORIA_PRODUCTO = [
-        ('Coloración', 'Coloración'),
-        ('Tratamientos', 'Tratamientos'),
-        ('Línea Rubias', 'Línea Rubias'),
-        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
-        ('Styling & Aftercare', 'Styling & Aftercare'),
-        ('Herramientas', 'Herramientas'),
-    ]
+# FORMULARIO PARA AGENDAR CITAS
+class ReservaCitaForm(forms.ModelForm):
+    # Mantener todos los campos necesarios
+    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    fecha = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+    hora = forms.TimeField(widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
+    servicio = forms.ChoiceField(choices=[
+        ('manicura', 'Manicura'),
+        ('masaje', 'Masaje'),
+        ('corte de pelo', 'Corte de Pelo'),
+        ('tinturado', 'Tinturado'),
+    ], widget=forms.Select(attrs={'class': 'form-control'}))
 
-    CATEGORIA_SERVICIO = [
-        ('Manicure y Pedicure', 'Manicure y Pedicure'),
-        ('Masajes', 'Masajes'),
-        ('Maquillaje para eventos', 'Maquillaje para eventos'),
-        ('Depilación', 'Depilación'),
-        ('Tratamientos Faciales', 'Tratamientos Faciales'),
-        ('Colorimetría', 'Colorimetría'),
-    ]
-
-    TIPO = [
-        ('producto', 'Producto'),
-        ('servicio', 'Servicio'),
-    ]
-
-    iditem = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
-    nombre = forms.CharField(max_length=45, label='Nombre')
-    categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
-    tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
-    costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
-    picture = forms.ImageField(required=False, label='Imagen')
-    cantidad = forms.IntegerField(initial=0, required=True, label='Cantidad')
-
-    def clean_nombre(self):
-        nombre = self.cleaned_data['nombre']
-        if Item.objects.filter(nombre=nombre).exists():
-            raise ValidationError('El producto o servicio ya existe, revisa el inventario e intenta otra vez.')
-        return nombre
-
+    # Nuevo campo para número de contacto
+    contacto = forms.CharField(
+        label="Número de contacto",
+        max_length=9,
+        required=True,
+        help_text="Ingresa tu número de contacto sin el prefijo (+56)",
+        widget=forms.TextInput(attrs={'placeholder': '9XXXXXXXX', 'class': 'form-control'})
+    )
+    
     class Meta:
-        model = Item
-        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture', 'cantidad']
-        labels = {
-            'nombre': 'Nombre',
-            'descripcion': 'Descripción',
-            'categoria': 'Categoría',
-            'tipo': 'Tipo',
-            'costo': 'Costo',
-            'picture': 'Imagen',
-            'cantidad':'Cantidad'
-        }
-
-
-class editarProductoForm(forms.ModelForm):
-
-    CATEGORIA_PRODUCTO = [
-        ('Coloración', 'Coloración'),
-        ('Tratamientos', 'Tratamientos'),
-        ('Línea Rubias', 'Línea Rubias'),
-        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
-        ('Styling & Aftercare', 'Styling & Aftercare'),
-        ('Herramientas', 'Herramientas'),
-    ]
-
-    CATEGORIA_SERVICIO = [
-        ('Manicure y Pedicure', 'Manicure y Pedicure'),
-        ('Masajes', 'Masajes'),
-        ('Maquillaje para eventos', 'Maquillaje para eventos'),
-        ('Depilación', 'Depilación'),
-        ('Tratamientos Faciales', 'Tratamientos Faciales'),
-        ('Colorimetría', 'Colorimetría'),
-    ]
-
-    TIPO = [
-        ('producto', 'Producto'),
-        ('servicio', 'Servicio'),
-    ]
-
-    iditem = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
-    nombre = forms.CharField(max_length=45, label='Nombre')
-    categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
-    tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
-    costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
-    picture = forms.ImageField(required=False, label='Imagen')
-    cantidad = forms.IntegerField(initial=0, required=True, label='Cantidad')
-
-    def clean_nombre(self):
-        nombre = self.cleaned_data['nombre']
-        if Item.objects.filter(nombre=nombre).exists():
-            raise ValidationError('El producto o servicio ya existe, revisa el inventario e intenta otra vez.')
-        return nombre
-
-    class Meta:
-        model = Item
-        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture', 'cantidad']
-        labels = {
-            'nombre': 'Nombre',
-            'descripcion': 'Descripción',
-            'categoria': 'Categoría',
-            'tipo': 'Tipo',
-            'costo': 'Costo',
-            'picture': 'Imagen',
-            'cantidad':'Cantidad',
-        }
+        model = Reserva
+        fields = ['nombre', 'email', 'servicio', 'fecha', 'hora', 'contacto']
+    
+    # Validación personalizada del número de contacto
+    def clean_contacto(self):
+        contacto = self.cleaned_data['contacto']
+        # Validar que el número siga el formato chileno sin el prefijo +56
+        if not re.match(r'^\d{9}$', contacto):
+            raise forms.ValidationError("El número debe tener 9 dígitos.")
+        
+        # Agregar el prefijo +56 antes de guardar
+        return f'+56 {contacto}'
