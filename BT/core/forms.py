@@ -1,4 +1,4 @@
-from .models import User, Item
+from .models import User, Item, Reserva
 from django.conf import settings
 from django import forms  
 from django.forms import TextInput
@@ -483,3 +483,26 @@ class editarProductoForm(forms.ModelForm):
             'picture': 'Imagen',
             'cantidad':'Cantidad',
         }
+
+# FORMULARIO PARA AGENDAR CITAS
+class ReservaCitaForm(forms.ModelForm):
+    # Mantener todos los campos necesarios
+    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    fecha = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+    hora = forms.TimeField(widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
+    servicio = forms.ChoiceField(choices=[
+        ('manicura', 'Manicura'),
+        ('masaje', 'Masaje'),
+        ('corte de pelo', 'Corte de Pelo'),
+        ('tinturado', 'Tinturado'),
+    ], widget=forms.Select(attrs={'class': 'form-control'}))
+
+    # Nuevo campo para número de contacto
+    contacto = forms.CharField(
+        label="Número de contacto",
+        max_length=9,
+        required=True,
+        help_text="Ingresa tu número de contacto sin el prefijo (+56)",
+        widget=forms.TextInput(attrs={'placeholder': '9XXXXXXXX', 'class': 'form-control'})
+    )

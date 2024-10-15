@@ -21,13 +21,9 @@
         <p>{{ servicio.descripcion|truncatechars:100 }}</p>
         <h5> <strong>Precio</strong> ${{servicio.costo}}</h5>
       </div>
-      {% comment %} <form method="post" action="{% url 'add' servicio.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="cantidad" class="form-control" required="" id="id_cantidad" value="1">
-        <a class="add-to-cart" href="#" onClick="javascript:this.parentNode.submit()">
-          <i class="bi bi-bag-fill"></i>&nbsp;Añadir al Carrito
+        <a class="book_service" href="{% url 'reservar_cita' %}" >
+          <i class="bi bi-journal-bookmark-fill"></i>&nbsp;Reservar Cita
         </a>
-      </form> {% endcomment %}
     </article>
     {% endfor %}
   </section>

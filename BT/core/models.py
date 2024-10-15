@@ -148,3 +148,24 @@ class Item(models.Model):
 
     def __str__(self):
         return self.nombre or f"Item {self.iditem}"
+
+
+# CREACIÓN EN BD DE RESERVAS
+class Reserva(models.Model):
+    nombre = models.CharField(max_length=100)
+    email = models.EmailField()
+    fecha = models.DateField()
+    hora = models.TimeField()
+    servicio = models.CharField(max_length=50)
+    contacto = models.CharField(max_length=13, null=True, blank=True)
+    
+    @property
+    def fecha_hora_inicio(self):
+        return datetime.combine(self.fecha, self.hora)
+    
+    @property
+    def fecha_hora_fin(self):
+        return self.fecha_hora_inicio + timedelta(hours=1)
+
+    def __str__(self):
+        return f'Reserva de {self.nombre} para {self.servicio} el {self.fecha} a las {self.hora}'

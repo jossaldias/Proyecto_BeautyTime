@@ -4,7 +4,7 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.863), rgba(255, 255, 255, 0.888)), url(https://cdn.hobbyconsolas.com/sites/navi.axelspringer.es/public/styles/hc_1440x810/public/media/image/2021/02/30-mejores-heroes-ultimos-30-anos-2243371.jpg?itok=QBzXQlZU);
+  background-color: rgb(234, 176, 234);
 }
 
 header {

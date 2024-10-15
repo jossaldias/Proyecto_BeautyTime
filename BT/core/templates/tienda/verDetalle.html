@@ -1,6 +1,7 @@
 {% extends "base/base.html" %}
 {% load static %}
 {% block template %}
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 
 <div class="container h-100" style="padding-top:5%;">
   <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="margin-bottom:20%;">
@@ -17,7 +18,7 @@
               <strong>Descripción</strong><br>
               <p style="text-align: justify;">{{ item.descripcion }}</p>
               <h5><strong>Precio</strong> ${{ item.costo }}</h5>
-              {% comment %} <form method="post" action="{% url 'add' item.id %}">
+              <form method="post" action="#">
                 {% csrf_token %}
                 <div class="d-flex flex-column align-items-start">
                   <div class="input-group input-group-sm mb-3">
@@ -29,7 +30,7 @@
                     <i class="bi bi-bag-fill" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="light-border"></i>&nbsp;Añadir al Carrito
                   </button>
                 </div>
-              </form> {% endcomment %}
+              </form> 
             </div>
           </div>
           {% elif tipo == 'servicio' %}
@@ -42,19 +43,9 @@
               <strong>Descripción</strong><br>
               <p style="text-align: justify;">{{ item.descripcion }}</p>
               <h5><strong>Precio</strong> ${{ item.costo }}</h5>
-              {% comment %} <form method="post" action="{% url 'add' item.id %}">
-                {% csrf_token %}
-                <div class="d-flex flex-column align-items-start">
-                  <div class="input-group input-group-sm mb-3">
-                    <button type="button" class="btn btn-primary" onclick="decrementarCantidad(this)">-</button>
-                    <input type="number" name="cantidad" class="custom-width" required id="id_cantidad" value="1" min="1">
-                    <button type="button" class="btn btn-primary" onclick="incrementarCantidad(this)">+</button>
-                  </div>
-                  <button class="btn btn-success btn-add" type="submit">
-                    <i class="bi bi-bag-fill" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="light-border"></i>&nbsp;Añadir al Carrito
-                  </button>
-                </div>
-              </form> {% endcomment %}
+                <a class="book_service" href="{% url 'reservar_cita' %}" >
+                  <i class="bi bi-journal-bookmark-fill"></i>&nbsp;Reservar Cita
+                </a>
             </div>
           </div>
           {% endif %}
@@ -75,6 +66,11 @@
   .input-group-sm {
     display: flex;
     align-items: center;
+  }
+  .card {
+    border: none !important; 
+    box-shadow: none !important; 
+    background-color: transparent; 
   }
 </style>
 
