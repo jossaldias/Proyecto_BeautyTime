@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{% static 'css/formulario.css' %}">
+
+  <title>Atención al Cliente - Beauty Time</title>
+</head>
+
+<body>
+  {% url 'home' as home %}
+  <nav class="navbar navbar-expand-lg navbar-light bg-white">
+    <div class="container justify-content-center">
+      <a class="navbar-brand" href="#">
+        <img src="{% static 'img/Beauty-Time.png' %}" alt="Logo" class="img-fluid" style="max-height: 60px;">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+        <ul class="navbar-nav mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == home %} active {% endif %}" aria-current="page"
+              href="{% url 'home' %}">Inicio</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Tienda
+            </a>
+            <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item text-grey" href="#">Productos</a></li>
+              <li><a class="dropdown-item text-grey" href="#">Servicios</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Novedades</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Nosotros</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Marcas</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'atencioncliente' %}">Atención al Cliente</a>
+          </li>
+
+          &nbsp;
+          {% if request.user.is_authenticated %}
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown" style="color:white">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ user.picture.url }}" style="border-radius: 25px; background:white;" height="36" width="36" alt="Avatar" />
+                &nbsp;&nbsp;
+                <strong style="text-decoration: underline;">{{ user.first_name|capfirst }}, bienvenido</strong>
+              </a>
+              <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item text-grey" href="{% url 'perfil' %}">Perfil</a></li>
+                <li><a class="dropdown-item text-grey" href="{% url 'carrito' %}">Mi Carrito</a></li> <!-- Aquí se añade "Mi Carrito" -->
+                <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
+                <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
+              </ul>
+            </li>
+          </ul>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Mi Cuenta</a>
+          </li>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded">
+          <div class="card-header bg-primary text-white text-center">
+            <h2 class="mb-0">Por favor envíanos tu consulta!</h2>
+          </div>
+          <div class="card-body">
+            <form action="https://formspree.io/f/xbljjkjv" method="POST">
+              <div class="mb-3">
+                <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Tu nombre" required
+                  pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+" title="El nombre solo puede contener letras y espacios (sin guiones)">
+              </div>
+
+              <div class="mb-3">
+                <input type="text" id="asunto" name="asunto" class="form-control" placeholder="Asunto" required
+                  pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+" title="El asunto solo puede contener letras y espacios.">
+              </div>
+
+              <div class="mb-3">
+                <select id="tipo_consulta" name="tipo_consulta" class="form-control" required>
+                  <option value="">Selecciona el tipo de consulta</option>
+                  <option value="Ayuda">Ayuda</option>
+                  <option value="Reclamo">Reclamación</option>
+                  <option value="Otros">Otros</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <input type="email" id="subscribe-email" name="email" class="form-control" placeholder="Tu correo electrónico" required
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Por favor ingresa un correo válido (ejemplo: usuario@dominio.com)">
+              </div>
+
+              <div class="mb-3">
+                <textarea id="mensaje" name="mensaje" class="form-control" placeholder="Tu mensaje" required
+                  pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s\.,?!\-]+" title="El mensaje solo puede contener letras, números, espacios y algunos caracteres como: . , ? ! -"></textarea>
+              </div>
+
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded">
+          <div class="card-header bg-warning text-dark text-center">
+            <h2 class="mb-0">Preguntas Frecuentes (FAQ)</h2>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li><strong>¿Cómo puedo agendar una cita?</strong> - Puedes agendar una cita llamándonos o escribiendo por Whatsapp al <a href="tel:+56998027818">+56 9 9802 7818</a> o enviándonos un correo a <a href="mailto:contacto@beautytime.cl">contacto@beautytime.cl</a>.</li>
+              <li><strong>¿Cuáles son los horarios disponibles?</strong> - Nuestros horarios son de martes a jueves de 9am a 5pm, viernes de 9am a 7pm y sábados de 8am a 4pm.</li>
+              <li><strong>¿Puedo cambiar mi cita?</strong> - Sí, puedes cambiar tu cita con al menos 24 horas de anticipación llamando o enviándonos un correo.</li>
+              <li><strong>¿Qué pasa si llego tarde a mi cita?</strong> - Si llegas tarde, es posible que no podamos atenderte o que se reduzca el tiempo de tu tratamiento.</li>
+              <li><strong>¿Aceptan pagos con tarjeta?</strong> - Sí, aceptamos tarjetas de crédito y débito para el pago de los servicios.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-center text-white mt-5"> 
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 mt-3">
+          <div class="footer-content">
+            <h3>Horario de Apertura</h3>
+            <p>Martes - Jueves: 9am - 5pm</p>
+            <p>Viernes: 9am - 7pm / Sáb: 8am - 4pm</p>
+            <p>Dom - Lun: Cerrado</p>
+          </div>
+        </div>
+        <div class="col-md-6 mt-3">
+          <div class="footer-content">
+            <h3>Contáctanos</h3>
+            <p>Correo electrónico: <a href="mailto:contacto@beautytime.cl" class="text-white">contacto@beautytime.cl</a></p>
+            <p>Teléfono: <a href="tel:+56998027818" class="text-white">+56 9 9802 7818</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 mt-3">
+          <div class="footer-content">
+            <h3>Ubicación</h3>
+            <p>XXXX, Peñalolén, Santiago</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+      © 2024 Copyright:
+      <a class="text-white" href="{% url 'home' %}">BeautyTime.cl</a>
+    </div>
+  </footer>
+
+  <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20mas%20informacion" class="float pulse" target="_blank">
+    <i class="fa fa-whatsapp my-float"></i>
+  </a>
+
+</body>
+
+</html>

@@ -133,3 +133,9 @@ from django.shortcuts import render
 
 def carrito(request):
     return render(request, 'base/carrito.html')  
+
+
+#ATENCION CLIENTE
+
+def atencioncliente(request):
+    return render(request, 'base/atencioncliente.html')

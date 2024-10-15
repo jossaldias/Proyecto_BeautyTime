@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="static/css/btnwsp.css">
+  <link rel="stylesheet" href="{% static 'css/formulario.css' %}">
+
   
   {% block css %}
   {% endblock %}
@@ -55,6 +57,10 @@
           <li class="nav-item">
             <a class="nav-link" href="#">Marcas</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'atencioncliente' %}">Atención al Cliente</a>
+          </li>
+          
           &nbsp;
           {% if request.user.is_authenticated %}
           <ul class="navbar-nav">
@@ -101,15 +107,19 @@
             <h3>Contáctanos</h3>
             <p>Correo electrónico: <a href="mailto:contacto@beautytime.cl" class="text-white">contacto@beautytime.cl</a></p>
             <p>Teléfono: <a href="tel:+56998027818" class="text-white">+56 9 9802 7818</a></p>
-            <div class="subscribe-form">
-              <input type="text" id="nombre" class="form-control" placeholder="Nombre"><br>
-              <input type="email" id="subscribe-email" class="form-control" placeholder="Correo electrónico"><br>
-              <input type="text" id="mensaje" class="form-control" placeholder="Mensaje"><br>
-              <button type="submit" class="btn btn-primary">Enviar</button>
-            </div>
           </div>
         </div>
       </div>
+      
+      <div class="row">
+        <div class="col-md-12 mt-3">
+          <div class="footer-content">
+            <h3>Ubicación</h3>
+            <p>XXXX, Peñalolén, Santiago</p>
+          </div>
+        </div>
+      </div>
+
     </div>
     <br>
     <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
@@ -134,7 +144,7 @@
     crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-  <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20mas%20informacion" class="float pulse" target="_blank">
+  <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20ayuda%20por favor" class="float pulse" target="_blank">
     <i class="fa fa-whatsapp my-float"></i>
   </a>
 

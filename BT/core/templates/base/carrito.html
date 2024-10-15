@@ -48,8 +48,14 @@
             <a class="nav-link {% if request.path == home %} active {% endif %}" aria-current="page"
               href="{% url 'home' %}">Inicio</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Tienda</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Tienda
+            </a>
+            <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item text-grey" href="#">Productos</a></li>
+              <li><a class="dropdown-item text-grey" href="#">Servicios</a></li>
+            </ul>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Novedades</a>
@@ -60,6 +66,10 @@
           <li class="nav-item">
             <a class="nav-link" href="#">Marcas</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'atencioncliente' %}">Atención al Cliente</a>
+          </li>
+          
           &nbsp;
           {% if request.user.is_authenticated %}
           <ul class="navbar-nav">
@@ -71,7 +81,7 @@
               </a>
               <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item text-grey" href="{% url 'perfil' %}">Perfil</a></li>
-                <li><a class="dropdown-item text-grey" href="{% url 'carrito' %}">Mi Carrito</a></li>
+                <li><a class="dropdown-item text-grey" href="{% url 'carrito' %}">Mi Carrito</a></li> <!-- Aquí se añade "Mi Carrito" -->
                 <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
                 <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
               </ul>
@@ -243,15 +253,20 @@
             <h3>Contáctanos</h3>
             <p>Correo electrónico: <a href="mailto:contacto@beautytime.cl" class="text-white">contacto@beautytime.cl</a></p>
             <p>Teléfono: <a href="tel:+56998027818" class="text-white">+56 9 9802 7818</a></p>
-            <div class="subscribe-form">
-              <input type="text" id="nombre" class="form-control" placeholder="Nombre"><br>
-              <input type="email" id="subscribe-email" class="form-control" placeholder="Correo electrónico"><br>
-              <input type="text" id="mensaje" class="form-control" placeholder="Mensaje"><br>
-              <button type="submit" class="btn btn-primary">Enviar</button>
-            </div>
           </div>
         </div>
       </div>
+      
+      <!-- Bloque separado para la ubicación, similar a "Horario de Apertura" -->
+      <div class="row">
+        <div class="col-md-12 mt-3">
+          <div class="footer-content">
+            <h3>Ubicación</h3>
+            <p>XXXX, Peñalolén, Santiago</p>
+          </div>
+        </div>
+      </div>
+
     </div>
     <br>
     <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
