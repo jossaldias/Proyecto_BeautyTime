@@ -505,3 +505,15 @@ def obtener_reserva(request, id):
         return JsonResponse(reserva_data)
     except Reserva.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Reserva no encontrada.'})
+
+#CARRITO
+from django.shortcuts import render
+
+def carrito(request):
+    return render(request, 'tienda/carrito.html')  
+
+
+#ATENCION CLIENTE
+
+def atencioncliente(request):
+    return render(request, 'tienda/atencioncliente.html')

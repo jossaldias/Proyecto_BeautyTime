@@ -37,4 +37,7 @@ urlpatterns = [
     path('editar_cita/<int:id>/', views.editar_cita, name='editar_cita'),
     path('obtener_servicios/', views.obtener_servicios, name='obtener_servicios'),
     path('obtener_reserva/<int:id>/', views.obtener_reserva, name='obtener_reserva'),
+
+    path('paginas/carrito/', views.carrito, name='carrito'),
+    path('paginas/atencioncliente/', views.atencioncliente, name='atencioncliente'), 
 ]

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css"
     rel="stylesheet">
+  <link rel="stylesheet" href="static/css/btnwsp.css">
 
   {% block css %}
   {% endblock %}
@@ -51,7 +52,7 @@
             <a class="nav-link" href="#">Novedades</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Nosotros</a>
+            <a class="nav-link" href="{% url 'atencioncliente' %}">Atención al Cliente</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Marcas</a>
@@ -138,6 +139,9 @@
     crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
+  <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20ayuda%20por favor" class="float pulse" target="_blank">
+    <i class="bi bi-whatsapp my-float"></i>
+  </a>
 
 </body>
 

@@ -1,0 +1,75 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+{% block template %}
+
+  <class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded">
+          <div class="card-header bg-primary text-white text-center">
+            <h2 class="mb-0">Por favor envíanos tu consulta!</h2>
+          </div>
+          <div class="card-body">
+            <form action="https://formspree.io/f/xbljjkjv" method="POST">
+              <div class="mb-3">
+                <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Tu nombre" required
+                  pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+" title="El nombre solo puede contener letras y espacios (sin guiones)">
+              </div>
+
+              <div class="mb-3">
+                <input type="text" id="asunto" name="asunto" class="form-control" placeholder="Asunto" required
+                  pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+" title="El asunto solo puede contener letras y espacios.">
+              </div>
+
+              <div class="mb-3">
+                <select id="tipo_consulta" name="tipo_consulta" class="form-control" required>
+                  <option value="">Selecciona el tipo de consulta</option>
+                  <option value="Ayuda">Ayuda</option>
+                  <option value="Reclamo">Reclamación</option>
+                  <option value="Otros">Otros</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <input type="email" id="subscribe-email" name="email" class="form-control" placeholder="Tu correo electrónico" required
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Por favor ingresa un correo válido (ejemplo: usuario@dominio.com)">
+              </div>
+
+              <div class="mb-3">
+                <textarea id="mensaje" name="mensaje" class="form-control" placeholder="Tu mensaje" required
+                  pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s\.,?!\-]+" title="El mensaje solo puede contener letras, números, espacios y algunos caracteres como: . , ? ! -"></textarea>
+              </div>
+
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-0 rounded">
+          <div class="card-header bg-warning text-dark text-center">
+            <h2 class="mb-0">Preguntas Frecuentes (FAQ)</h2>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li><strong>¿Cómo puedo agendar una cita?</strong> - Puedes agendar una cita llamándonos o escribiendo por Whatsapp al <a href="tel:+56998027818">+56 9 9802 7818</a> o enviándonos un correo a <a href="mailto:contacto@beautytime.cl">contacto@beautytime.cl</a>.</li>
+              <li><strong>¿Cuáles son los horarios disponibles?</strong> - Nuestros horarios son de martes a jueves de 9am a 5pm, viernes de 9am a 7pm y sábados de 8am a 4pm.</li>
+              <li><strong>¿Puedo cambiar mi cita?</strong> - Sí, puedes cambiar tu cita con al menos 24 horas de anticipación llamando o enviándonos un correo.</li>
+              <li><strong>¿Qué pasa si llego tarde a mi cita?</strong> - Si llegas tarde, es posible que no podamos atenderte o que se reduzca el tiempo de tu tratamiento.</li>
+              <li><strong>¿Aceptan pagos con tarjeta?</strong> - Sí, aceptamos tarjetas de crédito y débito para el pago de los servicios.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

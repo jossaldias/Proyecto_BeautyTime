@@ -1,0 +1,144 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+{% block template %}
+
+  <div class="container mt-4">
+    <h2>Mi Carrito</h2>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            Detalles del Carrito
+          </div>
+          <div class="card-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Producto</th>
+                  <th>Precio</th>
+                  <th>Cantidad</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Shampoo" width="50"></td>
+                  <td>Shampoo Hidratante</td>
+                  <td>$15.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$15.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Acondicionador" width="50"></td>
+                  <td>Acondicionador Reparador</td>
+                  <td>$25.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$25.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Mascarilla" width="50"></td>
+                  <td>Mascarilla Capilar</td>
+                  <td>$35.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$35.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Aceite" width="50"></td>
+                  <td>Aceite Nutritivo</td>
+                  <td>$18.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$18.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Spray" width="50"></td>
+                  <td>Spray Protector Calor</td>
+                  <td>$32.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$32.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Gel" width="50"></td>
+                  <td>Gel Fijador</td>
+                  <td>$18.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$18.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Crema" width="50"></td>
+                  <td>Crema Definidora</td>
+                  <td>$54.000</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$54.000</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="https://via.placeholder.com/50" alt="Spray" width="50"></td>
+                  <td>Spray Antifrizz</td>
+                  <td>$42.800</td>
+                  <td>
+                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                  </td>
+                  <td>$42.800</td>
+                  <td>
+                    <button class="btn btn-danger">Eliminar</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="resumen">
+          <h4>Resumen de Compra</h4>
+          <p><strong>Total de Productos:</strong> 7</p>
+          <p><strong>Subtotal:</strong> $254.800</p>
+          <p><strong>Descuento:</strong> $20.000</p>
+          <p><strong>Total a Pagar:</strong> $234.800</p>
+          <div class="text-center">
+            <button class="btn btn-success">Proceder a la Compra</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
