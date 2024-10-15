@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block template %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="wrapper">
+                <div class="logo">
+                    <img src="{% static 'img/Beauty-Time.png' %}" alt="">
+                </div>
+                <div class="text-center mt-4 name">
+                    Registro Clientes
+                </div>
+                <form id="" method="POST" class="p-3 mt-3">
+                    {% csrf_token %}
+                    {{form | crispy}}
+                
+                    <button type="submit" class="btn mt-3">Registrarse</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock template %}

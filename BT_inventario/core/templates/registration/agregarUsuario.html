@@ -1,0 +1,39 @@
+{% extends "base/base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}">
+{% endblock %}
+
+{% block template %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="wrapper">
+                <div class="text-left mt-4 name">
+                    Agregar Usuario
+                </div>
+                <div>
+                    <form method="POST" class="p-3 mt-3" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <p>{{ field.label }}<br>
+                            {{ field|add_class:"form-control text-dark" }}
+                        </p>
+                        {% endfor %}
+                        <div class="buttons d-flex flex-column flex-md-row justify-content-md-between align-items-center">
+                            <a class="btn btn-primary btn-sm w-100 w-md-auto" href="{% url 'usuarios' %}">
+                                <i class="bi bi-arrow-left-square-fill"></i>&nbsp;&nbsp;Volver
+                            </a>
+                            <button type="submit" value="Submit" class="btn btn-success btn-sm w-100 w-md-auto">
+                                <i class="bi bi-plus-square-fill"></i>&nbsp;&nbsp;Agregar
+                            </button>                   
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>
+{% endblock %}

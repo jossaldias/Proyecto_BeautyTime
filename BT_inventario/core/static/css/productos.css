@@ -1,0 +1,136 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Container for User Management */
+.container {
+    max-width: 100%;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+/* Wrapper Styling */
+.wrapper {
+    background-color: #ecf0f3;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Title Styles */
+.name {
+    font-size: 2rem; /* Increase the font size for prominence */
+    font-weight: bold; /* Make the text bold */
+    color: #343a40; /* Set a dark color for the text */
+    margin-bottom: 20px; /* Add some space below the title */
+    text-align: left; /* Align the text to the left */
+    border-bottom: 2px solid #03A9F4; /* Add a bottom border for emphasis */
+    padding-bottom: 10px; /* Add some padding below the text */
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    margin-bottom: 20px;
+    table-layout: auto;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table th, .table td {
+    text-align: left;
+    padding: 3px;
+    white-space: nowrap;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table-dark {
+    background-color: #343a40;
+    color: white;
+}
+
+.table-dark th, .table-dark td {
+    border-color: #454d55;
+}
+
+/* Button Styles */
+.btn {
+    margin: 10px 0;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+/* Modal Styles */
+.modal-header {
+    background-color: #17a2b8;
+}
+
+.modal-title {
+    font-size: 24px;
+}
+
+.modal-body {
+    background-color: #343a40;
+    color: white;
+    padding: 20px;
+}
+
+.modal-footer {
+    background-color: #343a40;
+    padding: 15px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .wrapper {
+        padding: 10px;
+    }
+
+    .table th, .table td {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+}

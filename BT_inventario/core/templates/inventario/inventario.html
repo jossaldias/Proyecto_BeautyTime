@@ -1,0 +1,131 @@
+{% extends "base/base.html" %}
+{% load widget_tweaks %}
+
+{% load static %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}">
+{% endblock %}
+
+{% block template %}
+
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="wrapper">
+                <div class="text-left mt-4 name">
+                    Inventario de Productos
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover" id="tableinventario">
+                        <br>
+                        {% if user.tipo_user == 'Administrador General' or user.tipo_user == 'Administrador Logístico' %}
+                        <a class="btn btn-success btn-lg" href="{% url 'agregarProducto' %}"><i
+                                class="bi bi-plus-square-fill"></i>&nbsp;&nbsp;Agregar Productos</a>
+                        <br><br>
+                        {% endif %}
+                        <thead>
+                            <tr class="table-dark">
+                                <th>Nombre</th>
+                                <th>Tipo de Producto</th>
+                                <th>Categoría</th>
+                                <th>Precio $</th>
+                                <th>Cantidad</th>
+                                {% if user.tipo_user == 'Administrador General' %}
+                                <th>Editar</th>
+                                <th>Quitar</th>
+                                {% endif %}
+
+                            </tr>
+                        </thead>
+                        <tbody class="text-dark">
+                            {% for i in productos %}
+                            <tr class="table-dark">
+                                <td class="table-dark">{{i.nombre}}</td>
+                                <td>{{i.tipo|title}}</td>
+                                <td class="table-dark">{{i.categoria}}</td>
+                                <td class="table-dark">${{i.costo}}</td>
+                                <td class="table-dark">{{i.cantidad}}</td>
+                                {% if user.tipo_user == 'Administrador General' %}
+                                <td>
+                                    <button type="button"
+                                        onclick="editarProducto('{{i.id}}','{{i.id_producto}}', '{{i.nombre}}', '{{i.descripcion}}', '{{i.costo}}', '{{i.cantidad}}')"
+                                        class="btn btn-primary" data-toggle="modal" href="#EditarProductoModal">
+                                        <i class="bi bi-pen-fill"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" onclick="eliminarProducto('{{i.id}}')" class="btn btn-danger"
+                                        data-toggle="modal" href="#EliminarProductoModal">
+                                        <i class="bi bi-x-square-fill"></i>
+                                    </button>
+                                </td>
+                                {% endif %}
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'verInventario'%}" class="btn btn-lg btn-primary">Imprimir</a>
+                </div>
+                    <div id="EliminarProductoModal" class="modal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-info">
+                                    <h3 class="modal-title text-dark">Eliminar Producto</h3>
+                                </div>
+                                <div class="modal-body bg-dark text-white">
+                                    <p class="labelmodal">Estas seguro?</p>
+                                    <form method="POST" action="{% url 'eliminarProducto'%}">{% csrf_token %}
+                                        <input type="hidden" id="id_producto_eliminar" name="id_producto_eliminar">
+                                </div>
+                                <div class="modal-footer bg-dark">
+                                    <button type="submit" class="btn btn-danger">
+                                        Eliminar
+                                    </button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                        Cerrar
+                                        <i class="bi bi-x-square-fill"></i>
+                                    </button>
+                                </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="EditarProductoModal" class="modal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-info">
+                                    <h3 class="modal-title text-dark">Editar Producto</h3>
+                                </div>
+                                <div class="modal-body bg-dark text-white">
+                                    <form method="POST" action="{% url 'editarProducto'%}"
+                                        enctype="multipart/form-data">{% csrf_token %}
+                                        <input type="hidden" id="id_producto_editar" name="id_producto_editar">
+                                        {% for field in form_editar %}
+                                        <p>{{field.label}}<br>
+                                            {{field|add_class:"form-control"}}</p>
+                                        {%endfor%}
+                                </div>
+                                <div class="modal-footer bg-dark text-white">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                        Cerrar
+                                        <i class="bi bi-x-square-fill"></i>                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        Guardar
+                                    </button>
+                                </form>   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

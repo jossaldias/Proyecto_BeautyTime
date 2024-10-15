@@ -1,0 +1,92 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+{% block template %}
+
+<style>
+  .card-content {
+
+    height: 150px
+  }
+
+  .carousel-item img {
+    height: 470px;
+    object-fit: cover; 
+  }
+
+
+  @media (max-width: 768px) {
+    .carousel-item img {
+      height: 40vh; 
+      object-fit: cover;
+    }
+  }
+
+</style>
+<main>
+  <div class="container-fluid w-100">
+  <div class="row">
+    <div class="col-md-12 p-0">
+      <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="{% static 'img/carrusel.jpg' %}" class="d-block w-100 img-fluid" alt="Producto 1">
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'img/carrusel2.jpg' %}" class="d-block w-100 img-fluid" alt="Producto 2">
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'img/carrusel3.jpg' %}" class="d-block w-100 img-fluid" alt="Producto 3">
+          </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Siguiente</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<section class="image-links-section py-4" style= "background-color:rgb(31,34,82)">
+  <div class="container">
+    <div class="row text-center mt-5 mb-5 mt-3">
+      <div class="col-md-4 col-12 mb-3">
+        <a href="{% url 'productos' %}">
+          <img src="{% static 'img/woman-makeup-icon.png' %}" alt="Link 1" class="img-fluid" style="max-height: 150px;">
+        </a>
+        <h1 class="d-md-block d-lg-none text-white mt-2">Productos</h1>
+        <p class="d-md-block d-lg-none text-white mt-2 " style="text-align: justify;">+  Cuida tu cabello con nuestra selección de productos para el cuidado capilar. Encuentra champús tratamientos, mascarillas hidratantes, aceites nutritivos y más. Reaviva tu cabello, reduce el frizz y consigue un aspecto sedoso y manejable. Dale a tu cabello el amor que se merece!
+        </p>
+      </div>
+      <div class="col-md-4 col-12 mb-3 mt-3">
+        <a href="{% url 'servicios' %}">
+          <img src="{% static 'img/hair-salon-icon.png' %}" alt="Link 2" class="img-fluid" style="max-height: 150px;">
+        </a>
+        <h1 class="d-md-block d-lg-none text-white mt-2">Servicios</h1>
+        <p class="d-md-block d-lg-none text-white mt-2 " style="text-align: justify;">+  Te asesoramos en la elección del color y la técnica adecuada para obtener los resultados que buscas.
+<br>+ Complementamos con una amplia variedad de tratamientos hidratantes, reconstructivos e hidratantes para que luzcas un cabello lleno de vida.
+<br>+ Además trabajamos con los mejores productos de alisados y texturizados del mercado, para que tu cabello luzca maravilloso.
+        </p>
+      </div>
+      <div class="col-md-4 col-12 mb-3 mt-3">
+        <a href="#">
+          <img src="{% static 'img/cosmetics-icon.png' %}" alt="Link 3" class="img-fluid" style="max-height: 150px;">
+        </a>
+        <h1 class="d-md-block d-lg-none text-white mt-2">Acerca del Salón</h1>
+        <p class="d-md-block d-lg-none text-white mt-2 " style="text-align: justify;">+  Nos encargaremos de que tu visita a Beauty Time siempre sea una experiencia de bienestar. Amamos nuestro trabajo, por eso nuestros estilistas están capacitados con las mejores técnicas de color, utilizando productos de alta gama para que obtengas resultados fantásticos. Además, ofrecemos una exclusiva selección de productos profesionales que puedes llevarte a casa, para que sigas cuidando de tu cabello y manteniendo los resultados entre visitas.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+{% endblock %}

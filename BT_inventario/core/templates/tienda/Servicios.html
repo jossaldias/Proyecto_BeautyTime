@@ -1,0 +1,35 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block template %}
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+<main>
+  <h1 class="card borders page-title">SERVICIOS</h1>
+  <section class="card-container">
+    {% for servicio in servicios %}
+    <article class="card">
+      <div class="card-title">
+        <h3 class="product-title">{{servicio.nombre}}</h3>
+      </div>
+      <div class="image-container">
+        <a title="verDetalle" href="{% url 'verDetalle' tipo='servicio' id=servicio.iditem %}">
+          <img src="{{ servicio.picture.url }}" alt="{{ servicio.nombre }}">
+        </a>
+      </div>
+      <br>
+      <strong>Descripción</strong><br>
+      <div class="card-content">
+        <p>{{ servicio.descripcion|truncatechars:100 }}</p>
+        <h5> <strong>Precio</strong> ${{servicio.costo}}</h5>
+      </div>
+      {% comment %} <form method="post" action="{% url 'add' servicio.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="cantidad" class="form-control" required="" id="id_cantidad" value="1">
+        <a class="add-to-cart" href="#" onClick="javascript:this.parentNode.submit()">
+          <i class="bi bi-bag-fill"></i>&nbsp;Añadir al Carrito
+        </a>
+      </form> {% endcomment %}
+    </article>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}
