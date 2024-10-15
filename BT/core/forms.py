@@ -1,3 +1,4 @@
+import re
 from .models import User, Item, Reserva
 from django.conf import settings
 from django import forms  
@@ -8,7 +9,6 @@ from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Field, Fieldset, Layout, Submit, ButtonHolder, HTML
 from django.core.exceptions import ValidationError
-
 
 User = get_user_model()
 
@@ -506,3 +506,14 @@ class ReservaCitaForm(forms.ModelForm):
         help_text="Ingresa tu número de contacto sin el prefijo (+56)",
         widget=forms.TextInput(attrs={'placeholder': '9XXXXXXXX', 'class': 'form-control'})
     )
+
+    class Meta:
+            model = Reserva
+            fields = ['nombre', 'email', 'servicio', 'fecha', 'hora', 'contacto']
+
+    def clean_contacto(self):
+        contacto = self.cleaned_data['contacto']
+        # Validar que el número siga el formato chileno sin el prefijo +56
+        if not re.match(r'^\d{9}$', contacto):
+               raise forms.ValidationError("El número debe tener 9 dígitos.")
+        return f'+56 {contacto}' 

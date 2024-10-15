@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, authenticate, login as auth_login
 from django.contrib.auth import update_session_auth_hash
+import json
 
 from django.db.models import Q
 from .models import *
@@ -450,7 +451,7 @@ def eliminar_cita(request, id):
 
 
 # Editar cita
-#@login_required
+@login_required
 def editar_cita(request, id):
     if request.method == 'POST':
         try:
