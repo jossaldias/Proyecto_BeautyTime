@@ -1,7 +1,12 @@
 {% extends "base/base.html" %}
 {% load static %}
-{% block template %}
+
+{% block css %}
 <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+
+{% endblock %}
+
+{% block template %}
 <main>
   <h1 class="card borders page-title">PRODUCTOS</h1>
   <section class="card-container">

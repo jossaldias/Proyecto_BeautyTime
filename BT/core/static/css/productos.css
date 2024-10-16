@@ -49,18 +49,6 @@
     white-space: nowrap;
 }
 
-.table-hover tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
-.table-dark {
-    background-color: #343a40;
-    color: white;
-}
-
-.table-dark th, .table-dark td {
-    border-color: #454d55;
-}
 
 /* Button Styles */
 .btn {
@@ -96,21 +84,20 @@
 
 /* Modal Styles */
 .modal-header {
-    background-color: #17a2b8;
+    background-color: #9817b8 !important;
 }
 
+.modal-body{
+    background-color: rgba(249 ,215 ,218) !important;
+    color:rgb(0, 0, 0) !important;
+}
 .modal-title {
     font-size: 24px;
-}
-
-.modal-body {
-    background-color: #343a40;
-    color: white;
-    padding: 20px;
+    color:rgb(0, 0, 0) !important;
 }
 
 .modal-footer {
-    background-color: #343a40;
+    background-color:  rgba(249 ,215 ,218)  !important;
     padding: 15px;
 }
 
@@ -133,4 +120,8 @@
     .modal-body {
         padding: 15px;
     }
+
+    .modal {
+            max-height: 65%; 
+        }
 }

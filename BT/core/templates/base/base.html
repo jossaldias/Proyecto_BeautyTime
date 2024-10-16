@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css"
     rel="stylesheet">
-  <link rel="stylesheet" href="static/css/btnwsp.css">
+  <link rel="stylesheet" href="{% static 'css/btnwsp.css' %}">
 
   {% block css %}
   {% endblock %}
@@ -66,13 +66,15 @@
                 <img src="{{ user.picture.url }}" style="border-radius: 25px; background:white;" height="36" width="36"
                   alt="Avatar" />
                 &nbsp;&nbsp;
-                <strong style="text-decoration: underline;">{{ user.first_name|capfirst }}, bienvenido</strong>
+                <strong style="text-decoration: underline;">{{ user.first_name|capfirst }}, bienvenido/a</strong>
               </a>
               <ul class="dropdown-menu bg-secondary text-white" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item text-grey" href="{% url 'perfil' %}">Perfil</a></li>
+                {% if user.tipo_user == 'Administrador General' %}
                 <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
                 <li><a class="dropdown-item" href="{% url 'inventario' %}">Gestión de Inventario</a></li>
                 <li><a class="dropdown-item" href="{% url 'calendario' %}">Gestión de Agendamiento</a></li>
+                {%endif%}
                 <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
               </ul>
             </li>
@@ -142,7 +144,6 @@
   <a href="https://api.whatsapp.com/send?phone=+56998027818&text=Buenas,%20me%20gustaria%20obtener%20ayuda%20por favor" class="float pulse" target="_blank">
     <i class="bi bi-whatsapp my-float"></i>
   </a>
-
 </body>
 
 </html>

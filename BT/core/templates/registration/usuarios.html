@@ -18,13 +18,13 @@
                     Gestión de Usuarios
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-dark table-hover">
+                    <table class="table table-danger table-hover">
                         <br>
                         <a class="btn btn-success btn-lg" href="{% url 'agregarUsuario' %}"><i
                                 class="bi bi-plus-square-fill"></i>&nbsp;&nbsp;Agregar Usuario</a>
                         <br><br>
                         <thead>
-                            <tr class="table-dark">
+                            <tr class="table-danger">
                                 <th>Tipo de Usuario</th>
                                 <th>Usuario</th>
                                 <th>User Name</th>
@@ -38,18 +38,18 @@
                                 <th>Eliminar</th>
                             </tr>
                         </thead>
-                        <tbody class="text-dark">
+                        <tbody class="text-danger">
                             {% for user in users %}
-                            <tr class="table-dark">
-                                <td class="table-dark">{{user.tipo_user}}</td>
-                                <td class="table-dark">{{user.first_name}} {{i.last_name}}</td>
-                                <td class="table-dark">{{user.username}}</td>
-                                <td class="table-dark">{{user.email}}</td>
-                                <td class="table-dark">{{user.direccion}}</td>
-                                <td class="table-dark">{{user.region}}</td>
-                                <td class="table-dark">{{user.comuna}}</td>
-                                <td class="table-dark">{{user.telefono}}</td>
-                                <td class="table-dark">{{user.fecha_nac}}</td>
+                            <tr class="table-danger">
+                                <td class="table-danger">{{user.tipo_user}}</td>
+                                <td class="table-danger">{{user.first_name}} {{i.last_name}}</td>
+                                <td class="table-danger">{{user.username}}</td>
+                                <td class="table-danger">{{user.email}}</td>
+                                <td class="table-danger">{{user.direccion}}</td>
+                                <td class="table-danger">{{user.region}}</td>
+                                <td class="table-danger">{{user.comuna}}</td>
+                                <td class="table-danger">{{user.telefono}}</td>
+                                <td class="table-danger">{{user.fecha_nac}}</td>
                                 <td>
                                     <button type="button"
                                         onclick="editarUsuario('{{user.id}}','{{user.username}}', '{{user.first_name}}', '{{user.last_name}}',  '{{user.email}}', '{{user.direccion}}' , '{{user.region}}', '{{user.comuna}}', '{{user.telefono}}', '{{user.fecha_nac}}','{{user.tipo_user}}')"
@@ -72,14 +72,14 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header bg-info">
-                                <h3 class="modal-title text-dark">Eliminar Usuario</h3>
+                                <h3 class="modal-title text-danger">Eliminar Usuario</h3>
                             </div>
-                            <div class="modal-body bg-dark text-white">
+                            <div class="modal-body bg-danger text-white">
                                 <p class="labelmodal">Estas seguro?</p>
                                 <form method="POST" action="{% url 'eliminarUsuario'%}">{% csrf_token %}
                                     <input type="hidden" id="id_usuario_eliminar" name="id_usuario_eliminar">
                             </div>
-                            <div class="modal-footer bg-dark">
+                            <div class="modal-footer bg-danger">
                                 <button type="submit" class="btn btn-danger">
                                     Eliminar
                                 </button>
@@ -96,18 +96,17 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header bg-info">
-                                <h3 class="modal-title text-dark">Editar Usuario</h3>
+                                <h3 class="modal-title text-danger">Editar Usuario</h3>
                             </div>
-                            <div class="modal-body bg-dark text-white">
-                                <form method="POST" action="{% url 'editarUsuario'%}" enctype="multipart/form-data">{%
-                                    csrf_token %}
+                            <div class="modal-body bg-danger text-white">
+                                <form method="POST" action="{% url 'editarUsuario'%}" enctype="multipart/form-data">{%csrf_token %}
                                     <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
                                     {% for field in form_editar %}
                                     <p>{{field.label}}<br>
                                         {{field|add_class:"form-control"}}</p>
                                     {%endfor%}
                             </div>
-                            <div class="modal-footer bg-dark text-white">
+                            <div class="modal-footer bg-danger text-white">
                                 <button type="button" class="btn btn-primary" data-dismiss="modal">
                                     Cerrar
                                     <i class="bi bi-x-square-fill"></i> </button>
