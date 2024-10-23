@@ -151,13 +151,36 @@ class Item(models.Model):
         return self.nombre or f"Item {self.iditem}"
 
 
+# MODELO DE CATEGORÍA
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+
+# MODELO CATEGORIA SERVICIO
+class CategoriaServicio(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)  # Example: 'Cabello', 'Corporal', 'Uñas'
+
+    def __str__(self):
+        return self.nombre
+
+
+# MODELO SERVICIOS
+class Servicio(models.Model):
+    categoria = models.ForeignKey(CategoriaServicio, on_delete=models.CASCADE, related_name='servicios')
+    nombre = models.CharField(max_length=100)  # Example: 'Corte de Pelo', 'Masaje Relajante'
+
+    def __str__(self):
+        return f'{self.nombre} ({self.categoria.nombre})'
+    
 # CREACIÓN EN BD DE RESERVAS
 class Reserva(models.Model):
     nombre = models.CharField(max_length=100)
     email = models.EmailField()
     fecha = models.DateField()
     hora = models.TimeField()
-    servicio = models.CharField(max_length=50)
+    servicio = models.ForeignKey(Servicio, on_delete=models.SET_NULL, null=True)
     contacto = models.CharField(max_length=13, null=True, blank=True)
     
     @property
@@ -169,4 +192,4 @@ class Reserva(models.Model):
         return self.fecha_hora_inicio + timedelta(hours=1)
 
     def __str__(self):
-        return f'Reserva de {self.nombre} para {self.servicio} el {self.fecha} a las {self.hora}'
+        return f'Reserva de {self.nombre} para {self.servicio} ({self.categoria_servicio}) el {self.fecha} a las {self.hora}'

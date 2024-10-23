@@ -1,5 +1,5 @@
 import re
-from .models import User, Item, Reserva
+from .models import User, Item, Reserva, Servicio
 from django.conf import settings
 from django import forms  
 from django.forms import TextInput
@@ -491,12 +491,12 @@ class ReservaCitaForm(forms.ModelForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
     fecha = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
     hora = forms.TimeField(widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
-    servicio = forms.ChoiceField(choices=[
-        ('manicura', 'Manicura'),
-        ('masaje', 'Masaje'),
-        ('corte de pelo', 'Corte de Pelo'),
-        ('tinturado', 'Tinturado'),
-    ], widget=forms.Select(attrs={'class': 'form-control'}))
+    
+    # Usar ModelChoiceField para cargar dinámicamente los servicios desde la base de datos
+    servicio = forms.ModelChoiceField(
+        queryset=Servicio.objects.all(),  # Cargar servicios desde la base de datos
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     # Nuevo campo para número de contacto
     contacto = forms.CharField(
@@ -508,12 +508,12 @@ class ReservaCitaForm(forms.ModelForm):
     )
 
     class Meta:
-            model = Reserva
-            fields = ['nombre', 'email', 'servicio', 'fecha', 'hora', 'contacto']
+        model = Reserva
+        fields = ['nombre', 'email', 'servicio', 'fecha', 'hora', 'contacto']
 
     def clean_contacto(self):
         contacto = self.cleaned_data['contacto']
         # Validar que el número siga el formato chileno sin el prefijo +56
         if not re.match(r'^\d{9}$', contacto):
-               raise forms.ValidationError("El número debe tener 9 dígitos.")
-        return f'+56 {contacto}' 
+            raise forms.ValidationError("El número debe tener 9 dígitos.")
+        return f'+56 {contacto}'
