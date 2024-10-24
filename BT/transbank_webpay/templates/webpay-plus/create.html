@@ -1,0 +1,37 @@
+{% extends "base/base.html" %}
+
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/estilo.css' %}">
+{% endblock %}
+
+{% block template %}
+
+<div class="container h-100" style="padding-top:5%;">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style=" margin-bottom:10% ">
+  <div class="card text-center" style="background:black; margin-top:2%; ">
+    <div class="card-header">
+      <h1 style="color:white">Pagar Pedido</h1>
+    </div>
+    <div class="card-body">
+      <img src="{% static 'img/webpay.png' %}" alt="">
+      <br> <br> <br>
+      <form action="{{ response.url }}" method="POST">
+        <input type="hidden" name="token_ws" value="{{ response.token }}"><br>
+        <input type="submit" value="Ejecutar Pago con Webpay">
+      </form>
+      <br> <br> <br>
+    </div>
+    <div class="card-footer text-muted">
+      <a class="btn btn-danger btn-lg" href="/"><i class="bi bi-x-octagon-fill"></i></i>&nbsp;&nbsp;Cancelar Compra</a>
+    </div>
+  </div>
+   <br> <br> <br>
+</div>
+</div>
+</div>
+
+
+{% endblock %}

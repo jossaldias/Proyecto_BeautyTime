@@ -10,12 +10,12 @@ from django.contrib.auth import logout, authenticate, login as auth_login
 from django.contrib.auth import update_session_auth_hash
 import json
 
-from django.db.models import Q
+from django.db.models import Q, F, Sum
 from .models import *
 from .forms import *
 
 from .utils import render_to_pdf
-from django.views.generic import View
+from django.views.generic import View, CreateView 
 from django.core.mail import send_mail
 
 from datetime import timedelta, datetime
@@ -517,3 +517,9 @@ def carrito(request):
 
 def atencioncliente(request):
     return render(request, 'tienda/atencioncliente.html')
+
+# CARRO DE COMPRAS
+
+#FUNCIÓN PARA VER CARRITO DE COMPRAS
+def carritoCompras(request):
+    return redirect('carritoCompras')

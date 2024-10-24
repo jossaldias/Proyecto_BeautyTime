@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'BT',
     'core',
+    'transbank_webpay',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

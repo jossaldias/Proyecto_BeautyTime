@@ -25,121 +25,105 @@
                 </tr>
               </thead>
               <tbody>
+                {% for item in cart %} {% with producto=item.producto %}
                 <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Shampoo" width="50"></td>
-                  <td>Shampoo Hidratante</td>
-                  <td>$15.000</td>
                   <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
+                      <img src="{{producto.picture.url}}" width="100" height="100" />
                   </td>
-                  <td>$15.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
+                  <td>{{producto.nombre}}</td>
+                  <td class="quantity">
+                      <div class="d-flex justify-content-center align-items-center">
+                        <form action="{% url 'add' producto.id %}" method="post">
+                          {% csrf_token %}
+                          <div class="form-row align-items-center">
+                            <div class="col">
+                              <div class="input-group">
+                                <div class="input-group-prepend">
+                                  <button type="submit" class="btn btn-primary" onclick="decrementarCantidadC(this)">-</button>
+                                </div>
+                                {% render_field item.update_cantidad_form.cantidad class+="custom-width" %}
+                                <div class="input-group-append">
+                                  <button type="submit" class="btn btn-primary" onclick="incrementarCantidadC(this)">+</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          {{ item.update_cantidad_form.override }}
+                        </form>               
+                        <td class="text-right">${{item.costo}}
+                        <td td class="product-subtotal"><span class="amount">${{item.precio_total}}</span></td>
+                        <td class="text-right">
+                        <form action="{% url 'eliminar' producto.id %}" method="post">
+                        {% csrf_token %}
+                        <span class="icon-input-btn">
+                        <button class="btn btn-danger" type="submit">
+                          <i class="bi bi-trash3-fill"></i> Eliminar
+                        </button>
+                        </span>
+                        </form>
                   </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Acondicionador" width="50"></td>
-                  <td>Acondicionador Reparador</td>
-                  <td>$25.000</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$25.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Mascarilla" width="50"></td>
-                  <td>Mascarilla Capilar</td>
-                  <td>$35.000</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$35.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Aceite" width="50"></td>
-                  <td>Aceite Nutritivo</td>
-                  <td>$18.000</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$18.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Spray" width="50"></td>
-                  <td>Spray Protector Calor</td>
-                  <td>$32.000</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$32.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Gel" width="50"></td>
-                  <td>Gel Fijador</td>
-                  <td>$18.000</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$18.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Crema" width="50"></td>
-                  <td>Crema Definidora</td>
-                  <td>$54.000</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$54.000</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="https://via.placeholder.com/50" alt="Spray" width="50"></td>
-                  <td>Spray Antifrizz</td>
-                  <td>$42.800</td>
-                  <td>
-                    <input type="number" class="form-control" value="1" min="1" style="width: 60px;">
-                  </td>
-                  <td>$42.800</td>
-                  <td>
-                    <button class="btn btn-danger">Eliminar</button>
-                  </td>
-                </tr>
+                  {% endwith %} {% endfor %}
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><strong>Total</strong></td>
+                    <td class="text-right">
+                      <strong>$ {{cart.get_precio_total}}</strong>
+                    </td>
+                  </tr>
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </div>         
 
-      <div class="col-md-4">
-        <div class="resumen">
-          <h4>Resumen de Compra</h4>
-          <p><strong>Total de Productos:</strong> 7</p>
-          <p><strong>Subtotal:</strong> $254.800</p>
-          <p><strong>Descuento:</strong> $20.000</p>
-          <p><strong>Total a Pagar:</strong> $234.800</p>
-          <div class="text-center">
-            <button class="btn btn-success">Proceder a la Compra</button>
+        <div class="col-md-4">
+          <div class="resumen">
+            <h4>Resumen de Compra</h4>
+            <p><strong>Total de Productos:</strong> 7</p>
+            <p><strong>Subtotal:</strong> $254.800</p>
+            <p><strong>Descuento:</strong> $20.000</p>
+            <p><strong>Total a Pagar:</strong> $234.800</p>
+            <div class="text-center">
+              <a href="{% url 'create-order' %}" class="btn btn-block btn-success">Realizar pedido</a>
+            </div>
+            <div class="col-sm-3 col-md-3 text-right">
+              <form action="{% url 'clear' %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-block btn-danger" type="submit">
+                  <i class="bi bi-cart-x-fill"></i> Vaciar carrito
+                </button>
+              </form> 
+            </div>
           </div>
         </div>
+        {% else %}
+        <div class="row">
+          <div class="container"><br><br>
+            <div class="d-flex justify-content-center">
+              <h1>Opps! Su Carrito esta vacío...</h1>
+              <br />
+            </div><br><br>
+            <div class="d-flex justify-content-center">
+              <img src="{% static 'img/emptycart.png'%}" class="carro" alt="" /><br />
+            </div>
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
+
+<style>
+  .custom-width {
+    width: 60px;
+    height: 38px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+  }
+</style>
+<script src="{% static 'js/botones.js' %}"></script>
 {% endblock %}
 
