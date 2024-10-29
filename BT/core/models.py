@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from datetime import datetime, timedelta
 from model_utils.models import TimeStampedModel
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 #USUARIOS
 class User(AbstractUser):
@@ -103,7 +104,7 @@ class User(AbstractUser):
     direccion = models.CharField(max_length=60, null=True, blank =True)
     region = models.CharField(max_length=200, choices=REGION, default=REGION[0][0])
     comuna = models.CharField(max_length=200, choices=COMUNA, default=COMUNA[0][0])
-    telefono = models.BigIntegerField(null=True)
+    telefono = models.CharField(max_length=9, null=True, validators=[MinLengthValidator(9)])
     fecha_nac = models.DateField(null=True)
     tipo_user = models.CharField(max_length=60, null=True, blank =True)
 
@@ -151,15 +152,36 @@ class Item(models.Model):
     def __str__(self):
         return self.nombre or f"Item {self.iditem}"
 
+# MODELO DE CATEGORÍA
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.nombre
+
+# MODELO CATEGORIA SERVICIO
+class CategoriaServicio(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)  
+
+    def __str__(self):
+        return self.nombre
+# MODELO SERVICIOS
+class Servicio(models.Model):
+    categoria = models.ForeignKey(CategoriaServicio, on_delete=models.CASCADE, related_name='servicios')
+    nombre = models.CharField(max_length=100)  
+    def __str__(self):
+        return f'{self.nombre} ({self.categoria.nombre})'
+    
 # CREACIÓN EN BD DE RESERVAS
 class Reserva(models.Model):
+    cliente = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
     nombre = models.CharField(max_length=100)
     email = models.EmailField()
     fecha = models.DateField()
     hora = models.TimeField()
-    servicio = models.CharField(max_length=50)
+    servicio = models.ForeignKey(Servicio, on_delete=models.SET_NULL, null=True)
     contacto = models.CharField(max_length=13, null=True, blank=True)
+    confirmado = models.BooleanField(default=False)
     
     @property
     def fecha_hora_inicio(self):
@@ -170,7 +192,7 @@ class Reserva(models.Model):
         return self.fecha_hora_inicio + timedelta(hours=1)
 
     def __str__(self):
-        return f'Reserva de {self.nombre} para {self.servicio} el {self.fecha} a las {self.hora}'
+        return f'Reserva de {self.nombre} para {self.servicio} ({self.categoria_servicio}) el {self.fecha} a las {self.hora}'
 
 #ÓRDENES
 

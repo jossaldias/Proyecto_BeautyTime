@@ -19,6 +19,7 @@ from django.views.generic import View, CreateView
 from django.core.mail import send_mail
 
 from datetime import timedelta, datetime
+from django.contrib.auth.models import AnonymousUser
 
 
 # HOME
@@ -71,16 +72,31 @@ def editarPerfil(request):
         form = editarPerfilForm(data=request.POST, files=request.FILES, instance=user)
         
         if form.is_valid():
-            if form.cleaned_data.get('password'):  
-                user.set_password(form.cleaned_data['password']) 
-            form.save()  
-            messages.success(request, 'Perfil actualizado correctamente.')  
-            return redirect("perfil")
-    else:
-        form = editarPerfilForm(instance=user)  
 
+            # Guardar cambios en el perfil
+            user = form.save(commit=False)
+
+            # Obtener el valor del campo de contraseña
+            password = form.cleaned_data.get('password')
+
+            # Solo cambiar la contraseña si el usuario ingresó una nueva
+            if password:
+                user.set_password(password)  # Encripta y actualiza la contraseña si hay una nueva
+                update_session_auth_hash(request, user)  # Mantener la sesión si la contraseña se cambia
+
+            user.save()
+            messages.success(request, 'Perfil actualizado correctamente.')
+            return redirect("perfil")
+        else:
+            messages.error(request, 'Error al actualizar el perfil. Revisa los campos obligatorios.')
+    else:
+        form = editarPerfilForm(instance=user)
+    
     context = {"form": form}
-    return render(request, "paginas/perfil.html", context)
+    return render(request, "registration/perfil.html", context)
+
+
+    
 
 
 # EDITAR USUARIO DESDE ADMINISTRADOR GENERAL
@@ -273,6 +289,20 @@ def calendario(request):
 # FUNCIÓN PARA AGENDAR UNA CITA
 def reservar_cita(request):
     reservas = Reserva.objects.all()
+
+    # Verificar si el usuario está autenticado
+    usuario_autenticado = request.user.is_authenticated
+
+    # Prellenar los campos si el usuario está autenticado
+    if usuario_autenticado:
+        user = request.user
+        nombre_usuario = f"{user.first_name.split()[0]} {user.last_name.split()[0]}" if user.first_name and user.last_name else ""
+        email_usuario = user.email
+        contacto_usuario = user.telefono
+    else:
+        nombre_usuario = ''
+        email_usuario = ''
+        contacto_usuario = ''
     
     if request.method == 'POST':
         form = ReservaCitaForm(request.POST)
@@ -284,6 +314,7 @@ def reservar_cita(request):
             fecha = form.cleaned_data['fecha']
             hora = form.cleaned_data['hora']
             servicio = form.cleaned_data['servicio']
+            categoria = servicio.categoria  # Obtener la categoría del servicio seleccionado
 
             # Combinar fecha y hora
             fecha_hora_inicio = datetime.combine(fecha, hora)
@@ -292,40 +323,32 @@ def reservar_cita(request):
             # Verificar si la fecha/hora ya ha pasado
             if fecha_hora_inicio < datetime.now():
                 form.add_error(None, 'No puedes agendar una cita en una fecha u hora pasada.')
-                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
+                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas, 'usuario_autenticado': usuario_autenticado})
 
             # Verificar si la fecha/hora está dentro del horario laboral
-            dia_semana = fecha_hora_inicio.weekday()  # 0 = Lunes, 6 = Domingo
-            if dia_semana == 0 or dia_semana == 6:
-                form.add_error(None, 'No puedes agendar citas los domingos o lunes, ya que estamos cerrados.')
-                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
+            dia_semana = fecha_hora_inicio.weekday()  # 6 = Domingo
+            if dia_semana == 6:
+                form.add_error(None, 'No puedes agendar citas los domingos, ya que estamos cerrados.')
+                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas, 'usuario_autenticado': usuario_autenticado})
 
-            if dia_semana in [1, 2, 3] and not (9 <= hora.hour < 17):
-                form.add_error(None, 'El horario de atención de martes a jueves es de 9:00 a 17:00.')
-                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
+            if dia_semana in [0, 1, 2, 3, 4, 5] and not (10 <= hora.hour < 20):
+                form.add_error(None, 'El horario de atención es de lunes a sábados de 10:00 a 20:00.')
+                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas, 'usuario_autenticado': usuario_autenticado})
 
-            if dia_semana == 4 and not (9 <= hora.hour < 19):
-                form.add_error(None, 'El horario de atención los viernes es de 9:00 a 19:00.')
-                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
-
-            if dia_semana == 5 and not (8 <= hora.hour < 16):
-                form.add_error(None, 'El horario de atención los sábados es de 8:00 a 16:00.')
-                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
-
-            # Verificar si ya hay una reserva para el mismo servicio en la misma hora
+            # Verificar si ya hay una reserva para la misma **categoría** en la misma hora
             reserva_existente = Reserva.objects.filter(
-                servicio=servicio,
+                servicio__categoria=categoria,
                 fecha=fecha,
                 hora__lt=(fecha_hora_fin.time()),  # Compara con la hora final
                 hora__gte=hora  # Compara con la hora de inicio
             )
 
             if reserva_existente.exists():
-                form.add_error(None, 'Ya existe una reserva para este servicio en el horario seleccionado.')
-                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
+                form.add_error(None, f'Ya existe una reserva para esta categoría ({categoria.nombre}) en el horario seleccionado.')
+                return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas, 'usuario_autenticado': usuario_autenticado})
 
-            # Crear una nueva reserva si no existe una en el mismo horario
-            nueva_reserva = Reserva.objects.create(
+            # Crear una nueva reserva
+            nueva_reserva = Reserva(
                 nombre=nombre,
                 email=email,
                 contacto=contacto,
@@ -333,6 +356,11 @@ def reservar_cita(request):
                 hora=hora,
                 servicio=servicio
             )
+
+            # Si el usuario está autenticado, asignar el cliente
+            if usuario_autenticado:
+                nueva_reserva.cliente = request.user
+
             nueva_reserva.save()
 
             # Enviar correos de confirmación
@@ -343,8 +371,14 @@ def reservar_cita(request):
     else:
         form = ReservaCitaForm()
 
-    return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas})
-
+    return render(request, 'agenda/reservar_cita.html', {
+        'form': form, 
+        'reservas': reservas, 
+        'usuario_autenticado': usuario_autenticado,
+        'nombre_usuario': nombre_usuario,
+        'email_usuario': email_usuario,
+        'contacto_usuario': contacto_usuario
+    })
 
 # AGENDADO EXITOSAMENTE
 def reserva_exitosa(request):
@@ -353,12 +387,14 @@ def reserva_exitosa(request):
 # ENVIAR CORREOS:
 # FUNCIÓN PARA ENVIAR EL CORREO AL CLIENTE
 def enviar_correo_cliente(nombre, email_cliente, fecha_hora_inicio, servicio):
-    asunto = 'Confirmación de cita en BeautyTime'
-    mensaje = f'Estimado {nombre},\n\n' \
-              f'Tu cita para el servicio de {servicio} ha sido confirmada.\n' \
-              f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n\n' \
+    categoria = servicio.categoria  # Obtener la categoría del servicio
+    asunto = 'Confirmación de cita en Capricho Divino'
+    mensaje = f'Estimado/a {nombre},\n\n' \
+              f'¡Su cita para el servicio {categoria.nombre} - {servicio.nombre} ha sido agendada con éxito!.\n' \
+              f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n' \
+              f'Dirección: Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana.\n\n'\
               f'Si tienes alguna consulta, no dudes en contactarnos.\n\n' \
-              f'Saludos,\nBeautyTime'
+              f'Saludos,\nCapricho Divino'
     send_mail(
         asunto,
         mensaje,
@@ -389,24 +425,34 @@ def enviar_correos_confirmacion(nombre, email_cliente, fecha_hora_inicio, servic
     enviar_correo_admin(nombre, fecha_hora_inicio, servicio)
 
 
-# FUNCIÓN PARA OBTENER RESERVAS
+# FUNCIÓN PARA OBTENER RESERVAS (reservar_cita.html)
 def obtener_reservas(request):
-    servicio = request.GET.get('servicio')
+    categoria_id = request.GET.get('categoria')
+    user = request.user
+    contexto = request.GET.get('contexto', 'calendario')  # Se agrega 'calendario' por defecto
 
-    # Si no se proporciona un servicio, devolver todas las reservas (para el administrador)
-    if servicio:
-        reservas = Reserva.objects.filter(servicio__iexact=servicio)  # Filtro insensible a mayúsculas/minúsculas
+    # Si se proporciona una categoría, filtrar las reservas por los servicios de esa categoría
+    if categoria_id:
+        reservas = Reserva.objects.filter(servicio__categoria_id=categoria_id)  # Filtrar por la categoría del servicio
     else:
-        reservas = Reserva.objects.all()  # Devuelve todas las reservas si no se filtra por servicio
+        reservas = Reserva.objects.all()  # Devuelve todas las reservas si no se filtra por categoría
+
+    # Si el usuario es cliente y el contexto es 'calendario', mostramos solo sus citas
+    if contexto == 'calendario' and user.tipo_user != 'admin':
+        reservas = reservas.filter(cliente=user)
 
     reservas_data = [{
         'id': reserva.id,
+        'categoria': reserva.servicio.categoria.nombre,  # Asegúrate de usar el nombre de la categoría
         'nombre': reserva.nombre,
         'email': reserva.email,  # Agregando el email
         'contacto': reserva.contacto,  # Agregando el número de contacto
-        'servicio': reserva.servicio,
+        'servicio': reserva.servicio.nombre,  # Añadir el nombre del servicio
+        'hora_inicio': reserva.hora.strftime("%H:%M"),  # Hora de inicio correctamente formateada
+        'hora_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).strftime("%H:%M"),  # Hora fin
         'fecha_inicio': datetime.combine(reserva.fecha, reserva.hora).isoformat(),
         'fecha_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).isoformat(),
+        'confirmado': reserva.confirmado
     } for reserva in reservas]
 
     return JsonResponse({'reservas': reservas_data})
@@ -414,7 +460,7 @@ def obtener_reservas(request):
 # Eliminar cita
 #@login_required
 def eliminar_cita(request, id):
-    if request.method == 'POST':  # Aseguramos que sea un POST
+    if request.method == 'POST':
         print(f"Solicitud de eliminación recibida para la cita con ID {id} con método {request.method}")
         try:
             # Obtener la cita a eliminar:
@@ -458,7 +504,8 @@ def editar_cita(request, id):
             reserva = get_object_or_404(Reserva, id=id)
             data = json.loads(request.body)
 
-            servicio = data.get('servicio')
+            servicio = get_object_or_404(Servicio, id=data.get('servicio'))  # Obtener el servicio por ID
+            categoria = servicio.categoria  # Obtener la categoría del servicio
             fecha = data.get('fecha')
             hora = data.get('hora')
             notify_client = data.get('notifyClient')  # Obtener si se debe notificar al cliente
@@ -472,9 +519,14 @@ def editar_cita(request, id):
             # Si el administrador ha decidido notificar al cliente, enviamos el correo
             if notify_client:
                 send_mail(
-                    'Actualización de su cita en BeautyTime',
+                    'Actualización de su cita en Capricho Divino',
                     f'Estimado/a {reserva.nombre}, su cita ha sido modificada. Los detalles actualizados son:\n\n'
-                    f'Servicio: {reserva.servicio}\nFecha: {reserva.fecha}\nHora: {reserva.hora}\n\nGracias por confiar en BeautyTime.',
+                    f'Categoría: {categoria.nombre}\n'
+                    f'Servicio: {servicio.nombre}\n'
+                    f'Fecha: {reserva.fecha}\n'
+                    f'Hora: {reserva.hora}\n'
+                    f'Dirección: Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana\n'
+                    f'\n\nGracias por confiar en Capricho Divino.',
                     'beautytimeagenda@gmail.com',
                     [reserva.email],
                     fail_silently=False,
@@ -485,26 +537,84 @@ def editar_cita(request, id):
             return JsonResponse({'success': False, 'message': 'Reserva no encontrada.'})
     return JsonResponse({'success': False, 'message': 'Método no permitido.'})
 
-def obtener_servicios(request):
-    servicios = ["Manicura", "Masaje", "Corte de Pelo", "Tinturado"]
-    return JsonResponse({'servicios': servicios})
 
-# FUNCIÓN PARA OBTENER LOS DETALLES DE UNA RESERVA ESPECÍFICA
+def obtener_categorias(request):
+    categorias = CategoriaServicio.objects.all()
+    categorias_data = [{'id': categoria.id, 'nombre': categoria.nombre} for categoria in categorias]
+    return JsonResponse({'categorias': categorias_data})
+
+def obtener_servicios(request):
+    categoria_id = request.GET.get('categoria_id')
+    
+    if categoria_id:
+        servicios = Servicio.objects.filter(categoria_id=categoria_id)
+        servicios_data = [{'id': servicio.id, 'nombre': servicio.nombre} for servicio in servicios]
+        return JsonResponse({'servicios': servicios_data})
+    else:
+        return JsonResponse({'error': 'Categoría no especificada'}, status=400)
+
+# FUNCIÓN PARA OBTENER LOS DETALLES DE UNA RESERVA ESPECÍFICA (calendario.html)
+@login_required
 def obtener_reserva(request, id):
+    user = request.user
+
     try:
-        reserva = get_object_or_404(Reserva, id=id)
+        # Obtener la reserva por ID
+        reserva = Reserva.objects.get(id=id)
+
+        # Verificar si el usuario está autenticado
+        if isinstance(user, AnonymousUser):
+            return JsonResponse({'success': False, 'message': 'Debes iniciar sesión para ver esta reserva.'}, status=403)
+
+        # Verificar si el usuario es cliente y solo puede ver sus propias reservas
+        if user.tipo_user != 'admin' and reserva.cliente != user:
+            return JsonResponse({'success': False, 'message': 'No tienes permiso para ver esta reserva.'}, status=403)
+
+        # Preparar los datos de la reserva
         reserva_data = {
             'id': reserva.id,
+            'categoria': reserva.servicio.categoria.id,
+            'categoria_nombre': reserva.servicio.categoria.nombre,  # Se añade para mostrar el nombre de la categoría
+            'servicio': reserva.servicio.id,
+            'servicio_nombre': reserva.servicio.nombre,  # Se añade para mostrar el nombre del servicio
+            'hora_inicio': reserva.hora.strftime("%H:%M"),
+            'hora_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).strftime("%H:%M"),
+            'fecha_inicio': datetime.combine(reserva.fecha, reserva.hora).isoformat(),
+            'fecha_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).isoformat(),
             'nombre': reserva.nombre,
             'email': reserva.email,
-            'servicio': reserva.servicio,
-            'fecha': reserva.fecha.isoformat(),
-            'hora': reserva.hora.strftime("%H:%M"),
-            'contacto': reserva.contacto  # Agregando el contacto
+            'contacto': reserva.contacto,
+            'confirmado': reserva.confirmado,
+            'es_admin': user.tipo_user == 'admin'  # Determina si es administrador para la lógica del frontend
         }
+
         return JsonResponse(reserva_data)
+
     except Reserva.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Reserva no encontrada.'})
+        return JsonResponse({'success': False, 'message': 'Reserva no encontrada.'}, status=404)
+
+# Confirmar reservas ya sea por correo desde el cliente o por whatsapp desde el admin.
+def confirmar_reserva(request, reserva_id):
+    # Obtener la reserva por ID
+    reserva = get_object_or_404(Reserva, id=reserva_id)
+
+    if request.method == 'POST':
+        # Si es un POST, se confirma desde el admin que se contactó por whatsapp
+        reserva.confirmado = True
+        reserva.save()
+        return JsonResponse({'success': True})
+
+    elif request.method == 'GET':
+        # Si es un GET, se confirma desde el cliente por correo
+        if 'accion' in request.GET and request.GET['accion'] == 'confirmar':
+            reserva.confirmado = True
+            reserva.save()
+            return render(request, 'agenda/confirmacion_exitosa.html', {'reserva': reserva})
+        else:
+            return render(request, 'agenda/confirmacion_fallida.html')
+    
+    # Si el método no es GET o POST, devolver un error
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
 #CARRITO
 from django.shortcuts import render

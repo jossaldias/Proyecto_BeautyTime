@@ -1,0 +1,16 @@
+{% extends "base/base.html" %}
+
+{% block template %}
+
+<div class="container mt-5">
+    <h1 class="text-center">Confirmación Exitosa</h1>
+    <p class="text-center">¡Gracias por confirmar tu asistencia {{ reserva.nombre }}!</p>
+    <p class="text-center">Tu reserva de {{ reserva.servicio.categoria.nombre }} - {{ reserva.servicio.nombre }} está programada para el {{ reserva.fecha }} a las {{ reserva.hora|slice:":5" }}.</p>
+    <p class="text-center">¡Te esperamos!</p>
+    <div class="d-flex justify-content-center mb-5">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d558.4058394322374!2d-70.5398146931322!3d-33.491530378029644!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d1b097c1146b%3A0xc1abefa9ffaeb04d!2sSal%C3%B3n%20Capricho%20Divino!5e0!3m2!1ses-419!2scl!4v1730158658381!5m2!1ses-419!2scl"
+                width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+</div>
+
+{% endblock %}

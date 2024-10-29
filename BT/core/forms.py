@@ -1,5 +1,5 @@
 import re
-from .models import User, Item, Reserva
+from .models import User, Item, Reserva, Servicio
 from django.conf import settings
 from django import forms  
 from django.forms import TextInput
@@ -9,6 +9,8 @@ from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Field, Fieldset, Layout, Submit, ButtonHolder, HTML
 from django.core.exceptions import ValidationError
+import logging
+from django.contrib.auth.hashers import check_password
 
 User = get_user_model()
 
@@ -250,6 +252,10 @@ class editarUsuarioForm(forms.ModelForm):
                     }
 
 
+# Validador personalizado para el número de teléfono
+def validar_telefono(value):
+    if not re.match(r'^9\d{8}$', value):
+        raise ValidationError("El número de teléfono debe comenzar con 9 y tener 9 dígitos.")
 
 class editarPerfilForm(forms.ModelForm):
         REGION = [
@@ -343,40 +349,61 @@ class editarPerfilForm(forms.ModelForm):
         
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
-        password = forms.CharField(
-                label='Cambiar Contraseña',
-                widget=forms.PasswordInput,
-                required=False,  
-            )
+        telefono = forms.CharField(max_length=9, widget=forms.TextInput(attrs={'type': 'tel'}), validators=[validar_telefono], required=True)
+        fecha_nac = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+        password = forms.CharField(required=False, widget=forms.PasswordInput, label="Cambiar Contraseña")
+
 
         class Meta:
-                    model = User
-                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion','telefono', 'fecha_nac', 'password']
-                    labels = {
-                                'username':'Nombre de Usuario',
-                                'first_name':'Primer Nombre',
-                                'last_name': 'Apellido', 
-                                'picture':'Avatar',
-                                'email': 'E-mail',
-                                'region': 'Región',
-                                'comuna':'Comuna',
-                                'direccion':'Dirección',
-                                'telefono':'Teléfono',
-                                'fecha_nac':'Fecha de Nacimiento',
-                                'password':'Cambiar Contraseña'                          
-                    }
-                    widgets = {
-                                'username':forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
-                                'first_name':forms.TextInput(attrs={'id': 'nombre_editar'}),
-                                'last_name':forms.TextInput(attrs={'id': 'apellido_editar'}),
-                                'email':forms.TextInput(attrs={'id': 'email_editar'}),
-                                'direccion':forms.TextInput(attrs={'id' :'direccion_editar'}),
-                                'region': forms.TextInput(attrs={'id': 'region_editar'}),
-                                'comuna':forms.TextInput(attrs={'id': 'comuna_editar'}),
-                                'telefono':forms.TextInput(attrs={'id': 'telefono_editar'}),
-                                'fecha_nac': forms.DateInput(format=('%d/%m/%Y'), attrs={'class': 'form-control','placeholder': 'Select a date', 'type': 'date' }),
-                                
-                    }
+            model = User
+            fields = ['username', 'first_name', 'last_name', 'picture', 'email', 'region', 'comuna', 'direccion', 'telefono', 'fecha_nac', 'password']
+            labels = {
+                'username': 'Nombre de Usuario',
+                'first_name': 'Primer Nombre',
+                'last_name': 'Apellido',
+                'picture': 'Avatar',
+                'email': 'E-mail',
+                'region': 'Región',
+                'comuna': 'Comuna',
+                'direccion': 'Dirección',
+                'telefono': 'Teléfono',
+                'fecha_nac': 'Fecha de Nacimiento',
+                'password': 'Cambiar Contraseña',
+            }
+            widgets = {
+                'username': forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
+                'first_name': forms.TextInput(attrs={'id': 'nombre_editar'}),
+                'last_name': forms.TextInput(attrs={'id': 'apellido_editar'}),
+                'email': forms.TextInput(attrs={'id': 'email_editar'}),
+                'direccion': forms.TextInput(attrs={'id': 'direccion_editar'}),
+                'region': forms.TextInput(attrs={'id': 'region_editar'}),
+                'comuna': forms.TextInput(attrs={'id': 'comuna_editar'}),
+                'telefono': forms.TextInput(attrs={'id': 'telefono_editar'}),
+                'fecha_nac': forms.DateInput(format=('%d/%m/%Y'), attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
+            }
+        # Método para validar el campo de contraseña
+        def clean_password(self):
+            password = self.cleaned_data.get('password')
+            if password:
+                return password  # Retornar la nueva contraseña si se ingresó
+            return None  # No cambiar la contraseña si el campo está vacío
+
+        # Método para cambiar la contraseña solo si se proporcionó una nueva
+        def save(self, commit=True):
+            # Guardamos el usuario sin la contraseña
+            user = super(editarPerfilForm, self).save(commit=False)
+
+            # Si hay una nueva contraseña y no está vacía
+            password = self.cleaned_data.get('password')
+            if password and password.strip():  # Validamos que la contraseña no esté vacía ni sea None
+                user.set_password(password)  # Establecemos la nueva contraseña
+            else:
+                # Aquí no cambiamos la contraseña existente
+                user.password = User.objects.get(pk=user.pk).password  # Recuperamos la contraseña actual de la base de datos
+
+            if commit:
+                user.save()
+            return user
 
 
 class agregarProductoForm(forms.ModelForm):
@@ -491,12 +518,12 @@ class ReservaCitaForm(forms.ModelForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
     fecha = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
     hora = forms.TimeField(widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
-    servicio = forms.ChoiceField(choices=[
-        ('manicura', 'Manicura'),
-        ('masaje', 'Masaje'),
-        ('corte de pelo', 'Corte de Pelo'),
-        ('tinturado', 'Tinturado'),
-    ], widget=forms.Select(attrs={'class': 'form-control'}))
+    
+    # Usar ModelChoiceField para cargar dinámicamente los servicios desde la base de datos
+    servicio = forms.ModelChoiceField(
+        queryset=Servicio.objects.all(),  # Cargar servicios desde la base de datos
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     # Nuevo campo para número de contacto
     contacto = forms.CharField(
@@ -508,12 +535,12 @@ class ReservaCitaForm(forms.ModelForm):
     )
 
     class Meta:
-            model = Reserva
-            fields = ['nombre', 'email', 'servicio', 'fecha', 'hora', 'contacto']
+        model = Reserva
+        fields = ['nombre', 'email', 'servicio', 'fecha', 'hora', 'contacto']
 
     def clean_contacto(self):
         contacto = self.cleaned_data['contacto']
         # Validar que el número siga el formato chileno sin el prefijo +56
         if not re.match(r'^\d{9}$', contacto):
-               raise forms.ValidationError("El número debe tener 9 dígitos.")
-        return f'+56 {contacto}' 
+            raise forms.ValidationError("El número debe tener 9 dígitos.")
+        return f'+56 {contacto}'

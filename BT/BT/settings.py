@@ -156,3 +156,13 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'beautytimeagenda@gmail.com'
 EMAIL_HOST_PASSWORD = 'cxas ipfs aknc eold'
 DEFAULT_FROM_EMAIL = 'beautytimeagenda@gmail.com'
+
+
+
+# settings.py
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s %(message)s',
+)

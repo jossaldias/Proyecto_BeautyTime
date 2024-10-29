@@ -14,27 +14,48 @@
         margin-bottom: 30px;
     }
 
-    /* Agregar espacio entre los botones y el selector de hora en el modal */
-    .modal-body .form-group {
-        margin-bottom: 15px;
+    /* Reducir el tamaño de los eventos para que no ocupen más espacio de lo necesario */
+    .fc-event {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;  /* Asegurar que el evento no exceda su contenedor */
     }
 
-    .modal-footer {
-        margin-top: 15px;
+    /* Agregar espacio entre los botones y el selector de hora en el modal */
+    .modal-body .form-group {
+        margin-top: 5px;
+        margin-bottom: 10px;
     }
+
+    #notify-client-container {
+        display: flex;
+        align-items: center;
+    }
+    
+    #notify-client {
+        margin-left: 10px;  /* Ajuste para separar el checkbox del label */
+    }
+
+    .fc-event-confirmado {
+        background-color: #28a745 !important; /* Verde para confirmados */
+        color: white; /* Texto blanco */
+    }
+    
+    .fc-event-no-confirmado {
+        background-color: #ffc107 !important; /* Amarillo para no confirmados */
+        color: white; /* Texto blanco */
+    }
+      
 </style>
 
 <div class="container mt-5">
     <h2 class="text-center">Calendario de Citas Agendadas</h2>
 
-    <!-- Dropdown para filtrar por servicio -->
-    <div class="form-group mb-3">
-        <select id="filter-servicio" class="form-control">
-            <option value="">Todos los servicios</option>
-            <option value="Masaje">Masaje</option>
-            <option value="Corte de Pelo">Corte de Pelo</option>
-            <option value="Manicura">Manicura</option>
-            <option value="Tinturado">Tinturado</option>
+    <!-- Dropdown para filtrar por categoría -->
+    <div id="filter-container" class="form-group mb-3">
+        <select id="filter-categoria" class="form-control">
+            <option value="">Todas las categorías</option>
         </select>
     </div>
 
@@ -46,16 +67,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="eventModalLabel">Editar/Eliminar Cita</h5>
+                <h5 class="modal-title" id="eventModalLabel">Información de la Cita</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="editEventForm">
                     <div class="form-group">
+                        <label for="editEventCategoria">Categoría</label>
+                        <select id="editEventCategoria" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
                         <label for="editEventServicio">Servicio</label>
-                        <select id="editEventServicio" class="form-control">
-                            <!-- Opciones se llenarán dinámicamente con los servicios -->
-                        </select>
+                        <select id="editEventServicio" class="form-control"></select>
                     </div>
                     <div class="form-group">
                         <label for="editEventFecha">Fecha</label>
@@ -63,94 +86,190 @@
                     </div>
                     <div class="form-group">
                         <label for="editEventHora">Hora</label>
-                        <input type="time" id="editEventHora" class="form-control">
+                        <input type="time" id="editEventHora" class="form-control" step="3600">
+                    </div>
+                    <div id="info-cliente"> 
+                        <div class="form-group">
+                            <label for="editEventNombre">Nombre del Cliente</label>
+                            <input type="text" id="editEventNombre" class="form-control" disabled>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="editEventEmail">Email del Cliente</label>
+                            <input type="email" id="editEventEmail" class="form-control" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEventContacto">Número de Contacto</label>
+                            <input type="text" id="editEventContacto" class="form-control" disabled>
+                        </div>    
                     </div>
                     <div class="form-group">
-                        <label for="editEventNombre">Nombre del Cliente</label>
-                        <input type="text" id="editEventNombre" class="form-control" disabled>
-                    </div>
+                        <p id="confirmacionStatus"></p> <!-- Mostrar confirmación -->
+                        <button id="whatsappBtn" class="btn btn-success" type="button">Enviar Mensaje por WhatsApp</button>
+                    </div>                                  
                     <div class="form-group">
-                        <label for="editEventEmail">Email del Cliente</label>
-                        <input type="email" id="editEventEmail" class="form-control" disabled>
+                        <button id="confirmarBtn" class="btn btn-primary" style="display:none;">Confirmar Reserva</button>
                     </div>
-                    <div class="form-group">
-                        <label for="editEventContacto">Número de Contacto</label>
-                        <input type="text" id="editEventContacto" class="form-control" disabled>
-                    </div>
-                    <div class="form-group">
-                        <button id="whatsappBtn" class="btn btn-success" type="button">Enviar Mensaje por WhatsApp Web</button>
-                    </div>
-                    <div class="form-group">
+                    <div id="notify-client-container" class="form-group">
                         <label for="notify-client">¿Notificar cambios al cliente por correo?</label>
                         <input type="checkbox" id="notify-client">
+                    </div>
+                    <div class="form-group">
+                        <button id="mapsBtn" class="btn btn-primary" type="button">Ver Ubicación en Maps</button> <!-- Botón para Google Maps -->
                     </div>                    
                 </form>
             </div>
             <div class="modal-footer">
-                <button id="deleteEventBtn" class="btn btn-danger">Eliminar Cita</button>
+                <button id="deleteEventBtn" class="btn btn-danger" onclick="eliminarCita(editEventId)">Eliminar Cita</button>
                 <button id="saveEventBtn" class="btn btn-primary" onclick="editarCita(editEventId)">Guardar Cambios</button>
+                <div id="alertContactoCliente" class="alert alert-warning mt-3" role="alert">
+                    En caso de querer cancelar o editar su cita, por favor contactarse por WhatsApp.
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-
 {% endblock %}
 
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarElement = document.getElementById('calendar');
-        var servicioSelect = document.getElementById('filter-servicio');
-        var deleteEventId = null;
-        var editEventId = null;
+        var categoriaSelect = document.getElementById('filter-categoria');
+        var editEventId = null; // Variable global para almacenar el ID del evento seleccionado
         var calendar;
+        var esAdmin = "{{ request.user.tipo_user }}" === "admin";
+
+        // Mostrar u ocultar el filtro al cargar la página
+        if (esAdmin) {
+            document.getElementById('filter-container').style.display = 'block';  // Mostrar el filtro para administradores
+        } else {
+            document.getElementById('filter-container').style.display = 'none';  // Ocultar el filtro para clientes
+        }
     
-        // Función para cargar los servicios en el dropdown del modal de edición
-        function cargarServiciosDisponibles(servicioSeleccionado) {
-            fetch('/obtener_servicios/')
+        // Función para validar si una hora está dentro del horario laboral
+        function validarHoraLaboral(hora) {
+            const [horaSeleccionada, minutos] = hora.split(':');
+            const horaInt = parseInt(horaSeleccionada);
+            const minutosInt = parseInt(minutos);
+
+            // Solo permitir horas entre las 10:00 y las 20:00
+            return horaInt >= 10 && horaInt < 20 && minutosInt === 0;
+        }
+
+        // Función para validar si una fecha es pasada
+        function validarFechaPasada(fecha) {
+            const fechaSeleccionada = new Date(fecha);
+            const hoy = new Date();
+
+            // Eliminar la parte de tiempo y comparar solo la fecha
+            hoy.setHours(0, 0, 0, 0);
+            fechaSeleccionada.setHours(0, 0, 0, 0);
+
+            return fechaSeleccionada >= hoy;  // Validar que no sea una fecha pasada
+        }
+
+        // Función para validar si la fecha es un día laboral (Lunes a Sábado)
+        function validarDiaLaboral(fecha) {
+            const fechaSeleccionada = new Date(fecha);
+            const diaSemana = fechaSeleccionada.getDay(); // 6 = Domingo, 0 = Lunes
+
+            return diaSemana !== 6; // Retornar true si es de Lunes a Sábado (0-5)
+        }
+
+        // Función para cargar las categorías en el modal
+        function cargarCategoriasDisponibles(categoriaSeleccionada) {
+            fetch('/obtener_categorias/')
+            .then(response => response.json())
+            .then(data => {
+                var categoriaSelect = document.getElementById('editEventCategoria');
+                categoriaSelect.innerHTML = '';  // Limpiar las opciones actuales
+
+                data.categorias.forEach(function(categoria) {
+                    var option = document.createElement('option');
+                    option.value = categoria.id;  // Usar el ID numérico como valor
+                    option.text = categoria.nombre;
+                    categoriaSelect.appendChild(option);
+                });
+
+                // Asignar la categoría seleccionada al modal
+                categoriaSelect.value = categoriaSeleccionada;  // Esto debe ser el ID de la categoría
+            })
+            .catch(error => {
+                console.error('Error al cargar las categorías:', error);
+            });
+        }
+
+        // Función para cargar las categorías en el filtro (solo para admin)
+        function cargarCategorias() {
+            fetch('/obtener_categorias/')
+            .then(response => response.json())
+            .then(data => {
+                categoriaSelect.innerHTML = '<option value="">Todas las categorías</option>';  // Resetear las opciones
+                data.categorias.forEach(categoria => {
+                    var option = document.createElement('option');
+                    option.value = categoria.id;  // Usar el ID numérico
+                    option.text = categoria.nombre;
+                    categoriaSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar las categorías:', error);
+            });
+        }
+
+        // Función para cargar los servicios de la categoría seleccionada en el modal
+        function cargarServiciosDisponibles(categoriaId, servicioSeleccionado) {
+            if (!categoriaId) {
+                console.error('El ID de la categoría no es válido');
+                return;
+            }
+            fetch(`/obtener_servicios/?categoria_id=` + categoriaId) // Usar el ID numérico, no el nombre
             .then(response => response.json())
             .then(data => {
                 var servicioSelect = document.getElementById('editEventServicio');
                 servicioSelect.innerHTML = '';  // Limpiar opciones actuales
-    
-                // Añadir las opciones al dropdown
-                data.servicios.forEach(function(servicio) {
+
+                data.servicios.forEach(servicio => {
                     var option = document.createElement('option');
-                    option.value = servicio;
-                    option.text = servicio.charAt(0).toUpperCase() + servicio.slice(1);  // Convertir primera letra a mayúscula
+                    option.value = servicio.id;
+                    option.text = servicio.nombre;
                     servicioSelect.appendChild(option);
                 });
-    
-                // Asignar el servicio seleccionado al campo del modal
-                servicioSelect.value = capitalizeFirstLetter(servicioSeleccionado.trim());
+
+                servicioSelect.value = servicioSeleccionado;  // Selecciona el servicio actual en el modal
             })
             .catch(error => {
                 console.error('Error al cargar los servicios:', error);
             });
         }
-    
-        function cargarReservas(servicio) {
-            var url = '/obtener_reservas/';
-            if (servicio) {
-                url += '?servicio=' + servicio;
+
+        // Función para cargar reservas (clientes solo ven sus citas, admin ve todas y filtra por categoría)
+        function cargarReservas(categoria) {
+            var url = '/obtener_reservas/?contexto=calendario';  // Pasar el contexto del calendario
+            if (categoria && esAdmin) {
+                url += '?categoria=' + categoria;  // Filtrar por categoría si es admin
             }
-    
+
             fetch(url)
             .then(response => response.json())
             .then(data => {
                 var events = data.reservas.map(reserva => ({
                     id: reserva.id,
-                    title: reserva.servicio.charAt(0).toUpperCase() + reserva.servicio.slice(1),  // Mayúscula inicial
-                    start: new Date(reserva.fecha_inicio),  // Convertir a la hora local correcta
+                    title: reserva.categoria + ' - ' + reserva.hora_inicio + ' a ' + reserva.hora_fin,
+                    start: new Date(reserva.fecha_inicio),
                     end: new Date(reserva.fecha_fin),
-                    color: 'blue'
+                    classNames: esAdmin ? (reserva.confirmado ? 'fc-event-confirmado' : 'fc-event-no-confirmado') : '',  // Solo aplicar clases si es admin
+                    extendedProps: {
+                        confirmado: reserva.confirmado
+                    }
                 }));
-    
+                
+
                 if (calendar) {
                     calendar.destroy();
                 }
-    
+
                 calendar = new FullCalendar.Calendar(calendarElement, {
                     locale: 'es',
                     initialView: 'dayGridMonth',
@@ -162,141 +281,285 @@
                     },
                     events: events,
                     eventContent: function(arg) {
-                        var startTime = arg.event.start.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
-                        var endTime = arg.event.end.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
-                        return { html: `<div>${arg.event.title} - ${startTime} a ${endTime}</div>` };  // Servicio y rango de horas en formato 24 horas
+                        return { html: `<div>${arg.event.title}</div>` };
                     },
                     eventClick: function(info) {
                         var eventObj = info.event;
-                        editEventId = eventObj.id;  // Guardar el ID del evento
-                        
-                        // Llamar a la función para cargar los servicios en el dropdown
+                        editEventId = eventObj.id;  // Asignar el ID del evento seleccionado
+                    
                         fetch(`/obtener_reserva/${editEventId}/`)
                         .then(response => response.json())
                         .then(data => {
-                            // Asignar el servicio seleccionado al modal
-                            cargarServiciosDisponibles(data.servicio);
-    
-                            // Usar directamente la fecha en formato yyyy-mm-dd para evitar desfases
-                            document.getElementById('editEventFecha').value = data.fecha;
-                            document.getElementById('editEventHora').value = data.hora.substring(0, 5);
+                            console.log(data.confirmado);  // Esto te mostrará el valor de "confirmado" en la consola del navegador.
+
+                            esAdmin = data.es_admin;  // Verifica si es administrador
+                    
+                            // Cargar categorías y servicios en el modal
+                            cargarCategoriasDisponibles(data.categoria);
+                            cargarServiciosDisponibles(data.categoria, data.servicio);
+                    
+                            document.getElementById('editEventFecha').value = data.fecha_inicio.split("T")[0];
+                            document.getElementById('editEventHora').value = data.hora_inicio;
                             document.getElementById('editEventNombre').value = data.nombre;
                             document.getElementById('editEventEmail').value = data.email;
                             document.getElementById('editEventContacto').value = data.contacto;
-    
+
+                            // Now, handle the confirmation status for the modal
+                            if (data.confirmado) {
+                                document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
+                                document.getElementById('confirmarBtn').style.display = 'none'; // Hide manual confirmation button
+                            } else {
+                                document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada.";
+                                document.getElementById('confirmarBtn').style.display = 'block'; // Show manual confirmation button
+                            }
+                            document.getElementById('confirmacionStatus').style.display = 'block';  // Show the confirmation message
+
+
+                            // Mostrar u ocultar features según Usuario Admin/Cli
+                            if (esAdmin) {
+                                document.getElementById('info-cliente').style.display = 'block';  // Mostrar la información para administradores
+                                document.getElementById('notify-client-container').style.display = 'block'; // Mostrar la opción de notificaciones para administradores
+                                document.getElementById('mapsBtn').style.display = 'none'; // Ocultar dirección por maps
+                                document.getElementById('notify-client').checked = true; // Marcar el checkbox por defecto para administradores             
+                                document.getElementById('alertContactoCliente').style.display = 'none'; // Ocultar alerta de contacto para administradores
+                    
+                                // Check confirmation status and update UI accordingly
+                                if (data.confirmado) {
+                                    document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
+                                    document.getElementById('confirmarBtn').style.display = 'none'; // Hide manual confirmation button
+                                } else {
+                                    document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada. Puedes solicitar una confirmación al cliente por WhatsApp y después registrarla dando click en 'Confirmar Reserva'";
+                                    document.getElementById('confirmarBtn').style.display = 'block'; // Show manual confirmation button
+
+                                    // Add functionality to confirm the reservation manually
+                                    document.getElementById('confirmarBtn').onclick = function() {
+                                        fetch(`/confirmar_reserva/${editEventId}/`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRFToken': getCookie('csrftoken')  // Add CSRF token
+                                            }
+                                        })
+                                        .then(response => response.json())
+                                        .then(result => {
+                                            if (result.success) {
+                                                document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
+                                                document.getElementById('confirmarBtn').style.display = 'none'; // Hide confirmation button
+                                                window.location.reload();  // Reload the page to reflect changes
+                                            } else {
+                                                alert('Error al confirmar la reserva.');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error en la confirmación:', error);
+                                            alert('Error en la confirmación.');
+                                        });
+                                    };
+                                }
+                                document.getElementById('confirmacionStatus').style.display = 'block';  // Show confirmation message
+                                
+                            } else {
+                                document.getElementById('editEventCategoria').disabled = true; // Deshabilitar datos de la cita 
+                                document.getElementById('editEventServicio').disabled = true;
+                                document.getElementById('editEventFecha').disabled = true;
+                                document.getElementById('editEventHora').disabled = true;
+                                document.getElementById('deleteEventBtn').style.display = 'none'; // Ocultar botones
+                                document.getElementById('saveEventBtn').style.display = 'none'; 
+                                document.getElementById('info-cliente').style.display = 'none';  // Ocultar la información para clientes
+                                document.getElementById('notify-client-container').style.display = 'none'; // Ocultar la opción de notificaciones para clientes                                
+                                document.getElementById('confirmacionStatus').style.display = 'none'; // Ocultar el mensaje
+                                document.getElementById('confirmarBtn').style.display = 'none'; // Ocultar el mensaje
+                                
+                            }
+                    
+                            // Ajustar el mensaje automático de WhatsApp para el cliente o el administrador
+                            var whatsappBtn = document.getElementById('whatsappBtn');
+                            if (esAdmin) {
+                                whatsappBtn.onclick = function() {
+                                    var mensajeAdmin = `¡Empezó la cuenta regresiva! ${data.nombre}, te esperamos en *Avenida Las Perdices 2990, Local 33, Peñalolén.* Nuestra cita es el ${data.fecha_inicio.split("T")[0]} a las ${data.hora_inicio} horas. *¿Confirmas tu cita? Favor de responder sí o no.*`;
+                                    var numeroCliente = document.getElementById('editEventContacto').value.replace(/\s+/g, '');  // Elimina todos los espacios en el número
+                                    window.open(`https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensajeAdmin)}`);
+                                };
+                            } else {
+                                whatsappBtn.onclick = function() {
+                                    var mensajeCliente = `Hola, soy ${data.nombre} y necesito ayuda con mi cita para ${data.categoria_nombre} - ${data.servicio_nombre}, con fecha: ${data.fecha_inicio.split("T")[0]}, Hora: ${data.hora_inicio}.`;
+                                    window.open(`https://wa.me/56974862722?text=${encodeURIComponent(mensajeCliente)}`);
+                                };
+                            }
+                    
+                            // Agregar funcionalidad para Google Maps
+                            var mapsBtn = document.getElementById('mapsBtn');
+                            mapsBtn.onclick = function() {
+                                window.open('https://www.google.com/maps/place/Salón+Capricho+Divino/@-33.4911126,-70.5399623,19.92z/data=!4m14!1m7!3m6!1s0x9662d1ed068f6a27:0xf8ddbd4f5be42129!2sAv.+Las+Perdices+2900,+Local+33,+Peñalolén,+Región+Metropolitana!3b1!8m2!3d-33.4902708!4d-70.5401966!3m5!1s0x9662d1b097c1146b:0xc1abefa9ffaeb04d!8m2!3d-33.4912505!4d-70.5400394!16s%2Fg%2F11vprzckfs?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D');
+                            };
+                    
                             // Mostrar el modal
                             var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), {});
                             eventModal.show();
-    
-                            // Configurar el botón de WhatsApp
-                            whatsappBtn.onclick = function() {
-                                var contacto = document.getElementById('editEventContacto').value.trim(); 
-                                var nombreCliente = document.getElementById('editEventNombre').value;
-                                var servicio = document.getElementById('editEventServicio').value;
-                                var fecha = document.getElementById('editEventFecha').value;
-                                var hora = document.getElementById('editEventHora').value;
-    
-                                // Limpiar el número de contacto
-                                contacto = contacto.replace(/\D/g, '');  // Eliminar cualquier carácter no numérico
-                                
-                                var mensaje = `Hola ${nombreCliente}, le recordamos que tiene una cita para ${servicio} el ${fecha} a las ${hora} en nuestro salón BeautyTime.`;
-    
-                                // Construir la URL de WhatsApp correctamente
-                                var url = `https://wa.me/${contacto}?text=${encodeURIComponent(mensaje)}`;
-                                window.open(url, '_blank');
-                            };
                         })
                         .catch(error => {
                             console.error('Error al obtener los detalles de la reserva:', error);
                         });
                     }
                 });
-    
+
                 calendar.render();
             });
         }
-    
-        function eliminarCita(eventId) {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            if (!eventId) {
-                alert('No se pudo obtener el ID del evento a eliminar.');
-                return;
+
+        // Evento para actualizar servicios cuando se cambia la categoría en el modal
+        document.getElementById('editEventCategoria').addEventListener('change', function() {
+            var categoriaId = this.value;  // Obtener el ID de la categoría seleccionada
+            cargarServiciosDisponibles(categoriaId, null);  // Actualizar los servicios según la categoría seleccionada
+        });
+
+        // Evento para filtrar reservas al seleccionar una categoría (solo para admin)
+        categoriaSelect.addEventListener('change', function() {
+            var categoria = categoriaSelect.value;
+            cargarReservas(categoria);
+        });
+
+        // Cargar todas las reservas por defecto al cargar la página
+        cargarCategorias();
+        cargarReservas();
+
+        // Función para eliminar una cita
+        document.getElementById('deleteEventBtn').addEventListener('click', function() {
+            if (editEventId !== null) {
+                eliminarCita(editEventId);
             }
-            fetch(`/eliminar_cita/${eventId}/`, {
+        });
+
+        // Función para editar una cita
+        document.getElementById('saveEventBtn').addEventListener('click', function() {
+            if (editEventId !== null) {  // Verificar que editEventId no sea null
+                // Redondear la hora al seleccionar
+                const inputHora = document.getElementById('editEventHora');
+                let [horaSeleccionada] = inputHora.value.split(':'); // Obtener solo la hora
+                inputHora.value = `${horaSeleccionada}:00`;  // Establecer los minutos en 00
+        
+                if (validarFormulario()) {
+                    editarCita(editEventId);
+                }
+            } else {
+                console.error('No se ha seleccionado un evento para editar.');
+            }
+        });
+
+        // Función para validar antes de guardar cambios en la cita
+        function validarFormulario() {
+            const fecha = document.getElementById('editEventFecha').value;
+            const hora = document.getElementById('editEventHora').value;
+
+            if (!validarFechaPasada(fecha)) {
+                alert('No puedes seleccionar una fecha pasada.');
+                return false;
+            }
+
+            if (!validarDiaLaboral(fecha)) {
+                alert('Solo puedes agendar citas de lunes a sábado.');
+                return false;
+            }
+
+            if (!validarHoraLaboral(hora)) {
+                alert('Solo puedes agendar citas entre las 10:00 AM y las 8:00 PM.');
+                return false;
+            }
+
+            return true;  // Si todas las validaciones pasan, continuar
+        }
+
+        // Función para editar una cita
+        function editarCita(editEventId) {
+            var categoriaId = document.getElementById('editEventCategoria').value;
+            var servicioId = document.getElementById('editEventServicio').value;
+            var fecha = document.getElementById('editEventFecha').value;
+            var hora = document.getElementById('editEventHora').value;
+            var notifyClient = document.getElementById('notify-client').checked;
+
+            // Empaquetar los datos en un objeto
+            var data = {
+                categoria: categoriaId,
+                servicio: servicioId,
+                fecha: fecha,
+                hora: hora,
+                notifyClient: notifyClient
+            };
+
+            // Realizar la solicitud AJAX para actualizar la cita
+            fetch(`/editar_cita/${editEventId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
+                    'X-CSRFToken': getCookie('csrftoken')  // Asegúrate de incluir el CSRF token
                 },
+                body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Cita eliminada correctamente.');
-                    cargarReservas();  // Refrescar el calendario después de eliminar
-                    alert('Se ha notificado al cliente sobre la cancelación.');
+            .then(result => {
+                if (result.success) {
+                    // Notificar al usuario
+                    alert('La cita ha sido actualizada correctamente.');
+
+                    if (notifyClient && esAdmin) {
+                        alert('El correo de notificación fue enviado al cliente.');
+                    }
+
+                    // Recargar la página para reflejar los cambios
+                    window.location.reload();
                 } else {
-                    alert('Error al eliminar la cita: ' + data.message);
+                    console.error('Error al actualizar la cita:', result.message);
+                    alert('Error al actualizar la cita.');
                 }
             })
             .catch(error => {
-                console.error('Error al eliminar la cita:', error);
+                console.error('Error en la solicitud de actualización:', error);
+                alert('Error en la solicitud de actualización.');
             });
         }
-    
-        function editarCita(eventId) {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const servicio = document.getElementById('editEventServicio').value;
-            const fecha = document.getElementById('editEventFecha').value;
-            const hora = document.getElementById('editEventHora').value;
-            const notifyClient = document.getElementById('notify-client').checked;
 
-            fetch(`/editar_cita/${eventId}/`, {
+        // Función para eliminar una cita
+        function eliminarCita(editEventId) {
+            fetch(`/eliminar_cita/${editEventId}/`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    servicio: servicio,
-                    fecha: fecha,
-                    hora: hora,
-                    notifyClient: notifyClient
-                })
+                    'X-CSRFToken': getCookie('csrftoken')  // Asegúrate de incluir el CSRF token
+                }
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Cita actualizada correctamente.');
-                    cargarReservas();  // Refrescar el calendario después de editar
+            .then(result => {
+                if (result.success) {
+                    // Notificar al usuario
+                    alert('La cita ha sido eliminada correctamente.');
 
-                    // Si el administrador eligió notificar al cliente, mostramos una confirmación adicional
-                    if (notifyClient) {
-                        alert('Se ha notificado al cliente sobre los cambios.');
-                    }
+                    // Recargar la página para reflejar los cambios
+                    window.location.reload();
                 } else {
-                    alert('Error al actualizar la cita: ' + data.message);
+                    console.error('Error al eliminar la cita:', result.message);
+                    alert('Error al eliminar la cita.');
                 }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud de eliminación:', error);
+                alert('Error en la solicitud de eliminación.');
             });
         }
-    
-        // Filtrar reservas al seleccionar un servicio
-        servicioSelect.addEventListener('change', function() {
-            var servicio = servicioSelect.value;
-            cargarReservas(servicio);
-        });
-    
-        // Cargar todas las reservas por defecto al cargar la página
-        cargarReservas();
 
-        document.getElementById('deleteEventBtn').addEventListener('click', function() {
-            eliminarCita(editEventId);  // Llama a la función eliminar y pasa el ID del evento
-        });
-
-        // Añadir evento al botón de guardar cambios
-        document.getElementById('saveEventBtn').addEventListener('click', function() {
-            editarCita(editEventId);  // Llamar a la función y pasar el ID del evento al guardar
-        });
-    });    
+        // Función para obtener el CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }     
+    });
 </script>
 {% endblock %}

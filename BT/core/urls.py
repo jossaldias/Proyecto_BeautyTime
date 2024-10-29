@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 
 from . import views
 
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # INICIO
@@ -36,8 +38,13 @@ urlpatterns = [
     path('eliminar_cita/<int:id>/', views.eliminar_cita, name='eliminar_cita'),
     path('editar_cita/<int:id>/', views.editar_cita, name='editar_cita'),
     path('obtener_servicios/', views.obtener_servicios, name='obtener_servicios'),
+    path('obtener_categorias/', views.obtener_categorias, name='obtener_categorias'),
     path('obtener_reserva/<int:id>/', views.obtener_reserva, name='obtener_reserva'),
+    path('confirmar_reserva/<int:reserva_id>/', views.confirmar_reserva, name='confirmar_reserva'),
 
     path('paginas/carrito/', views.carrito, name='carrito'),
     path('paginas/atencioncliente/', views.atencioncliente, name='atencioncliente'), 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

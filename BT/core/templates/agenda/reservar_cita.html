@@ -11,25 +11,39 @@
     <h2 class="text-center">Reservar una cita</h2>
 
     <div class="row">
+        {% if not usuario_autenticado %}
+            <div class="alert alert-warning">
+                <p>Aún no has iniciado sesión. Puedes <a href="{% url 'login' %}">iniciar sesión</a> para guardar tu reserva en tu cuenta o <strong>reservar como visita</strong>.</p>
+            </div>
+        {% endif %}
         <!-- Formulario a la izquierda -->
         <div class="col-md-4" id="form-container" style="margin-bottom: 40px;">
             <form id="reservation-form" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
                     {{ form.nombre.label_tag }} 
-                    {{ form.nombre }}
+                    <!--{{ form.nombre }}-->
+                    <input type="text" name="nombre" class="form-control" value="{{ user.first_name }} {{ user.last_name }}" {% if not usuario_autenticado %}required{% endif %}>
                 </div>
                 <div class="mb-3">
                     {{ form.email.label_tag }}
-                    {{ form.email }}
+                    <!--{{ form.email }}-->
+                    <input type="email" name="email" class="form-control" value="{{ user.email }}" {% if not usuario_autenticado %}required{% endif %}>
                 </div>
                 <div class="mb-3">
                     {{ form.contacto.label_tag }}
-                    {{ form.contacto }}
+                    <!--{{ form.contacto }}-->
+                    <input type="text" name="contacto" class="form-control" value="{{ user.telefono }}" {% if not usuario_autenticado %}required{% endif %}>
                 </div>
                 <div class="mb-3">
-                    {{ form.servicio.label_tag }}
-                    {{ form.servicio }}
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria" name="categoria" class="form-control">
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="servicio">Servicio</label>
+                    <select id="servicio" name="servicio" class="form-control">
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="selected-date">Fecha seleccionada</label>
@@ -63,126 +77,113 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var servicioSelect = document.querySelector('[name="servicio"]');
+        var categoriaSelect = document.getElementById('categoria');
+        var servicioSelect = document.getElementById('servicio');
         var fechaInput = document.getElementById('selected-date');
         var horaInput = document.getElementById('selected-time');
     
-        function cargarCalendarioConReservas(servicio) {
-            fetch('/obtener_reservas/?servicio=' + servicio)
+        // Cargar categorías al cargar la página
+        fetch('/obtener_categorias/')
+        .then(response => response.json())
+        .then(data => {
+            // Cargar las categorías y seleccionar la primera por defecto
+            data.categorias.forEach(categoria => {
+                var option = document.createElement('option');
+                option.value = categoria.id;
+                option.text = categoria.nombre;
+                categoriaSelect.appendChild(option);
+            });
+            // Cargar el calendario con la primera categoría por defecto
+            if (data.categorias.length > 0) {
+                var primeraCategoria = data.categorias[0].id;
+                cargarCalendarioConReservas(primeraCategoria);  // Cargar las reservas de la primera categoría
+                cargarServiciosPorCategoria(primeraCategoria);  // Cargar los servicios de la primera categoría
+            }
+        });
+    
+        // Función para cargar los servicios según la categoría seleccionada
+        function cargarServiciosPorCategoria(categoria) {
+            fetch('/obtener_servicios/?categoria_id=' + categoria)
+            .then(response => response.json())
+            .then(data => {
+                servicioSelect.innerHTML = ''; // Limpiar opciones anteriores
+                data.servicios.forEach(function(servicio) {
+                    var option = document.createElement('option');
+                    option.value = servicio.id;
+                    option.text = servicio.nombre;
+                    servicioSelect.add(option);
+                });
+            }).catch(err => console.log('Error al cargar servicios:', err));
+        }
+    
+        // Función para cargar el calendario con las reservas filtradas por categoría
+        function cargarCalendarioConReservas(categoria) {
+            fetch('/obtener_reservas/?contexto=reservar&categoria=' + categoria)  // Pasar el contexto de reserva
             .then(response => response.json())
             .then(data => {
                 var events = data.reservas.map(reserva => ({
-                    title: 'Reservado',  // Mostrar solo "Reservado"
-                    start: reserva.fecha_inicio,  // Fecha y hora de inicio
-                    end: reserva.fecha_fin,  // Fecha y hora de fin
-                    color: 'red',  // Marcar las horas ocupadas en rojo
-                    displayEventTime: false  // No mostrar la hora en los eventos
+                    title: 'Reservado: ' + reserva.servicio,  // Añadir el servicio en el título
+                    start: reserva.fecha_inicio,
+                    end: reserva.fecha_fin,
+                    color: 'red',
+                    displayEventTime: false
                 }));
         
                 var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                     locale: 'es',
                     initialView: 'timeGridWeek',
-                    firstDay: 1,  // Comienza en lunes
+                    firstDay: 1,
                     slotDuration: '01:00:00',
                     allDaySlot: false,
                     expandRows: true,
                     height: 'auto',
                     businessHours: [
                         {
-                            daysOfWeek: [2, 3, 4], // Martes a Jueves
-                            startTime: '09:00',
-                            endTime: '17:00'
+                            daysOfWeek: [1, 2, 3, 4, 5, 6], // Lunes a Sábado
+                            startTime: '10:00',
+                            endTime: '20:00'
                         },
-                        {
-                            daysOfWeek: [5], // Viernes
-                            startTime: '09:00',
-                            endTime: '19:00'
-                        },
-                        {
-                            daysOfWeek: [6], // Sábado
-                            startTime: '08:00',
-                            endTime: '16:00'
-                        }
                     ],
-                    slotMinTime: '08:00:00',
-                    slotMaxTime: '19:00:00',
-                    scrollTime: '09:00:00',
+                    slotMinTime: '10:00:00',
+                    slotMaxTime: '20:00:00',
+                    scrollTime: '10:00:00',
                     events: events,
                     selectable: true,
                     validRange: {
-                        start: new Date().toISOString().split('T')[0],  // Restringir fechas anteriores a la fecha actual
+                        start: new Date().toISOString().split('T')[0],
                     },
-                    selectConstraint: 'businessHours',  // Restringir selección a las horas de negocio
+                    selectConstraint: 'businessHours',
                     select: function(info) {
                         var now = new Date();
                         var selectedDateTime = new Date(info.start);
-    
+        
                         if (selectedDateTime >= now) {
-                            fechaInput.value = info.startStr.split("T")[0];  // Fecha
-                            horaInput.value = info.startStr.split("T")[1].substring(0, 5);  // Hora (HH:mm)
+                            fechaInput.value = info.startStr.split("T")[0];
+                            horaInput.value = info.startStr.split("T")[1].substring(0, 5);
                         } else {
                             alert("No puedes agendar una cita en una fecha u hora pasada.");
                         }
                     },
-                    displayEventTime: false,  // Evitar mostrar las horas en los eventos reservados
+                    displayEventTime: false,
                     eventContent: function(arg) {
-                        return { html: '<div>Reservado</div>' };  // Forzar que el evento solo muestre "Reservado"
+                        return { html: '<div>Reservado</div>' };
                     }
                 });
-                
-                // Renderizar el calendario
+        
                 calendar.render();
-            });
+            }).catch(err => console.log('Error al cargar reservas:', err));
         }
+        
     
-        // Escuchar cambios en la selección del servicio
-        servicioSelect.addEventListener('change', function() {
-            var servicio = servicioSelect.value;
-            if (servicio) {
-                cargarCalendarioConReservas(servicio);
+        // Escuchar cambios en la selección de categoría
+        categoriaSelect.addEventListener('change', function() {
+            var categoria = this.value;
+            if (categoria) {
+                cargarServiciosPorCategoria(categoria);  // Cargar los servicios de la categoría seleccionada
+                cargarCalendarioConReservas(categoria);  // Cargar el calendario filtrado por la categoría seleccionada
             }
         });
-    
-        // Cargar reservas para el servicio seleccionado por defecto (si existe)
-        if (servicioSelect.value) {
-            cargarCalendarioConReservas(servicioSelect.value);
-        } else {
-            var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                locale: 'es',
-                initialView: 'timeGridWeek',
-                firstDay: 1,  // Comienza en lunes
-                slotDuration: '01:00:00',  // Intervalos de 1 hora
-                allDaySlot: false,
-                expandRows: true,
-                height: 'auto',
-                businessHours: [
-                    {
-                        daysOfWeek: [2, 3, 4], // Martes a Jueves
-                        startTime: '09:00',  
-                        endTime: '17:00'
-                    },
-                    {
-                        daysOfWeek: [5], // Viernes
-                        startTime: '09:00',
-                        endTime: '19:00'
-                    },
-                    {
-                        daysOfWeek: [6], // Sábado
-                        startTime: '08:00',
-                        endTime: '16:00'
-                    }
-                ],
-                validRange: {
-                    start: new Date().toISOString().split('T')[0],  // Evitar agendar fechas pasadas
-                },
-                selectConstraint: 'businessHours',  // Restringir la selección a las horas laborales
-                slotMinTime: '08:00:00',
-                slotMaxTime: '19:00:00',
-                scrollTime: '09:00:00',
-                selectable: true
-            });
-            calendar.render();
-        }
+
     });    
 </script>
 {% endblock %}
