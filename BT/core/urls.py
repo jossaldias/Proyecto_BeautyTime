@@ -43,6 +43,10 @@ urlpatterns = [
     path('confirmar_reserva/<int:reserva_id>/', views.confirmar_reserva, name='confirmar_reserva'),
 
     path('paginas/carrito/', views.carrito, name='carrito'),
+    path("add/<int:producto_id>/", views.cart_add, name="add"),
+    path("eliminar/<int:producto_id>/", views.cart_eliminar, name="eliminar"),
+    path("clear/", views.cart_clear, name="clear"),
+
     path('paginas/atencioncliente/', views.atencioncliente, name='atencioncliente'), 
 ]
 

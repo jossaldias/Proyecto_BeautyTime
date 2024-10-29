@@ -1,5 +1,8 @@
 import os
 import requests
+import time
+import string
+
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
@@ -13,6 +16,8 @@ import json
 from django.db.models import Q, F, Sum
 from .models import *
 from .forms import *
+from .cart import Cart
+
 
 from .utils import render_to_pdf
 from django.views.generic import View, CreateView 
@@ -163,7 +168,7 @@ def eliminarUsuario(request):
 
 
 def servicios(request):    
-    servicios = Item.objects.filter(
+    servicios = Producto.objects.filter(
                                     Q(tipo='servicio') & 
                                     (Q(categoria='Manicure y Pedicure') | 
                                      Q(categoria='Masajes') | 
@@ -178,7 +183,7 @@ def servicios(request):
     return render(request, 'tienda/servicios.html', context)
 
 def productos(request):    
-    productos = Item.objects.filter(
+    productos = Producto.objects.filter(
                                     Q(tipo='producto') & 
                                     (Q(categoria='Coloración') | 
                                      Q(categoria='Tratamientos') | 
@@ -195,7 +200,7 @@ def productos(request):
 def verDetalle(request, tipo, id):
     if tipo not in ['producto', 'servicio']:
         return render(request, '404.html') 
-    item = get_object_or_404(Item, iditem=id)
+    item = get_object_or_404(Producto, iditem=id)
     if item.tipo != tipo:
         return render(request, '404.html')  
     context = {
@@ -207,7 +212,7 @@ def verDetalle(request, tipo, id):
 class verInventario(View):
 
     def get(self, request, *args, **kwargs):
-        productos = Item.objects.all()
+        productos = Producto.objects.all()
         
         form_editar = editarProductoForm()
 
@@ -225,7 +230,7 @@ class verInventario(View):
 #FUNCION PARA VER STOCK DE PRODUCTOS
 @login_required
 def inventarioProducto(request):
-    productos = Item.objects.all()
+    productos = Producto.objects.all()
     form_editar = editarProductoForm()
     context = {
         'productos': productos,
@@ -622,14 +627,44 @@ from django.shortcuts import render
 def carrito(request):
     return render(request, 'tienda/carrito.html')  
 
+#FUNCIÓN PARA AGREGAR UN PRODUCTO MÁS AL CARRITO CON BOTÓN +
+def cart_add(request, producto_id):
+
+  cart = Cart(request)
+  producto = get_object_or_404(Producto, id=producto_id)
+
+  form = CartAddProductoForm(request.POST)
+  if form.is_valid():
+    cart_add = form.cleaned_data
+    cart.add(
+      producto=producto,
+      cantidad=cart_add["cantidad"],
+      override_cantidad=cart_add["override"]
+    )
+
+  return redirect("carrito")
+
+#FUNCIÓN PARA DISMIUIR UN PRODUCTO MÁS AL CARRITO CON BOTÓN -
+def cart_eliminar(request, producto_id):
+
+  cart = Cart(request)
+  producto = get_object_or_404(Producto, id=producto_id)
+  cart.remove(producto)
+  return redirect("carrito")
+
+#FUNCIÓN PARA LIMPIAR EL CARRITO 
+def cart_clear(request):
+  cart = Cart(request)
+  cart.clear()
+  return redirect("carritoCompras")
+
+#FUNCIÓN QUE MUESTRA EL DETALLE DE LA COMPRA 
+def cart_detalle(request):
+  cart = Cart(request)
+  return render(request, 'tienda/carrito.html', {"cart": cart})
 
 #ATENCION CLIENTE
 
 def atencioncliente(request):
     return render(request, 'tienda/atencioncliente.html')
 
-# CARRO DE COMPRAS
-
-#FUNCIÓN PARA VER CARRITO DE COMPRAS
-def carritoCompras(request):
-    return redirect('carritoCompras')

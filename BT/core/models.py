@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from datetime import datetime, timedelta
 from model_utils.models import TimeStampedModel
-from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.core.validators import MinLengthValidator, MaxLengthValidator, MaxValueValidator, MinValueValidator
 
 #USUARIOS
 class User(AbstractUser):
@@ -108,9 +108,7 @@ class User(AbstractUser):
     fecha_nac = models.DateField(null=True)
     tipo_user = models.CharField(max_length=60, null=True, blank =True)
 
-from django.db import models
-
-class Item(models.Model):
+class Producto(models.Model):
 
     CATEGORIA_PRODUCTO = [
         ('Coloración', 'Coloración'),
@@ -311,3 +309,27 @@ class Order(TimeStampedModel):
     def get_precio_total(self):
         total_costo = sum(producto.get_precio_total() for producto in self.productos.all())
         return total_costo
+
+    def get_description(self):
+        descriptions = []
+        for item in self.items.all():
+            description = '{} x {}'.format(item.cantidad, item.producto.nombre)
+            descriptions.append(description)
+            
+        return ", ".join(descriptions)
+
+
+
+class Item(models.Model):
+    orden = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, related_name="order_items", on_delete=models.CASCADE)
+    costo = models.DecimalField(max_digits=10, decimal_places=2)
+    cantidad = models.PositiveIntegerField(validators=[MinValueValidator(settings.CART_ITEM_MIN_CANTIDAD), MaxValueValidator(settings.CART_ITEM_MAX_CANTIDAD),])
+    codigo = models.CharField(max_length=100, blank=True, null=True)
+
+
+    def __str__(self):
+        return str(self.id)
+
+    def get_precio_total(self):
+        return self.costo * self.cantidad

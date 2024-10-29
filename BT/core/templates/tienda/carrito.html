@@ -1,11 +1,11 @@
-{% extends "base/base.html" %}
+{% extends "base/base.html" %} {% load widget_tweaks %}
 
 {% load static %}
 {% block template %}
-<link rel="stylesheet" href="{% static 'css/carrito.css' %}">
 
   <div class="container mt-4">
     <h2>Mi Carrito</h2>
+{% if cart %}
     <div class="row">
       <div class="col-md-8">
         <div class="card mb-4">
