@@ -22,7 +22,7 @@ urlpatterns = [
 
     path("paginas/servicios", views.servicios, name="servicios"),
     path("paginas/productos", views.productos, name="productos"),
-    path('verDetalle/<str:tipo>/<int:id>/', views.verDetalle, name='verDetalle'),
+    path('verDetalle/<str:tipo>/<int:producto_id>/', views.verDetalle, name='verDetalle'),
 
     path('paginas/inventario', views.inventarioProducto, name="inventario"),
     path("paginas/verInventario/", views.verInventario.as_view(), name="verInventario"),
@@ -42,12 +42,16 @@ urlpatterns = [
     path('obtener_reserva/<int:id>/', views.obtener_reserva, name='obtener_reserva'),
     path('confirmar_reserva/<int:reserva_id>/', views.confirmar_reserva, name='confirmar_reserva'),
 
-    path('paginas/carrito/', views.carrito, name='carrito'),
+    path('paginas/carrito/', views.cart_detalle, name='carrito'),
     path("add/<int:producto_id>/", views.cart_add, name="add"),
     path("eliminar/<int:producto_id>/", views.cart_eliminar, name="eliminar"),
     path("clear/", views.cart_clear, name="clear"),
+    path("create-order/",login_required(views.OrderCreateView.as_view()), name="create-order"),
+    path('paginas/pedidoListo', views.pedidoListo, name="pedidoListo"),
+    path('paginas/misOrdenes', views.misOrdenes, name="misOrdenes"),
 
     path('paginas/atencioncliente/', views.atencioncliente, name='atencioncliente'), 
+
 ]
 
 if settings.DEBUG:

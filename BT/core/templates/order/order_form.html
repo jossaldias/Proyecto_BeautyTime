@@ -1,0 +1,44 @@
+
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %} 
+
+{% block template %}
+
+
+<div class="container mt-3 rounded" style="background-color: #212529; padding-top:3%; margin-bottom:3%; ">
+ 
+<div class="logo">
+  <img src="{% static 'img/Beauty-Time.png' %}" alt="">
+</div> 
+    
+  <h1 class="font-weight-bold text-white">DETALLES DE PEDIDO</h1>
+  {% if cart %}
+  <div class="row">
+    <div class="col-lg-6 text-white">
+      {% crispy form %}<br>
+    </div>
+    <div class="col-lg-6 mt-5">
+       {% include "order/order_summary.html" with items=cart total_price=cart.get_precio_total %}
+    </div>
+  </div>
+  {% else %}
+  <div class="row d-flex justify-content-center align-items-center h-100 rounded" style="background:#212529">
+    <div class="container">
+      <div class="d-flex justify-content-center">
+        <h1 class="text-white"> Opps! Su Carrito esta vacío...</h1> <br>         
+      </div>
+      <div class="d-flex justify-content-center">        
+        <img src="{% static 'img/emptycart.png'%}" class="carro" alt=""><br>        
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %} 

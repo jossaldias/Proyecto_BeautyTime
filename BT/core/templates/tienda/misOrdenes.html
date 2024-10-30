@@ -1,0 +1,49 @@
+{% extends "base/base.html" %}
+{% load widget_tweaks %}
+
+{% load static %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}">
+{% endblock %}
+
+{% block template %}
+
+
+<div class="container h-100" style="padding-top:5%;">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="margin-bottom:10% ">
+      <div class="col-md-12">
+          <div class="wrapper">
+                            <div class="text-left mt-4 name">
+                                Mis Compras
+                            </div>
+                              <div>
+                                  <table class="table table-danger table-hover rounded">
+                                    <tbody>
+                                      <tr class="table-danger">
+                                        <th>Nº Compra</th>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                      </tr>
+                                      {% for order in ordenes %}
+                                      <tr>
+                                        <td>{{order}}</td>
+                                        <td>{{order.created}}</td>
+                                        <td>{{order.get_description}}</td>
+                                        <td>${{order.get_precio_total}}</td>
+                                        <td>{{order.estado_venta}}</td>
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                              </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

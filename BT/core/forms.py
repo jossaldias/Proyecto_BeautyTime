@@ -431,7 +431,7 @@ class agregarProductoForm(forms.ModelForm):
         ('servicio', 'Servicio'),
     ]
 
-    iditem = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
+    id_producto = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
     nombre = forms.CharField(max_length=45, label='Nombre')
     categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
     tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
@@ -484,7 +484,7 @@ class editarProductoForm(forms.ModelForm):
         ('servicio', 'Servicio'),
     ]
 
-    iditem = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
+    id_producto = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
     nombre = forms.CharField(max_length=45, label='Nombre')
     categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
     tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
@@ -699,7 +699,7 @@ class OrderCreateForm(forms.ModelForm):
       ButtonHolder(
             Submit(
                 "submit",
-                "Escoger Método de Pago",
+                "Siguiente",
                 css_class="btn btn-success btn-lg btn-block"
             ),
             HTML('<a href="/clear/" class="btn btn-danger btn-lg btn-block">Cancelar compra</a>'),

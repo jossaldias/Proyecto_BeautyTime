@@ -22,7 +22,7 @@
                 <div class="table-responsive">
                     <table class="table table-danger table-hover" id="tableinventario">
                         <br>
-                        {% if user.tipo_user == 'Administrador General' or user.tipo_user == 'Administrador Logístico' %}
+                        {% if user.is_staff %}
                         <a class="btn btn-success btn-lg" href="{% url 'agregarProducto' %}"><i
                                 class="bi bi-plus-square-fill"></i>&nbsp;&nbsp;Agregar Productos</a>
                         <br><br>
@@ -52,13 +52,13 @@
                                 {% if user.tipo_user == 'Administrador General' %}
                                 <td>
                                     <button type="button"
-                                        onclick="editarProducto('{{i.id}}','{{i.id_producto}}', '{{i.nombre}}', '{{i.descripcion}}', '{{i.costo}}', '{{i.cantidad}}')"
+                                        onclick="editarProducto('{{i.id_producto}}', '{{i.nombre}}', '{{i.descripcion}}', '{{i.categoria}}',{{i.costo}}' ,'{{i.tipo}}', {{i.cantidad}}')"
                                         class="btn btn-primary" data-toggle="modal" href="#EditarProductoModal">
                                         <i class="bi bi-pen-fill"></i>
                                     </button>
                                 </td>
                                 <td>
-                                    <button type="button" onclick="eliminarProducto('{{i.id}}')" class="btn btn-danger"
+                                    <button type="button" onclick="eliminarProducto('{{i.id_producto}}')" class="btn btn-danger"
                                         data-toggle="modal" href="#EliminarProductoModal">
                                         <i class="bi bi-x-square-fill"></i>
                                     </button>

@@ -1,119 +1,123 @@
 {% extends "base/base.html" %} {% load widget_tweaks %}
-
 {% load static %}
+
+{%block css %}
+<link rel="stylesheet" href="{% static 'css/carro.css' %}" />
+{% endblock %}
+
 {% block template %}
 
-  <div class="container mt-4">
-    <h2>Mi Carrito</h2>
-{% if cart %}
-    <div class="row">
-      <div class="col-md-8">
-        <div class="card mb-4">
-          <div class="card-header">
-            Detalles del Carrito
-          </div>
-          <div class="card-body">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Producto</th>
-                  <th>Precio</th>
-                  <th>Cantidad</th>
-                  <th>Total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in cart %} {% with producto=item.producto %}
-                <tr>
-                  <td>
-                      <img src="{{producto.picture.url}}" width="100" height="100" />
-                  </td>
-                  <td>{{producto.nombre}}</td>
-                  <td class="quantity">
-                      <div class="d-flex justify-content-center align-items-center">
-                        <form action="{% url 'add' producto.id %}" method="post">
-                          {% csrf_token %}
-                          <div class="form-row align-items-center">
-                            <div class="col">
-                              <div class="input-group">
-                                <div class="input-group-prepend">
-                                  <button type="submit" class="btn btn-primary" onclick="decrementarCantidadC(this)">-</button>
-                                </div>
-                                {% render_field item.update_cantidad_form.cantidad class+="custom-width" %}
-                                <div class="input-group-append">
-                                  <button type="submit" class="btn btn-primary" onclick="incrementarCantidadC(this)">+</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          {{ item.update_cantidad_form.override }}
-                        </form>               
-                        <td class="text-right">${{item.costo}}
-                        <td td class="product-subtotal"><span class="amount">${{item.precio_total}}</span></td>
-                        <td class="text-right">
-                        <form action="{% url 'eliminar' producto.id %}" method="post">
-                        {% csrf_token %}
-                        <span class="icon-input-btn">
-                        <button class="btn btn-danger" type="submit">
-                          <i class="bi bi-trash3-fill"></i> Eliminar
-                        </button>
-                        </span>
-                        </form>
-                  </td>
-                  {% endwith %} {% endfor %}
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><strong>Total</strong></td>
-                    <td class="text-right">
-                      <strong>$ {{cart.get_precio_total}}</strong>
-                    </td>
-                  </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>         
 
-        <div class="col-md-4">
-          <div class="resumen">
-            <h4>Resumen de Compra</h4>
-            <p><strong>Total de Productos:</strong> 7</p>
-            <p><strong>Subtotal:</strong> $254.800</p>
-            <p><strong>Descuento:</strong> $20.000</p>
-            <p><strong>Total a Pagar:</strong> $234.800</p>
-            <div class="text-center">
-              <a href="{% url 'create-order' %}" class="btn btn-block btn-success">Realizar pedido</a>
-            </div>
-            <div class="col-sm-3 col-md-3 text-right">
-              <form action="{% url 'clear' %}" method="post">
-                {% csrf_token %}
-                <button class="btn btn-block btn-danger" type="submit">
-                  <i class="bi bi-cart-x-fill"></i> Vaciar carrito
-                </button>
-              </form> 
-            </div>
-          </div>
-        </div>
-        {% else %}
-        <div class="row">
-          <div class="container"><br><br>
-            <div class="d-flex justify-content-center">
-              <h1>Opps! Su Carrito esta vacío...</h1>
-              <br />
-            </div><br><br>
-            <div class="d-flex justify-content-center">
-              <img src="{% static 'img/emptycart.png'%}" class="carro" alt="" /><br />
-            </div>
-          </div>
-        </div>
-        {% endif %}
+<div class="container h-100" style="padding-top:5%; padding-bottom:5%">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded"
+    style="background: #212529; padding-bottom:20%; margin-bottom:15%">
+    {% if cart %}
+    <h1>Carrito de compras</h1>
+    <h5>Detalle de producto</h5>
+    <hr />
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Producto</th>
+              <th scope="col" class="text-center">Cantidad</th>
+              <th scope="col" class="text-right">Precio Unitario</th>
+              <th scope="col" class="text-right">Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart %} {% with producto=item.producto %}
+            <tr>
+              <td>
+                <img src="{{producto.picture.url}}" width="100" height="100" />
+              </td>
+              <td>{{producto.nombre}}</td>
+              <td class="quantity">
+                <div class="d-flex justify-content-center align-items-center">
+                  <form action="{% url 'add' producto.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-row align-items-center">
+                      <div class="col">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <button type="submit" class="btn btn-primary" onclick="decrementarCantidadC(this)">-</button>
+                          </div>
+                          {% render_field item.update_cantidad_form.cantidad class+="custom-width" %}
+                          <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary" onclick="incrementarCantidadC(this)">+</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {{ item.update_cantidad_form.override }}
+                  </form>
+                  
+                  
+                      <td class="text-right">${{item.costo}}</td>
+              <td class="product-subtotal"><span class="amount">${{item.precio_total}}</span></td>
+              <td class="text-right">
+                <form action="{% url 'eliminar' producto.id %}" method="post">
+                  {% csrf_token %}
+                  <span class="icon-input-btn">
+                    <button class="btn btn-danger" type="submit">
+                      <i class="bi bi-trash3-fill"></i> Eliminar
+                    </button>
+                  </span>
+                </form>
+              </td>
+            </tr>
+            {% endwith %} {% endfor %}
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><strong>Total</strong></td>
+              <td class="text-right">
+                <strong>$ {{cart.get_precio_total}}</strong>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
+    <div class="col mb-2">
+      <div class="row">
+        <div class="col-sm-3 col-md-3">
+          <a href="{% url 'productos'%}" class="btn btn-block btn-primary">Seguir comprando</a>
+        </div>
+        <div class="col-sm-3 col-md-3 text-right">
+          <a href="{% url 'create-order' %}" class="btn btn-block btn-success">Realizar pedido</a>
+        </div>
+        <div class="col-sm-3 col-md-3 text-right">
+          <form action="{% url 'clear' %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-block btn-danger" type="submit">
+              <i class="bi bi-cart-x-fill"></i> Vaciar carrito
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="row">
+      <div class="container"><br><br>
+        <div class="d-flex justify-content-center">
+          <h1>Opps! Su Carrito esta vacío...</h1>
+          <br />
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <img src="{% static 'img/emptycart.png'%}" class="carro" alt="" /><br />
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
+</div>
 
 <style>
   .custom-width {
@@ -125,5 +129,8 @@
   }
 </style>
 <script src="{% static 'js/botones.js' %}"></script>
-{% endblock %}
 
+
+
+
+{% endblock %}

@@ -14,10 +14,6 @@ from django.contrib.auth import update_session_auth_hash
 import json
 
 from django.db.models import Q, F, Sum
-from .models import *
-from .forms import *
-from .cart import Cart
-
 
 from .utils import render_to_pdf
 from django.views.generic import View, CreateView 
@@ -25,6 +21,11 @@ from django.core.mail import send_mail
 
 from datetime import timedelta, datetime
 from django.contrib.auth.models import AnonymousUser
+
+
+from .models import *
+from .forms import *
+from .cart import Cart
 
 
 # HOME
@@ -169,13 +170,7 @@ def eliminarUsuario(request):
 
 def servicios(request):    
     servicios = Producto.objects.filter(
-                                    Q(tipo='servicio') & 
-                                    (Q(categoria='Manicure y Pedicure') | 
-                                     Q(categoria='Masajes') | 
-                                     Q(categoria='Maquillaje para eventos') | 
-                                     Q(categoria='Depilación') | 
-                                     Q(categoria='Tratamientos Faciales') | 
-                                     Q(categoria='Colorimetría'))
+                                    Q(tipo='servicio') 
                                     )
     context = {
         'servicios': servicios
@@ -183,24 +178,16 @@ def servicios(request):
     return render(request, 'tienda/servicios.html', context)
 
 def productos(request):    
-    productos = Producto.objects.filter(
-                                    Q(tipo='producto') & 
-                                    (Q(categoria='Coloración') | 
-                                     Q(categoria='Tratamientos') | 
-                                     Q(categoria='Línea Rubias') | 
-                                     Q(categoria='Shampoo & Acondicionadores') | 
-                                     Q(categoria='Styling & Aftercare') | 
-                                     Q(categoria='Herramientas'))
-                                    )
+    productos = Producto.objects.filter(Q(tipo='producto'))
     context = {
         'productos': productos
     }
     return render(request, 'tienda/productos.html', context)
 
-def verDetalle(request, tipo, id):
+def verDetalle(request, tipo, producto_id):
     if tipo not in ['producto', 'servicio']:
         return render(request, '404.html') 
-    item = get_object_or_404(Producto, iditem=id)
+    item = get_object_or_404(Producto, id=producto_id)
     if item.tipo != tipo:
         return render(request, '404.html')  
     context = {
@@ -278,10 +265,6 @@ def eliminarProducto(request):
   if request.method == 'POST':
         id_producto_eliminar = request.POST.get('id_producto_eliminar')
         producto = Producto.objects.get(pk=id_producto_eliminar)
-
-        codigos = Codigo.objects.filter(producto_id=id_producto_eliminar)
-
-        codigos.delete()
 
         producto.delete()
 
@@ -625,7 +608,7 @@ def confirmar_reserva(request, reserva_id):
 from django.shortcuts import render
 
 def carrito(request):
-    return render(request, 'tienda/carrito.html')  
+    return redirect('carrito')
 
 #FUNCIÓN PARA AGREGAR UN PRODUCTO MÁS AL CARRITO CON BOTÓN +
 def cart_add(request, producto_id):
@@ -656,15 +639,74 @@ def cart_eliminar(request, producto_id):
 def cart_clear(request):
   cart = Cart(request)
   cart.clear()
-  return redirect("carritoCompras")
+  return redirect("carrito")
 
 #FUNCIÓN QUE MUESTRA EL DETALLE DE LA COMPRA 
 def cart_detalle(request):
   cart = Cart(request)
   return render(request, 'tienda/carrito.html', {"cart": cart})
 
+
+# FUNCIÓN QUE CREA LA COMPRA PARA EL CLIENTE
+class OrderCreateView(CreateView):
+    model = Order
+    form_class = OrderCreateForm
+    template_name = "order/order_form.html"
+
+    # FUNCIÓN PARA AGREGAR DATOS DEL CLIENTE A LA COMPRA
+    def form_valid(self, form):
+        cart = Cart(self.request)
+        if cart:
+            order = form.save(commit=False)
+            order.user = self.request.user
+            order.is_pagado = True
+            order.save()
+
+            for item in cart:
+                producto = item["producto"]
+                costo = item["costo"]
+                cantidad = item["cantidad"]
+
+                # Crear un Item para cada producto en el carrito
+                Item.objects.create(
+                    orden=order,
+                    producto=producto,
+                    costo=costo,
+                    cantidad=cantidad,
+                )
+
+                # Actualizar la cantidad del producto en la base de datos
+                Producto.objects.filter(id=producto.id).update(cantidad=F('cantidad') - cantidad)
+
+            cart.clear()  # Limpiar el carrito después de crear la orden
+            return render(self.request, 'order/ordenCreada.html', {'order': order})
+
+        return HttpResponseRedirect(reverse("home"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cart"] = Cart(self.request)
+        return context  
+
+
+
+#FUNCIÓN QUE DEVUELVE AL USUARIO A LA PÁGINA INDICANDO PEDIDO LISTO
+@login_required
+def pedidoListo(request):
+    
+    return render(request, 'tienda/pedidoListo.html')
+
+
+#FUNCIÓN PARA VER MIS COMPRAS Y REALIZAR SEGUIMIENTO
+@login_required
+def misOrdenes(request):
+    ordenes = Order.objects.filter(user=request.user)
+    print(ordenes)
+    return render(request, 'tienda/misOrdenes.html',  {'ordenes': ordenes} )
 #ATENCION CLIENTE
 
 def atencioncliente(request):
     return render(request, 'tienda/atencioncliente.html')
+
+
 

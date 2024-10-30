@@ -16,7 +16,7 @@
         <h3 class="product-title">{{producto.nombre}}</h3>
       </div>
       <div class="image-container">
-        <a title="verDetalle" href="{% url 'verDetalle' tipo='producto' id=producto.iditem %}">
+        <a title="verDetalle" href="{% url 'verDetalle' tipo='producto' producto_id=producto.id %}">
           <img src="{{ producto.picture.url }}" alt="{{ producto.nombre }}">
         </a>
       </div>
@@ -26,7 +26,7 @@
         <p>{{ producto.descripcion|truncatechars:100 }}</p>
         <h5> <strong>Precio</strong> ${{producto.costo}}</h5>
       </div>
-       <form method="post" action="#">
+       <form method="post" action="{% url 'add' producto.id %}">
         {% csrf_token %}
         <input type="hidden" name="cantidad" class="form-control" required="" id="id_cantidad" value="1">
         <a class="add-to-cart" href="#" onClick="javascript:this.parentNode.submit()">

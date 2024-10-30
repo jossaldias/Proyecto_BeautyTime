@@ -133,7 +133,7 @@ class Producto(models.Model):
         ('servicio', 'Servicio'),
     ]
 
-    iditem = models.AutoField(primary_key=True)
+    id_producto = models.CharField(max_length = 255, unique = True, null = True, blank= True)
     nombre = models.CharField(max_length=45, null=True)
     descripcion = models.CharField(max_length=255, null=True, blank=True)
     categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO)
@@ -143,12 +143,12 @@ class Producto(models.Model):
     cantidad = models.IntegerField(default=0)
 
     class Meta:
-        verbose_name = 'item'
-        verbose_name_plural = 'items'
+        verbose_name = 'producto'
+        verbose_name_plural = 'productos'
         ordering = ['tipo']
 
     def __str__(self):
-        return self.nombre or f"Item {self.iditem}"
+        return self.nombre or f"Item {self.id_producto}"
 
 # MODELO DE CATEGORÍA
 class Categoria(models.Model):
@@ -307,7 +307,7 @@ class Order(TimeStampedModel):
         return 'Compra {}'.format(self.id)
 
     def get_precio_total(self):
-        total_costo = sum(producto.get_precio_total() for producto in self.productos.all())
+        total_costo = sum(item.get_precio_total() for item in self.items.all())
         return total_costo
 
     def get_description(self):
