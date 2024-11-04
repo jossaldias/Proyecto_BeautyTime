@@ -42,7 +42,6 @@ def login(request):
 
     return render(request, "registration/login.html", {"login": login})
 
-
 # PERFILES
 
 

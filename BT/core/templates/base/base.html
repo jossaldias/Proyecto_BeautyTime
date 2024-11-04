@@ -18,6 +18,28 @@
   {% block css %}
   {% endblock %}
 
+
+<style>
+.badge {
+    position: absolute;
+    top: -5px;   /* Ajusta según la posición deseada */
+    right: -5px; /* Ajusta según la posición deseada */
+    width: 20px; /* Ancho fijo para el badge */
+    height: 20px; /* Alto fijo para el badge */
+    background-color: red;
+    color: white;
+    border-radius: 50%; /* Hace el badge perfectamente redondo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+}
+  </style>
+
+
+
   <title>Beauty Time</title>
 </head>
 
@@ -58,12 +80,15 @@
             <a class="nav-link" href="#">Marcas</a>
           </li>
           &nbsp;&nbsp;
-          <li>
-             <a href="{% url 'carrito' %}">
-              <img src="{% static 'img/carrito_png.png' %}" width="30px" height="30px"
-                alt="Carrito de Compras">
-             </a>
+          <li style="position: relative;">
+              <a href="{% url 'carrito' %}" style="position: relative;">
+                  <img src="{% static 'img/carrito_png.png' %}" width="30px" height="30px" alt="Carrito de Compras">
+                  {% if cart_badge > 0 %}
+                      <span class="badge">{{ cart_badge }}</span>
+                  {% endif %}
+              </a>
           </li>
+
           &nbsp;&nbsp;
           {% if request.user.is_authenticated %}
           <ul class="navbar-nav">
@@ -80,7 +105,6 @@
                 <li><a class="dropdown-item" href="{% url 'misOrdenes' %}">Mis compras</a></li>
 
                 <li><a class="dropdown-item" href="{% url 'calendario' %}">Calendario</a></li>
-                <li><a class="dropdown-item" href="{% url 'carrito' %}">Carrito</a></li>
                 {% if user.is_staff %}
                 <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
                 <li><a class="dropdown-item" href="{% url 'inventario' %}">Gestión de Inventario</a></li>

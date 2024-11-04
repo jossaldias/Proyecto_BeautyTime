@@ -107,6 +107,7 @@ class CustomUserCreationForm(UserCreationForm):
         direccion = forms.CharField(max_length=60 )
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
+
         
     
         class Meta:
@@ -213,41 +214,42 @@ class editarUsuarioForm(forms.ModelForm):
 
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
+        fecha_nac = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
         tipo_user = forms.ChoiceField(choices=TIPO_USUARIO)
         password = forms.CharField(required=False, widget=forms.PasswordInput, label="Cambiar Contraseña")
 
         class Meta:
-                    model = User
-                    fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion', 'telefono', 'fecha_nac','tipo_user', 'password']
-                    labels = {
-                                'username':'Nombre de Usuario',
-                                'first_name':'Primer Nombre',
-                                'last_name': 'Apellido', 
-                                'picture':'Avatar',
-                                'email': 'E-mail',
-                                'region': 'Región',
-                                'comuna':'Comuna',
-                                'direccion':'Dirección',
-                                'telefono':'Teléfono',
-                                'fecha_nac':'Fecha de Nacimiento',
-                                'tipo_user': 'Tipo de Usuario',
-                                'password':'Cambiar Contraseña' 
-                            
-                    }
+            model = User
+            fields = ['username','first_name','last_name','picture', 'email','region','comuna','direccion', 'telefono', 'fecha_nac','tipo_user', 'password']
+            labels = {
+                'username':'Nombre de Usuario',
+                'first_name':'Primer Nombre',
+                'last_name': 'Apellido', 
+                'picture':'Avatar',
+                'email': 'E-mail',
+                'region': 'Región',
+                'comuna':'Comuna',
+                'direccion':'Dirección',
+                'telefono':'Teléfono',
+                'fecha_nac':'Fecha de Nacimiento',
+                'tipo_user': 'Tipo de Usuario',
+                'password':'Cambiar Contraseña' 
+                    
+            }
 
-                    widgets = {
-                        'username': forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
-                        'first_name': forms.TextInput(attrs={'id': 'nombre_editar'}),
-                        'last_name': forms.TextInput(attrs={'id': 'apellido_editar'}),
-                        'email': forms.TextInput(attrs={'id': 'email_editar'}),
-                        'direccion': forms.TextInput(attrs={'id': 'direccion_editar'}),
-                        'region': forms.TextInput(attrs={'id': 'region_editar'}),
-                        'comuna': forms.TextInput(attrs={'id': 'comuna_editar'}),
-                        'telefono': forms.TextInput(attrs={'id': 'telefono_editar'}),
-                        'fecha_nac': forms.DateInput(format=('%d/%m/%Y'), attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
-                        'tipo_user':forms.TextInput(attrs={'id': 'tipo_user_editar'}),
+            widgets = {
+                'username': forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
+                'first_name': forms.TextInput(attrs={'id': 'nombre_editar'}),
+                'last_name': forms.TextInput(attrs={'id': 'apellido_editar'}),
+                'email': forms.TextInput(attrs={'id': 'email_editar'}),
+                'direccion': forms.TextInput(attrs={'id': 'direccion_editar'}),
+                'region': forms.TextInput(attrs={'id': 'region_editar'}),
+                'comuna': forms.TextInput(attrs={'id': 'comuna_editar'}),
+                'telefono': forms.TextInput(attrs={'id': 'telefono_editar'}),
+                'fecha_nac': forms.DateInput(format=('%Y/%m/%d'), attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
+                'tipo_user':forms.TextInput(attrs={'id': 'tipo_user_editar'}),
 
-                    }
+            }
 
         def clean_password(self):
             password = self.cleaned_data.get('password')
@@ -399,7 +401,7 @@ class editarPerfilForm(forms.ModelForm):
                 'region': forms.TextInput(attrs={'id': 'region_editar'}),
                 'comuna': forms.TextInput(attrs={'id': 'comuna_editar'}),
                 'telefono': forms.TextInput(attrs={'id': 'telefono_editar'}),
-                'fecha_nac': forms.DateInput(format=('%d/%m/%Y'), attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
+                'fecha_nac': forms.DateInput(format=('%Y/%m/%d'), attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
             }
         # Método para validar el campo de contraseña
         def clean_password(self):
@@ -674,7 +676,7 @@ class OrderCreateForm(forms.ModelForm):
       "email",
       "direccion",
       "telefono",
-      "descripcion",
+      "observaciones",
       "region",
       "comuna",
     ]
@@ -711,7 +713,7 @@ class OrderCreateForm(forms.ModelForm):
           css_class="row",
         ),
         Div(
-          Field("descripcion", css_class="form-control", wrapper_class="col"),
+          Field("observaciones", css_class="form-control", wrapper_class="col"),
           css_class="row",
         ),
         css_class="border-bottom mb-3",

@@ -306,7 +306,7 @@ class Order(TimeStampedModel):
     email = models.EmailField()
     direccion = models.CharField("Dirección", max_length=250, null = True)
     telefono = models.CharField("Teléfono", max_length=250, null = True)
-    descripcion = models.CharField("Descripción", max_length=250, blank=True)
+    observaciones = models.CharField("Observaciones", max_length=250, blank=True)
     region = models.CharField("Región", max_length=200, choices=REGION, default=REGION[0][0])
     comuna = models.CharField("Comuna", max_length=200, choices=COMUNA, default=COMUNA[0][0])
     estado_venta = models.CharField("Estado Órden", max_length=200, choices=ESTADO_VENTA, default=ESTADO_VENTA[0][0])

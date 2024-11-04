@@ -9,172 +9,173 @@
 
 {% block template %}
 
-
-<div class="container py-5 h-100">
-    <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col col-12">
-            <div class="wrapper">
-                <div class="text-left mt-4 name">
-                    Gestión de Usuarios
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-danger table-hover">
-                        <br>
-                        <a class="btn btn-success btn-lg" href="{% url 'agregarUsuario' %}"><i
-                                class="bi bi-plus-square-fill"></i>&nbsp;&nbsp;Agregar Usuario</a>
-                        <br><br>
-                        <thead>
-                            <tr class="table-danger">
-                                <th>Tipo de Usuario</th>
-                                <th>Usuario</th>
-                                <th>User Name</th>
-                                <th>E-mail</th>
-                                <th>Dirección</th>
-                                <th>Región</th>
-                                <th>Comuna</th>
-                                <th>Teléfono</th>
-                                <th>Fecha de Nacimiento</th>
-                                <th>Editar</th>
-                                <th>Eliminar</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-danger">
-                            {% for user in users %}
-                            <tr class="table-danger">
-                                <td class="table-danger">{{user.tipo_user}}</td>
-                                <td class="table-danger">{{user.first_name}} {{i.last_name}}</td>
-                                <td class="table-danger">{{user.username}}</td>
-                                <td class="table-danger">{{user.email}}</td>
-                                <td class="table-danger">{{user.direccion}}</td>
-                                <td class="table-danger">{{user.region}}</td>
-                                <td class="table-danger">{{user.comuna}}</td>
-                                <td class="table-danger">{{user.telefono}}</td>
-                                <td class="table-danger">{{user.fecha_nac}}</td>
-                                <td>
-                                    <button type="button"
-                                        onclick="editarUsuario('{{user.id}}','{{user.username}}', '{{user.first_name}}', '{{user.last_name}}',  '{{user.email}}', '{{user.direccion}}' , '{{user.region}}', '{{user.comuna}}', '{{user.telefono}}', '{{user.fecha_nac}}','{{user.tipo_user}}')"
-                                        class="btn btn-primary" data-toggle="modal" href="#EditarUsuarioModal">
-                                        <i class="bi bi-pen-fill"></i>
+<section class="py-5">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-12">
+                <div class="wrapper">
+                    <div class="text-left mt-4 name">
+                        Gestión de Usuarios
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-danger table-hover">
+                            <br>
+                            <a class="btn btn-success btn-lg" href="{% url 'agregarUsuario' %}"><i
+                                    class="bi bi-plus-square-fill"></i>&nbsp;&nbsp;Agregar Usuario</a>
+                            <br><br>
+                            <thead>
+                                <tr class="table-danger">
+                                    <th>Tipo de Usuario</th>
+                                    <th>Username</th>
+                                    <th>Nombre y Apellido</th>
+                                    <th>E-mail</th>
+                                    <th>Dirección</th>
+                                    <th>Región</th>
+                                    <th>Comuna</th>
+                                    <th>Teléfono</th>
+                                    <th>Fecha de Nacimiento</th>
+                                    <th>Editar</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-danger">
+                                {% for user in users %}
+                                <tr class="table-danger">
+                                    <td class="table-danger">{{user.tipo_user}}</td>
+                                    <td class="table-danger">{{user.username}}</td>
+                                    <td class="table-danger">{{user.first_name}} {{user.last_name}}</td>
+                                    <td class="table-danger">{{user.email}}</td>
+                                    <td class="table-danger">{{user.direccion}}</td>
+                                    <td class="table-danger">{{user.region}}</td>
+                                    <td class="table-danger">{{user.comuna}}</td>
+                                    <td class="table-danger">{{user.telefono}}</td>
+                                    <td class="table-danger">{{user.fecha_nac}}</td>
+                                    <td>
+                                        <button type="button"
+                                            onclick="editarUsuario('{{user.id}}','{{user.username}}', '{{user.first_name}}', '{{user.last_name}}',  '{{user.email}}', '{{user.direccion}}' , '{{user.region}}', '{{user.comuna}}', '{{user.telefono}}', '{{user.fecha_nac|date:'Y-m-d'}}','{{user.tipo_user}}')"
+                                            class="btn btn-primary" data-toggle="modal" href="#EditarUsuarioModal">
+                                            <i class="bi bi-pen-fill"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button" onclick="eliminarUsuario('{{user.id}}')"
+                                            class="btn btn-danger" data-toggle="modal" href="#EliminarUsuarioModal">
+                                            <i class="bi bi-x-square-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="EliminarUsuarioModal" class="modal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-info">
+                                    <h3 class="modal-title text-danger">Eliminar Usuario</h3>
+                                </div>
+                                <div class="modal-body bg-danger text-white">
+                                    <p class="labelmodal">Estas seguro?</p>
+                                    <form method="POST" action="{% url 'eliminarUsuario'%}">{% csrf_token %}
+                                        <input type="hidden" id="id_usuario_eliminar" name="id_usuario_eliminar">
+                                </div>
+                                <div class="modal-footer bg-danger">
+                                    <button type="submit" class="btn btn-danger">
+                                        Eliminar
                                     </button>
-                                </td>
-                                <td>
-                                    <button type="button" onclick="eliminarUsuario('{{user.id}}')"
-                                        class="btn btn-danger" data-toggle="modal" href="#EliminarUsuarioModal">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                        Cerrar
                                         <i class="bi bi-x-square-fill"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div id="EliminarUsuarioModal" class="modal">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info">
-                                <h3 class="modal-title text-danger">Eliminar Usuario</h3>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="modal-body bg-danger text-white">
-                                <p class="labelmodal">Estas seguro?</p>
-                                <form method="POST" action="{% url 'eliminarUsuario'%}">{% csrf_token %}
-                                    <input type="hidden" id="id_usuario_eliminar" name="id_usuario_eliminar">
-                            </div>
-                            <div class="modal-footer bg-danger">
-                                <button type="submit" class="btn btn-danger">
-                                    Eliminar
-                                </button>
+                        </div>
+                    </div>
+                    <div id="EditarUsuarioModal" class="modal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title text-danger">Editar Usuario</h3>
+                                </div>
+                                <div class="modal-body">
+                                <form method="POST" action="{% url 'editarUsuario' %}" enctype="multipart/form-data">
+
+                                    {% csrf_token %}
+                                
+                                    <!-- Campo oculto para el ID del perfil -->
+                                    <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
+
+                                    <!-- Avatar -->
+                                    <label for="picture_editar">Avatar</label>
+                                    <input type="file" id="picture_editar" name="picture" class="form-control" style="margin-bottom: 15px;">
+
+                                    <!-- Nombre de Usuario -->
+                                    <label for="username_editar">Nombre de Usuario</label>
+                                    <input type="text" id="username_editar" name="username" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Primer Nombre -->
+                                    <label for="nombre_editar">Primer Nombre</label>
+                                    <input type="text" id="nombre_editar" name="first_name" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Apellido -->
+                                    <label for="apellido_editar">Apellido</label>
+                                    <input type="text" id="apellido_editar" name="last_name" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Correo Electrónico -->
+                                    <label for="email_editar">Correo Electrónico</label>
+                                    <input type="email" id="email_editar" name="email" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Dirección -->
+                                    <label for="direccion_editar">Dirección</label>
+                                    <input type="text" id="direccion_editar" name="direccion" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Región -->
+                                    <label for="region_editar">Región</label>
+                                    <select id="region_editar" name="region" class="form-control" style="margin-bottom: 10px">
+                                        {% for region in form_editar.region.field.choices %}
+                                        <option value="{{ region.0 }}">{{ region.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <!-- Comuna -->
+                                    <label for="comuna_editar">Comuna</label>
+                                    <select id="comuna_editar" name="comuna" class="form-control" style="margin-bottom: 10px">
+                                        {% for comuna in form_editar.comuna.field.choices %}
+                                        <option value="{{ comuna.0 }}">{{ comuna.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <!-- Teléfono -->
+                                    <label for="telefono_editar">Teléfono</label>
+                                    <input type="tel" id="telefono_editar" name="telefono" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Fecha de Nacimiento -->
+                                    <label for="fecha_nac">Fecha de Nacimiento</label>
+                                    <input type="date" id="fecha_nac" name="fecha_nac" class="form-control" required style="margin-bottom: 10px">
+
+                                    <!-- Tipo Usuario -->
+                                    <label for="tipo_user_editar">Tipo Usuario</label>
+                                    <select id="tipo_user_editar" name="tipo_user_editar" class="form-control" required style="margin-bottom: 10px">
+                                        {% for tipo in form_editar.tipo_user.field.choices %}
+                                        <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    
+                                    <!-- Cambiar Contraseña -->
+                                    <label for="password_editar">Cambiar Contraseña</label>
+                                    <input type="password" id="password_editar" name="password" class="form-control" style="margin-bottom: 15px;" placeholder="Dejar en blanco si no se quiere cambiar">
+                                </div>
+                                <div class="modal-footer">
                                 <button type="button" class="btn btn-primary" data-dismiss="modal">
                                     Cerrar
                                     <i class="bi bi-x-square-fill"></i>
                                 </button>
+                                <button type="submit" class="btn btn-success">
+                                    Guardar
+                                </button>
                                 </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="EditarUsuarioModal" class="modal">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3 class="modal-title text-danger">Editar Usuario</h3>
-                            </div>
-                            <div class="modal-body">
-                            <form method="POST" action="{% url 'editarUsuario' %}" enctype="multipart/form-data">
-
-                                {% csrf_token %}
-                            
-                                <!-- Campo oculto para el ID del perfil -->
-                                <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
-
-                                <!-- Avatar -->
-                                <label for="picture_editar">Avatar</label>
-                                <input type="file" id="picture_editar" name="picture" class="form-control" style="margin-bottom: 15px;">
-
-                                <!-- Nombre de Usuario -->
-                                <label for="username_editar">Nombre de Usuario</label>
-                                <input type="text" id="username_editar" name="username" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Primer Nombre -->
-                                <label for="nombre_editar">Primer Nombre</label>
-                                <input type="text" id="nombre_editar" name="first_name" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Apellido -->
-                                <label for="apellido_editar">Apellido</label>
-                                <input type="text" id="apellido_editar" name="last_name" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Correo Electrónico -->
-                                <label for="email_editar">Correo Electrónico</label>
-                                <input type="email" id="email_editar" name="email" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Dirección -->
-                                <label for="direccion_editar">Dirección</label>
-                                <input type="text" id="direccion_editar" name="direccion" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Región -->
-                                <label for="region_editar">Región</label>
-                                <select id="region_editar" name="region" class="form-control" style="margin-bottom: 10px">
-                                    {% for region in form.region.field.choices %}
-                                      <option value="{{ region.0 }}">{{ region.1 }}</option>
-                                    {% endfor %}
-                                </select>
-
-                                <!-- Comuna -->
-                                <label for="comuna_editar">Comuna</label>
-                                <select id="comuna_editar" name="comuna" class="form-control" style="margin-bottom: 10px">
-                                    {% for comuna in form.comuna.field.choices %}
-                                      <option value="{{ comuna.0 }}">{{ comuna.1 }}</option>
-                                    {% endfor %}
-                                </select>
-
-                                <!-- Teléfono -->
-                                <label for="telefono_editar">Teléfono</label>
-                                <input type="tel" id="telefono_editar" name="telefono" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Fecha de Nacimiento -->
-                                <label for="fecha_nac">Fecha de Nacimiento</label>
-                                <input type="date" id="fecha_nac" name="fecha_nac" class="form-control" required style="margin-bottom: 10px">
-
-                                <!-- Tipo Usuario -->
-                                <label for="tipo_user_editar">Tipo Usuario</label>
-                                <select id="tipo_user_editar" name="tipo_user_editar" class="form-control" required style="margin-bottom: 10px">
-                                    {% for tipo in form.tipo_user.field.choices %}
-                                      <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
-                                    {% endfor %}
-                                </select>
-                                
-                                <!-- Cambiar Contraseña -->
-                                <label for="password_editar">Cambiar Contraseña</label>
-                                <input type="password" id="password_editar" name="password" class="form-control" style="margin-bottom: 15px;" placeholder="Dejar en blanco si no se quiere cambiar">
-                            </div>
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">
-                                Cerrar
-                                <i class="bi bi-x-square-fill"></i>
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                Guardar
-                            </button>
-                            </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -182,8 +183,7 @@
             </div>
         </div>
     </div>
-</div>
-</div>
+</section>
 
 
 {% if form.errors %}
