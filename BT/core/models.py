@@ -99,14 +99,28 @@ class User(AbstractUser):
         ('Viña del Mar', 'Viña del Mar'), ('Vitacura', 'Vitacura'), ('Yerbas Buenas', 'Yerbas Buenas'), ('Yumbel', 'Yumbel'),
         ('Yungay', 'Yungay'), ('Zapallar', 'Zapallar')
     ]
-
+    CLIENTE = 'Cliente'
+    ADMINISTRADOR = 'Administrador'
+    
+    TIPO_USUARIO = [
+        (CLIENTE, 'Cliente'),
+        (ADMINISTRADOR, 'Administrador'),
+    ]
+    
     picture = models.ImageField(default = 'users/profile_default.png', upload_to='media/users/')
     direccion = models.CharField(max_length=60, null=True, blank =True)
     region = models.CharField(max_length=200, choices=REGION, default=REGION[0][0])
     comuna = models.CharField(max_length=200, choices=COMUNA, default=COMUNA[0][0])
     telefono = models.CharField(max_length=9, null=True, validators=[MinLengthValidator(9)])
     fecha_nac = models.DateField(null=True)
-    tipo_user = models.CharField(max_length=60, null=True, blank =True)
+    tipo_user = models.CharField(max_length=60, choices=TIPO_USUARIO, default=CLIENTE, null=True, blank=True )
+
+    def save(self, *args, **kwargs):
+        if self.tipo_user == self.ADMINISTRADOR:
+            self.is_staff = True
+        else:
+            self.is_staff = False
+        super().save(*args, **kwargs)
 
 class Producto(models.Model):
 

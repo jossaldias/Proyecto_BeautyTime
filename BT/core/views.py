@@ -109,22 +109,25 @@ def editarPerfil(request):
 @login_required
 def editarUsuario(request):
     user = get_object_or_404(User, pk=request.POST.get("id_usuario_editar") if request.method == "POST" else request.GET.get("id_usuario_editar"))
-    
+
     if request.method == "POST":
         form_editar = editarUsuarioForm(data=request.POST, files=request.FILES, instance=user)
         
         if form_editar.is_valid():
             password = form_editar.cleaned_data.get('password')  
             if password:  
-                user.set_password(password)  
+                user.set_password(password)  # Solo cambia la contraseña si se ingresa una nueva
             form_editar.save()  
             messages.success(request, 'Usuario actualizado correctamente.')  
             return redirect("usuarios")
+        else:
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')  # Mensaje si hay errores en el formulario
     else:
         form_editar = editarUsuarioForm(instance=user)  
 
     context = {"form_editar": form_editar}
     return render(request, "paginas/usuarios.html", context)
+
 
 
 # FUNCIÓN PARA SALIR DE LA SESIÓN DEL USUARIO

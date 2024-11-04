@@ -53,7 +53,7 @@
                                 <td>
                                     <button type="button"
                                         onclick="editarUsuario('{{user.id}}','{{user.username}}', '{{user.first_name}}', '{{user.last_name}}',  '{{user.email}}', '{{user.direccion}}' , '{{user.region}}', '{{user.comuna}}', '{{user.telefono}}', '{{user.fecha_nac}}','{{user.tipo_user}}')"
-                                        class="btn btn-primary" data-toggle="modal" href="#EditarPerfilModal">
+                                        class="btn btn-primary" data-toggle="modal" href="#EditarUsuarioModal">
                                         <i class="bi bi-pen-fill"></i>
                                     </button>
                                 </td>
@@ -92,28 +92,89 @@
                         </div>
                     </div>
                 </div>
-                <div id="EditarPerfilModal" class="modal">
+                <div id="EditarUsuarioModal" class="modal">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <div class="modal-header bg-info">
+                            <div class="modal-header">
                                 <h3 class="modal-title text-danger">Editar Usuario</h3>
                             </div>
-                            <div class="modal-body bg-danger text-white">
-                                <form method="POST" action="{% url 'editarUsuario'%}" enctype="multipart/form-data">{%csrf_token %}
-                                    <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
-                                    {% for field in form_editar %}
-                                    <p>{{field.label}}<br>
-                                        {{field|add_class:"form-control"}}</p>
-                                    {%endfor%}
+                            <div class="modal-body">
+                            <form method="POST" action="{% url 'editarUsuario' %}" enctype="multipart/form-data">
+
+                                {% csrf_token %}
+                            
+                                <!-- Campo oculto para el ID del perfil -->
+                                <input type="hidden" id="id_usuario_editar" name="id_usuario_editar">
+
+                                <!-- Avatar -->
+                                <label for="picture_editar">Avatar</label>
+                                <input type="file" id="picture_editar" name="picture" class="form-control" style="margin-bottom: 15px;">
+
+                                <!-- Nombre de Usuario -->
+                                <label for="username_editar">Nombre de Usuario</label>
+                                <input type="text" id="username_editar" name="username" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Primer Nombre -->
+                                <label for="nombre_editar">Primer Nombre</label>
+                                <input type="text" id="nombre_editar" name="first_name" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Apellido -->
+                                <label for="apellido_editar">Apellido</label>
+                                <input type="text" id="apellido_editar" name="last_name" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Correo Electrónico -->
+                                <label for="email_editar">Correo Electrónico</label>
+                                <input type="email" id="email_editar" name="email" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Dirección -->
+                                <label for="direccion_editar">Dirección</label>
+                                <input type="text" id="direccion_editar" name="direccion" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Región -->
+                                <label for="region_editar">Región</label>
+                                <select id="region_editar" name="region" class="form-control" style="margin-bottom: 10px">
+                                    {% for region in form.region.field.choices %}
+                                      <option value="{{ region.0 }}">{{ region.1 }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <!-- Comuna -->
+                                <label for="comuna_editar">Comuna</label>
+                                <select id="comuna_editar" name="comuna" class="form-control" style="margin-bottom: 10px">
+                                    {% for comuna in form.comuna.field.choices %}
+                                      <option value="{{ comuna.0 }}">{{ comuna.1 }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <!-- Teléfono -->
+                                <label for="telefono_editar">Teléfono</label>
+                                <input type="tel" id="telefono_editar" name="telefono" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Fecha de Nacimiento -->
+                                <label for="fecha_nac">Fecha de Nacimiento</label>
+                                <input type="date" id="fecha_nac" name="fecha_nac" class="form-control" required style="margin-bottom: 10px">
+
+                                <!-- Tipo Usuario -->
+                                <label for="tipo_user_editar">Tipo Usuario</label>
+                                <select id="tipo_user_editar" name="tipo_user_editar" class="form-control" required style="margin-bottom: 10px">
+                                    {% for tipo in form.tipo_user.field.choices %}
+                                      <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <!-- Cambiar Contraseña -->
+                                <label for="password_editar">Cambiar Contraseña</label>
+                                <input type="password" id="password_editar" name="password" class="form-control" style="margin-bottom: 15px;" placeholder="Dejar en blanco si no se quiere cambiar">
                             </div>
-                            <div class="modal-footer bg-danger text-white">
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">
-                                    Cerrar
-                                    <i class="bi bi-x-square-fill"></i> </button>
-                                <button type="submit" class="btn btn-success">
-                                    Guardar
-                                </button>
-                                </form>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                Cerrar
+                                <i class="bi bi-x-square-fill"></i>
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                Guardar
+                            </button>
+                            </form>
                             </div>
                         </div>
                     </div>
@@ -124,4 +185,92 @@
 </div>
 </div>
 
+
+{% if form.errors %}
+<script>
+  // Mantén el modal abierto si hay errores en el formulario
+  $(document).ready(function() {
+      $('#EditarUsuarioModal').modal('show');
+  });
+</script>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    // Validar el formulario antes de enviarlo
+    document.querySelector('form').addEventListener('submit', function(event) {
+      let isValid = true;
+
+      // Obtener los campos del formulario
+      const telefono = document.getElementById('telefono_editar');
+      const email = document.getElementById('email_editar');
+      const firstName = document.getElementById('nombre_editar');
+      const lastName = document.getElementById('apellido_editar');
+      const direccion = document.getElementById('direccion_editar');
+
+      // Limpiar errores previos
+      document.querySelectorAll('.text-danger').forEach(el => el.innerHTML = '');
+
+      // Validar teléfono
+      const telefonoValue = telefono.value;
+      if (telefonoValue.length !== 9 || !telefonoValue.startsWith('9')) {
+        telefono.insertAdjacentHTML('afterend', '<div class="text-danger">El número de teléfono debe comenzar con 9 y tener exactamente 9 dígitos.</div>');
+        isValid = false;
+      }
+
+      // Validar correo electrónico (ejemplo básico)
+      const emailValue = email.value;
+      const emailPattern = /^[^@]+@[^@]+\.[a-zA-Z]{2,}$/;
+      if (!emailPattern.test(emailValue)) {
+        email.insertAdjacentHTML('afterend', '<div class="text-danger">Ingrese un correo electrónico válido.</div>');
+        isValid = false;
+      }
+
+      // Validar nombre
+      const firstNameValue = firstName.value;
+      if (firstNameValue.trim() === '') {
+        firstName.insertAdjacentHTML('afterend', '<div class="text-danger">El nombre no puede estar vacío.</div>');
+        isValid = false;
+      }
+
+      // Validar apellido
+      const lastNameValue = lastName.value;
+      if (lastNameValue.trim() === '') {
+        lastName.insertAdjacentHTML('afterend', '<div class="text-danger">El apellido no puede estar vacío.</div>');
+        isValid = false;
+      }
+
+      // Validar dirección
+      const direccionValue = direccion.value;
+      if (direccionValue.trim() === '') {
+        direccion.insertAdjacentHTML('afterend', '<div class="text-danger">La dirección no puede estar vacía.</div>');
+        isValid = false;
+      }
+
+      // Si hay algún error, evitar que el formulario se envíe
+      if (!isValid) {
+        event.preventDefault();  // Detener el envío del formulario
+        return false;
+      }
+    });
+
+    // Cargar información del usuario para mostrar en el modal
+    function editarUsuario(id, username, first_name, last_name, email, direccion, region, comuna, telefono, fecha_nac, tipo_user) {
+        // Rellenar los campos del modal con los valores proporcionados
+        document.getElementById('id_usuario_editar').value = id;
+        document.getElementById('username_editar').value = username;
+        document.getElementById('nombre_editar').value = first_name;
+        document.getElementById('apellido_editar').value = last_name;
+        document.getElementById('email_editar').value = email;
+        document.getElementById('direccion_editar').value = direccion;
+        document.getElementById('region_editar').value = region;
+        document.getElementById('comuna_editar').value = comuna;
+        document.getElementById('telefono_editar').value = telefono;
+        document.getElementById('fecha_nac').value = fecha_nac;  // Este campo debe estar en formato 'YYYY-MM-DD'
+        document.getElementById('tipo_user_editar').value = tipo_user;
+
+    }
+  </script>  
 {% endblock %}

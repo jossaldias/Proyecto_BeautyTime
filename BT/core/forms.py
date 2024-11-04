@@ -202,21 +202,19 @@ class editarUsuarioForm(forms.ModelForm):
                 ('Viña del Mar', 'Viña del Mar'), ('Vitacura', 'Vitacura'), ('Yerbas Buenas', 'Yerbas Buenas'), ('Yumbel', 'Yumbel'),
                 ('Yungay', 'Yungay'), ('Zapallar', 'Zapallar')
             ]
-        TIPO_USER = [
-                      ('Administrador General', 'Administrador General'), 
-                      ('Administrador Logístico', 'Administrador Logístico'), 
-                      ('Ejecutivo', 'Ejecutivo'), 
-                      ('Cliente', 'Cliente'), 
-        ]
+
+        CLIENTE = 'Cliente'
+        ADMINISTRADOR = 'Administrador'     
+
+        TIPO_USUARIO = [
+                        (CLIENTE, 'Cliente'),
+                        (ADMINISTRADOR, 'Administrador'),
+                        ]
+
         region = forms.ChoiceField(choices=REGION)
         comuna = forms.ChoiceField(choices=COMUNA)
-        tipo_user = forms.ChoiceField(choices=TIPO_USER)
-        password = forms.CharField(
-                label='Cambiar Contraseña',
-                widget=forms.PasswordInput,
-                required=False,  
-            )
-
+        tipo_user = forms.ChoiceField(choices=TIPO_USUARIO)
+        password = forms.CharField(required=False, widget=forms.PasswordInput, label="Cambiar Contraseña")
 
         class Meta:
                     model = User
@@ -236,21 +234,43 @@ class editarUsuarioForm(forms.ModelForm):
                                 'password':'Cambiar Contraseña' 
                             
                     }
-                    widgets = {
-                                'username':forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
-                                'first_name':forms.TextInput(attrs={'id': 'nombre_editar'}),
-                                'last_name':forms.TextInput(attrs={'id': 'apellido_editar'}),
-                                'email':forms.TextInput(attrs={'id': 'email_editar'}),
-                                'direccion':forms.TextInput(attrs={'id' :'direccion_editar'}),
-                                'region': forms.TextInput(attrs={'id': 'region_editar'}),
-                                'comuna':forms.TextInput(attrs={'id': 'comuna_editar'}),
-                                'telefono':forms.NumberInput(attrs={'id': 'telefono_editar'}),
-                                'fecha_nac': forms.DateInput(format=('%d/%m/%Y'), attrs={'class': 'form-control','placeholder': 'Select a date', 'type': 'date' }),
-                                'tipo_user':forms.TextInput(attrs={'id': 'tipo_user_editar'}),
 
-                                
+                    widgets = {
+                        'username': forms.TextInput(attrs={'type': 'text', 'id': 'username_editar'}),
+                        'first_name': forms.TextInput(attrs={'id': 'nombre_editar'}),
+                        'last_name': forms.TextInput(attrs={'id': 'apellido_editar'}),
+                        'email': forms.TextInput(attrs={'id': 'email_editar'}),
+                        'direccion': forms.TextInput(attrs={'id': 'direccion_editar'}),
+                        'region': forms.TextInput(attrs={'id': 'region_editar'}),
+                        'comuna': forms.TextInput(attrs={'id': 'comuna_editar'}),
+                        'telefono': forms.TextInput(attrs={'id': 'telefono_editar'}),
+                        'fecha_nac': forms.DateInput(format=('%d/%m/%Y'), attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
+                        'tipo_user':forms.TextInput(attrs={'id': 'tipo_user_editar'}),
+
                     }
 
+        def clean_password(self):
+            password = self.cleaned_data.get('password')
+            if password:
+                return password  # Retornar la nueva contraseña si se ingresó
+            return None  # No cambiar la contraseña si el campo está vacío
+
+        # Método para cambiar la contraseña solo si se proporcionó una nueva
+        def save(self, commit=True):
+            # Guardamos el usuario sin la contraseña
+            user = super(editarUsuarioForm, self).save(commit=False)
+
+            # Si hay una nueva contraseña y no está vacía
+            password = self.cleaned_data.get('password')
+            if password and password.strip():  # Validamos que la contraseña no esté vacía ni sea None
+                user.set_password(password)  # Establecemos la nueva contraseña
+            else:
+                # Aquí no cambiamos la contraseña existente
+                user.password = User.objects.get(pk=user.pk).password  # Recuperamos la contraseña actual de la base de datos
+
+            if commit:
+                user.save()
+            return user
 
 # Validador personalizado para el número de teléfono
 def validar_telefono(value):
