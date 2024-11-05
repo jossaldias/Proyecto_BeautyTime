@@ -149,7 +149,7 @@ class Producto(models.Model):
 
     id_producto = models.CharField(max_length = 255, unique = True, null = True, blank= True)
     nombre = models.CharField(max_length=45, null=True)
-    descripcion = models.CharField(max_length=255, null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
     categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO)
     costo = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     picture = models.ImageField(upload_to='media/items/', null=True)

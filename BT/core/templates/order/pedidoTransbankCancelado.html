@@ -1,0 +1,30 @@
+{% extends "base/base.html" %} {% load widget_tweaks %}
+{% load static %}
+
+{%block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}" />
+{% endblock %}
+
+{% block template %}
+
+
+<div class="container h-100" style="padding-top:5%;">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: #212529; margin-bottom:10% ">
+    <div class="row">
+      <div class="container">
+        <div class="d-flex justify-content-center">
+          <h1 style="color:white">Transacción Cancelada</h1>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <p style="color:white">La transacción ha sido cancelada y la orden ha sido eliminada de nuestro sistema. No se ha realizado ningún cobro.</p>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <img src="{% static 'img/cancelar-pedido.png'%}" height="100" class="carro" alt="">
+
+        </div><br><br><br>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

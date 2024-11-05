@@ -696,7 +696,7 @@ class OrderCreateView(CreateView):
 @login_required
 def pedidoListo(request):
     
-    return render(request, 'tienda/pedidoListo.html')
+    return render(request, 'order/pedidoListo.html')
 
 
 #FUNCIÓN PARA VER MIS COMPRAS Y REALIZAR SEGUIMIENTO
