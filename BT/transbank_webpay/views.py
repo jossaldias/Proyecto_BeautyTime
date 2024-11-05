@@ -5,7 +5,7 @@ from transbank.error.transbank_error import TransbankError
 from transbank.webpay.webpay_plus.transaction import Transaction
 from datetime import datetime as dt
 from datetime import timedelta
-from core.models import Order
+from core.models import Order, Item
 
 
 # Create your views here.
@@ -45,7 +45,19 @@ def webpay_plus_commit(request):
 
         order = Order.objects.filter(user=request.user).first()
         if order:
-            order.delete()
+            # Retrieve products from the order before deleting it
+            items = Item.objects.filter(orden=order)  # Assuming you have a related name 'orden' in Item
+
+            # Re-add products back to inventory
+            for item in items:
+                producto = item.producto  # Get the product from the order item
+                cantidad = item.cantidad  # Get the quantity from the order item
+                
+                # Update the product quantity in the inventory
+                producto.cantidad += cantidad  # Increase the stock by the ordered quantity
+                producto.save()  # Save the updated product back to the database
+
+            order.delete()  # Delete the order after re-adding products
             print("Orden eliminada de la base de datos")
 
         return render(request, 'order/pedidoTransbankCancelado.html')
@@ -76,6 +88,7 @@ def webpay_plus_commit(request):
     except TransbankError as e:
         print(f"Error en la transacción: {e}")
         return render(request, 'order/pedidoTransbankCancelado.html')
+
 
 
 

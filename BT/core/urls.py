@@ -51,6 +51,7 @@ urlpatterns = [
     path('paginas/misOrdenes', views.misOrdenes, name="misOrdenes"),
 
     path('paginas/atencioncliente/', views.atencioncliente, name='atencioncliente'), 
+    path('paginas/dashboard', views.dashboard, name="dashboard"),
 
 ]
 

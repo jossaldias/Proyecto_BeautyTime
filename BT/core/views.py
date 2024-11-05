@@ -710,5 +710,30 @@ def misOrdenes(request):
 def atencioncliente(request):
     return render(request, 'tienda/atencioncliente.html')
 
+#FUNCIÓN PARA OBTENER ESTADÍSTICAS DE STOCK PRODUCTOS Y PRODUCTOS MÁS VENDIDOS
+def dashboard(request):
+    products = Producto.objects.all() 
+    product_count = products.count()
+
+    orders = Order.objects.all()
+    order_count = orders.count()
+
+    products_sold = Item.objects.values('producto_id').annotate(total_quantity=Sum('cantidad')).order_by('-total_quantity')
+    product_names = Producto.objects.filter(id__in=[product_sold['producto_id'] for product_sold in products_sold])
+
+    products_sold_dict = {product_sold['producto_id']: {'total_quantity': product_sold['total_quantity'], 'name': product_name.nombre} for product_sold, product_name in zip(products_sold, product_names)}
+
+
+    context = {
+        'products': products,
+        'product_count': product_count,
+
+        'orders': orders,
+        'order_count': order_count,
+        'products_sold': products_sold_dict.values(),
+
+        
+    }
+    return render(request, 'dashboard/dashboard.html', context)
 
 

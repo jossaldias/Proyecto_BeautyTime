@@ -108,6 +108,7 @@
                 {% if user.is_staff %}
                 <li><a class="dropdown-item" href="{% url 'usuarios' %}">Gestión de Usuarios</a></li>
                 <li><a class="dropdown-item" href="{% url 'inventario' %}">Gestión de Inventario</a></li>
+                <a class="dropdown-item" href="{% url 'dashboard' %}">Estadísticas</a>
                 {%endif%}
                 <li><a class="dropdown-item text-grey" href="{% url 'exit' %}">Cerrar Sesión</a></li>
               </ul>

@@ -1,0 +1,169 @@
+{% extends "base/base.html" %} {% load widget_tweaks %} 
+{% load static %} 
+{%block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}" />
+{% endblock %} 
+{% block template %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+<div class="container h-100" style="padding-top: 5%; padding-bottom:3px ">
+  <h1  class="card borders custom-heading"  style="text-align: center; background-color: darkblue; color: #ffffff;  width: 50%; margin: 0 auto; ">
+  ESTADÍSTICAS GENERALES
+</h1>
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: #212529; margin-bottom: 10%; margin-top: 1%;  " >
+   
+    <div class="row">
+      <div class="col-md-6 my-4">
+        <div class="bg-white">
+          <div class="card-body">
+            <canvas id="myChart1" width="200" height="100"></canvas>
+
+            <script>
+                              var ctx = document.getElementById('myChart1').getContext('2d');
+                              var myChart1 = new Chart(ctx, {
+                                  type: 'pie',
+                                  data: {
+                                      labels: [
+                                          {% for product in products %}
+                              '{{ product.nombre }}',
+                          {% endfor %}
+                      ],
+                              datasets: [{
+                                  label: 'Number of Products',
+                                  data: [
+                                      {% for product in products %}
+                                  {{ product.cantidad }},
+                              {% endfor %}
+                              ],
+                                  backgroundColor: [
+                                      'rgba(255, 99, 132, 1)',
+                                      'rgba(54, 162, 235, 1)',
+                                      'rgba(255, 206, 86, 1)',
+                                      'rgba(75, 192, 192, 1)',
+                                      'rgba(153, 102, 255, 1)',
+                                      'rgba(255, 159, 64, 1)',
+                                      'rgba(255, 0, 0, 1)',
+                                      'rgba(0, 255, 0, 1)',
+                                      'rgba(0, 0, 255, 1)',
+                                      'rgba(128, 128, 0, 1)',
+                                      'rgba(128, 0, 128, 1)',
+                                      'rgba(0, 128, 128, 1)',
+                                      'rgba(128, 128, 128, 1)',
+                                      'rgba(0, 0, 0, 1)',
+                                      'rgba(255, 255, 255, 1)'
+                                  ],
+                                      borderColor: [
+                                          'rgba(255, 99, 132, 1)',
+                                          'rgba(54, 162, 235, 1)',
+                                          'rgba(255, 206, 86, 1)',
+                                          'rgba(75, 192, 192, 1)',
+                                          'rgba(153, 102, 255, 1)',
+                                          'rgba(255, 159, 64, 1)',
+                                          'rgba(255, 0, 0, 1)',
+                                          'rgba(0, 255, 0, 1)',
+                                          'rgba(0, 0, 255, 1)',
+                                          'rgba(128, 128, 0, 1)',
+                                          'rgba(128, 0, 128, 1)',
+                                          'rgba(0, 128, 128, 1)',
+                                          'rgba(128, 128, 128, 1)',
+                                          'rgba(0, 0, 0, 1)',
+                                          'rgba(255, 255, 255, 1)'
+                                      ],
+                                          borderWidth: 1
+                      }]
+                  },
+                              options: {
+                                  title: {
+                                      display: true,
+                                          text: 'Cantidad de Productos'
+                                  },
+                                  scales: {
+                                      yAxes: [{
+                                          ticks: {
+                                              beginAtZero: true
+                                          }
+                                      }]
+                                  }
+                              }
+              });
+            </script>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 my-4">
+        <div class="bg-white">
+          <div class="card-body">
+            <canvas id="myChart" width="200" height="100"></canvas>
+            <script>
+              var ctx = document.getElementById('myChart').getContext('2d');
+              var products_sold = [{% for product_sold in products_sold %} { name: '{{ product_sold.name }}', total_quantity: {{ product_sold.total_quantity }} }, {% endfor %}];
+              var labels = products_sold.map(function(product) {
+                  return product.name;
+              });
+              var data = products_sold.map(function(product) {
+                  return product.total_quantity;
+              });
+              var colors = [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)',
+                  'rgba(255, 0, 0, 1)',
+                  'rgba(0, 255, 0, 1)',
+                  'rgba(0, 0, 255, 1)',
+                  'rgba(128, 128, 0, 1)',
+                  'rgba(128, 0, 128, 1)',
+                  'rgba(0, 128, 128, 1)',
+                  'rgba(128, 128, 128, 1)',
+                  'rgba(0, 0, 0, 1)',
+                  'rgba(255, 255, 255, 1)',
+                  'rgba(255, 192, 203, 1)',
+                  'rgba(255, 165, 0, 1)',
+                  'rgba(0, 255, 255, 1)',
+                  'rgba(255, 255, 0, 1)',
+                  'rgba(0, 0, 128, 1)'
+              ];
+
+              var myChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: labels,
+                      datasets: [{
+                          label: 'Cantidades de productos vendidos',
+                          data: data,
+                          backgroundColor: colors,
+                          borderColor: colors,
+                          borderWidth: 1
+                      }]
+                  },
+                  options: {
+                      title: {
+                          display: true,
+                          text: 'Productos Más Vendidos'
+                      },
+                      scales: {
+                          yAxes: [{
+                              ticks: {
+                                  beginAtZero: true
+                              }
+                          }]
+                      },
+                      legend: {
+                          display: false // Ocultar la leyenda
+                      }
+                  }
+              });
+            </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  {% endblock %}
+
