@@ -19,7 +19,7 @@ body{
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: rgb(243, 124, 219);
+  background-color: rgb(249, 215, 218);
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -106,3 +106,4 @@ h5 {
   padding: 15px;
   border-radius: 5px;
 }
+

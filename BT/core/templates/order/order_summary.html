@@ -1,14 +1,14 @@
 
-<div class="card-header text-white">
+<div class="card-header">
   <h4>Resumen de Pedido</h4>
   <ul class="list-group list-group-flush">
       {% for item in items %}
-      <li class="list-group-item text-white bg-dark">
+      <li class="list-group-item"  style="background-color: rgb(249, 215, 218);">
           {{ item.cantidad }} x {{ item.producto.nombre }}
           <span class="float-right">{{ item.precio_total }}</span>
       </li>
       {% endfor %}
-      <li class="font-weight-bold list-group-item text-white border-dark bg-dark">Total
+      <li class="font-weight-bold list-group-item" style="background-color: rgb(249, 215, 218);">Total
           <span class="float-right">{{ total_price }}</span>
       </li>
   </ul>

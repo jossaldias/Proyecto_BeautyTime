@@ -1,4 +1,7 @@
 /* General Reset */
+body{
+  background-color: rgb(244, 226, 244);
+}
 * {
     margin: 0;
     padding: 0;
@@ -99,6 +102,10 @@
 .modal-footer {
     background-color:  rgba(249 ,215 ,218)  !important;
     padding: 15px;
+}
+
+.wrapper{
+  background-color: rgb(255, 255, 255);
 }
 
 /* Responsive Adjustments */

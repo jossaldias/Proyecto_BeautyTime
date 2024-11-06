@@ -1,0 +1,36 @@
+{% extends "base/base.html" %} {% load widget_tweaks %}
+{% load static %}
+
+{%block css %}
+<link rel="stylesheet" href="{% static 'css/carro.css' %}" />
+{% endblock %}
+
+{% block template %}
+
+
+<div class="container h-100" style="padding-top:5%;">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: rgba(249, 215, 218); margin-bottom:10% ">
+    <div class="row">
+      <div class="container">
+        <div class="d-flex justify-content-center">
+          <h1>Pedido Listo !!..</h1>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <p>Revisaremos tu Transferencia, una vez haya sido confirmada, recibirás un correo con tu
+            número de seguimiento .</p>
+        </div>
+        <div class="d-flex justify-content-center">
+          <img src="{% static 'img/icono-retiro-en-tienda.svg'%}" height="200" class="carro" alt="">
+
+        </div>
+        <div style="padding-top:5%; padding-bottom:3%; text-align: center;">
+          <a class="btn btn-success btn-lg" href="{% url 'misOrdenes' %}">
+            <i class="bi bi-bag-heart"></i>&nbsp;&nbsp;Seguir Mi
+            Compra</a><br><br><br>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
