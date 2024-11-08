@@ -453,11 +453,10 @@ class agregarProductoForm(forms.ModelForm):
         ('servicio', 'Servicio'),
     ]
 
-    id_producto = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
     nombre = forms.CharField(max_length=45, label='Nombre')
     categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
     tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
-    costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
+    costo = forms.IntegerField(initial=0, required=True, label='Costo')
     picture = forms.ImageField(required=False, label='Imagen')
     cantidad = forms.IntegerField(initial=0, required=True, label='Cantidad')
 
@@ -482,55 +481,19 @@ class agregarProductoForm(forms.ModelForm):
 
 
 class editarProductoForm(forms.ModelForm):
-
-    CATEGORIA_PRODUCTO = [
-        ('Coloración', 'Coloración'),
-        ('Tratamientos', 'Tratamientos'),
-        ('Línea Rubias', 'Línea Rubias'),
-        ('Shampoo & Acondicionadores', 'Shampoo & Acondicionadores'),
-        ('Styling & Aftercare', 'Styling & Aftercare'),
-        ('Herramientas', 'Herramientas'),
-    ]
-
-    CATEGORIA_SERVICIO = [
-        ('Manicure y Pedicure', 'Manicure y Pedicure'),
-        ('Masajes', 'Masajes'),
-        ('Maquillaje para eventos', 'Maquillaje para eventos'),
-        ('Depilación', 'Depilación'),
-        ('Tratamientos Faciales', 'Tratamientos Faciales'),
-        ('Colorimetría', 'Colorimetría'),
-    ]
-
-    TIPO = [
-        ('producto', 'Producto'),
-        ('servicio', 'Servicio'),
-    ]
-
-    id_producto = forms.CharField(widget=forms.HiddenInput(), required=False, label='')
-    nombre = forms.CharField(max_length=45, label='Nombre')
-    categoria = forms.ChoiceField(choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO, required=False, label='Categoría')
-    tipo = forms.ChoiceField(choices=TIPO, label='Tipo')
-    costo = forms.DecimalField(max_digits=10, decimal_places=2, label='Costo')
-    picture = forms.ImageField(required=False, label='Imagen')
-    cantidad = forms.IntegerField(initial=0, required=True, label='Cantidad')
-
-    def clean_nombre(self):
-        nombre = self.cleaned_data['nombre']
-        if Producto.objects.filter(nombre=nombre).exists():
-            raise ValidationError('El producto o servicio ya existe, revisa el inventario e intenta otra vez.')
-        return nombre
+    costo = forms.IntegerField(widget=forms.NumberInput(attrs={'type': 'number'}),required=True, label='Costo')
+    descuento = forms.DecimalField(widget=forms.NumberInput(attrs={'type': 'number'}), max_digits=4, decimal_places=2, required=True, label='Descuento')
 
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'categoria', 'tipo', 'costo', 'picture', 'cantidad']
+        fields = ['costo', 'descuento'] 
         labels = {
-            'nombre': 'Nombre',
-            'descripcion': 'Descripción',
-            'categoria': 'Categoría',
-            'tipo': 'Tipo',
             'costo': 'Costo',
-            'picture': 'Imagen',
-            'cantidad':'Cantidad',
+            'descuento': 'Descuento',
+        }
+        widgets = {
+            'costo': forms.NumberInput(attrs={'id': 'costo_editar'}),
+            'descuento': forms.NumberInput(attrs={'id': 'descuento_editar'}),
         }
 
 # FORMULARIO PARA AGENDAR CITAS

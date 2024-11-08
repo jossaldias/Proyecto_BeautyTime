@@ -17,7 +17,17 @@
               <h3>{{ item.nombre }}</h3>
               <strong>Descripción</strong><br>
               <p style="text-align: justify;">{{ item.descripcion }}</p>
-              <h5><strong>Precio</strong> ${{ item.costo }}</h5>
+              {% if item.descuento %}
+              <h5>
+                <strong>Precio</strong> 
+                <span style="text-decoration: line-through; color:grey">${{ item.costo }}</span>&nbsp;${{ item.costo2}}
+              </h5>
+                <strong class="text-success">{{ item.descuento|floatformat:0}}% de descuento</strong>
+              {% else %}
+              <h5>
+                <strong>Precio</strong> ${{ item.costo }}
+              </h5>
+              {% endif %}                   
               <form method="post" action="{% url 'add' item.id %}">
                 {% csrf_token %}
                 <div class="d-flex flex-column align-items-start">

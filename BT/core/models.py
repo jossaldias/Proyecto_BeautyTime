@@ -123,7 +123,6 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 class Producto(models.Model):
-
     CATEGORIA_PRODUCTO = [
         ('Coloración', 'Coloración'),
         ('Tratamientos', 'Tratamientos'),
@@ -147,13 +146,14 @@ class Producto(models.Model):
         ('servicio', 'Servicio'),
     ]
 
-    id_producto = models.CharField(max_length = 255, unique = True, null = True, blank= True)
     nombre = models.CharField(max_length=45, null=True)
     descripcion = models.TextField(null=True, blank=True)
     categoria = models.CharField(max_length=255, null=True, choices=CATEGORIA_PRODUCTO + CATEGORIA_SERVICIO)
-    costo = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    costo = models.IntegerField(default=0)
+    costo2 = models.IntegerField(default=0)
     picture = models.ImageField(upload_to='media/items/', null=True)
     tipo = models.CharField(max_length=10, choices=TIPO)
+    descuento = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, default=0.00)
     cantidad = models.IntegerField(default=0)
 
     class Meta:
@@ -161,8 +161,16 @@ class Producto(models.Model):
         verbose_name_plural = 'productos'
         ordering = ['tipo']
 
-    def __str__(self):
-        return self.nombre or f"Item {self.id_producto}"
+    def save(self, *args, **kwargs):
+        # Si hay un descuento, calculamos el costo2 con el descuento aplicado
+        if self.descuento:
+            descuento_factor = (100 - self.descuento) / 100
+            self.costo2 = int(self.costo * descuento_factor)
+        else:
+            self.costo2 = self.costo  # Si no hay descuento, se mantiene igual
+
+        # Llamamos al método save original para guardar los cambios
+        super().save(*args, **kwargs)
 
 # MODELO DE CATEGORÍA
 class Categoria(models.Model):
@@ -339,8 +347,6 @@ class Item(models.Model):
     producto = models.ForeignKey(Producto, related_name="order_items", on_delete=models.CASCADE)
     costo = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.PositiveIntegerField(validators=[MinValueValidator(settings.CART_ITEM_MIN_CANTIDAD), MaxValueValidator(settings.CART_ITEM_MAX_CANTIDAD),])
-    codigo = models.CharField(max_length=100, blank=True, null=True)
-
 
     def __str__(self):
         return str(self.id)

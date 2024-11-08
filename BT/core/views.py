@@ -181,15 +181,16 @@ def servicios(request):
 
 def productos(request):    
     productos = Producto.objects.filter(Q(tipo='producto'))
+
     context = {
         'productos': productos
     }
     return render(request, 'tienda/productos.html', context)
 
-def verDetalle(request, tipo, producto_id):
+def verDetalle(request, tipo, id):
     if tipo not in ['producto', 'servicio']:
         return render(request, '404.html') 
-    item = get_object_or_404(Producto, id=producto_id)
+    item = get_object_or_404(Producto, id=id)
     if item.tipo != tipo:
         return render(request, '404.html')  
     context = {
@@ -203,11 +204,11 @@ class verInventario(View):
     def get(self, request, *args, **kwargs):
         productos = Producto.objects.all()
         
-        form_editar = editarProductoForm()
+        form = editarProductoForm()
 
         context = {
             'productos': productos,
-            'form_editar': form_editar,
+            'form': form,
         }
         
         if 'pdf' in request.GET:
@@ -220,10 +221,10 @@ class verInventario(View):
 @login_required
 def inventarioProducto(request):
     productos = Producto.objects.all()
-    form_editar = editarProductoForm()
+    form = editarProductoForm()
     context = {
         'productos': productos,
-        'form_editar':form_editar
+        'form':form
     }
   
     return render(request, 'inventario/inventario.html', context)
@@ -248,17 +249,17 @@ def agregarProducto(request):
 #FUNCIÓN PARA EDITAR PRODUCTO
 @login_required
 def editarProducto(request):
+    producto = get_object_or_404(Producto, pk=request.POST.get("id_producto_editar") if request.method == "POST" else request.GET.get("id_producto_editar"))
+
     if request.method == 'POST':
-        producto = get_object_or_404(Producto, pk=request.POST.get('id_producto_editar'))
-        form_editar = editarProductoForm(data=request.POST, files=request.FILES, instance=producto)
-        if form_editar.is_valid():
-            form_editar.save()
-        return redirect('inventario')
+        form = editarProductoForm(data=request.POST, instance=producto)
+
+        if form.is_valid():
+            form.save()
+            return redirect('inventario')
     else:
-        form_editar = editarProductoForm()
-        context = {
-            'form_editar': form_editar
-        }
+        form = editarProductoForm(instance=producto)
+        context = {"form": form }
     return render(request, 'inventario/inventario.html', context)
 
 #FUNCIÓN PARA ELIMINAR PRODUCTO

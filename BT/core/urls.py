@@ -22,7 +22,7 @@ urlpatterns = [
 
     path("paginas/servicios", views.servicios, name="servicios"),
     path("paginas/productos", views.productos, name="productos"),
-    path('verDetalle/<str:tipo>/<int:producto_id>/', views.verDetalle, name='verDetalle'),
+    path('verDetalle/<str:tipo>/<int:id>/', views.verDetalle, name='verDetalle'),
 
     path('paginas/inventario', views.inventarioProducto, name="inventario"),
     path("paginas/verInventario/", views.verInventario.as_view(), name="verInventario"),

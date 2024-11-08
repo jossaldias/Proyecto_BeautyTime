@@ -41,7 +41,7 @@ class Cart:
     if producto_id not in self.cart:
       self.cart[producto_id] = {
         "cantidad": 0,
-        "costo": str(producto.costo),
+        "costo": str(producto.costo2),
       }
 
     if override_cantidad:

@@ -33,7 +33,7 @@
                                         <td>{{order}}</td>
                                         <td>{{order.created}}</td>
                                         <td>{{order.get_description}}</td>
-                                        <td>${{order.get_precio_total}}</td>
+                                        <td>${{order.get_precio_total|floatformat:0}}</td>
                                         <td>{{order.estado_venta}}</td>
                                       </tr>
                                       {% endfor %}
