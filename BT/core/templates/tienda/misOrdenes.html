@@ -11,39 +11,40 @@
 {% block template %}
 
 
-<div class="container h-100" style="padding-top:5%;">
-  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="margin-bottom:10% ">
-      <div class="col-md-12">
-          <div class="wrapper">
-                            <div class="text-left mt-4 name">
-                                Mis Compras
-                            </div>
-                              <div>
-                                  <table class="table table-danger table-hover rounded">
-                                    <tbody>
-                                      <tr class="table-danger">
-                                        <th>Nº Compra</th>
-                                        <th>Fecha</th>
-                                        <th>Descripción</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                      </tr>
-                                      {% for order in ordenes %}
-                                      <tr>
-                                        <td>{{order}}</td>
-                                        <td>{{order.created}}</td>
-                                        <td>{{order.get_description}}</td>
-                                        <td>${{order.get_precio_total|floatformat:0}}</td>
-                                        <td>{{order.estado_venta}}</td>
-                                      </tr>
-                                      {% endfor %}
-                                    </tbody>
-                                  </table>
-                              </div>
-                  </div>
-              </div>
+<section class="py-5">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100"  style="background: (249, 215, 218)">
+      <div class="col col-12">
+        <div class="wrapper">
+          <div class="text-left mt-4 name">
+          Mis Compras
           </div>
+            <div class="table-responsive">
+              <table class="table table-danger table-hover rounded">
+                <tbody>
+                  <tr class="table-danger">
+                    <th>Nº Compra</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                  </tr>
+                  {% for order in ordenes %}
+                  <tr>
+                    <td>{{order}}</td>
+                    <td>{{order.created}}</td>
+                    <td>{{order.get_description}}</td>
+                    <td>${{order.get_precio_total|floatformat:0}}</td>
+                    <td>{{order.estado_venta}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</section>
 {% endblock %}

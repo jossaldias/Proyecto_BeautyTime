@@ -22,15 +22,19 @@
             <script>
                               var ctx = document.getElementById('myChart1').getContext('2d');
                               var myChart1 = new Chart(ctx, {
-                                  type: 'pie',
+                                  type: 'bar',
                                   data: {
                                       labels: [
                                           {% for product in products %}
+                                            {% if product.tipo == "producto" %}
+
                               '{{ product.nombre }}',
-                          {% endfor %}
+
+                                            {% endif %}
+                                          {% endfor %}
                       ],
                               datasets: [{
-                                  label: 'Number of Products',
+                                  label: 'Cantidad de Productos',
                                   data: [
                                       {% for product in products %}
                                   {{ product.cantidad }},
@@ -84,7 +88,10 @@
                                               beginAtZero: true
                                           }
                                       }]
-                                  }
+                                  },
+                                legend: {
+                                    display: false // Ocultar la leyenda
+                                }
                               }
               });
             </script>
@@ -161,6 +168,44 @@
           </div>
         </div>
       </div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="wrapper">
+                <div class="text-left mt-4 name">
+                    Inventario de Productos
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-danger table-hover" id="tableinventario">
+                     
+                        <thead>
+                            <tr class="table-danger">
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio $</th>
+                                <th>Cantidad</th>
+                                <th>Productos Vendidos</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-danger">
+                            {% for producto in products %}
+                                {% if producto.tipo == "producto" %}
+                            <tr class="table-danger">
+                                <td class="table-danger">{{producto.nombre}}</td>
+                                <td class="table-danger">{{producto.categoria}}</td>
+                                <td class="table-danger">${{producto.costo}}</td>
+                                <td class="table-danger">{{producto.cantidad}}</td>
+                                <td class="table-danger">{{producto.total_quantity}}</td>
+                            </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+          </div>
+        </div>
+        </div>
     </div>
   </div>
 </div>

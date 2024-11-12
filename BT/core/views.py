@@ -725,6 +725,12 @@ def dashboard(request):
     products_sold_dict = {product_sold['producto_id']: {'total_quantity': product_sold['total_quantity'], 'name': product_name.nombre} for product_sold, product_name in zip(products_sold, product_names)}
 
 
+    for product in products:
+            if product.id in products_sold_dict:
+                product.total_quantity = products_sold_dict[product.id]['total_quantity']
+            else:
+                product.total_quantity = 0 
+
     context = {
         'products': products,
         'product_count': product_count,
