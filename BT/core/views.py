@@ -27,6 +27,8 @@ from .models import *
 from .forms import *
 from .cart import Cart
 
+from django.db.models import Count
+from .models import ReservaEliminada
 
 # HOME
 
@@ -461,7 +463,10 @@ def eliminar_cita(request, id):
             servicio = reserva.servicio
             fecha = reserva.fecha
             hora_formateada = reserva.hora.strftime("%H:%M")
-
+            # Registrar la eliminación de la reserva
+            ReservaEliminada.objects.create(
+                reserva=reserva  # Relacionamos la reserva eliminada
+            )
             # Eliminar la cita
             reserva.delete()
 
@@ -731,6 +736,20 @@ def dashboard(request):
             else:
                 product.total_quantity = 0 
 
+    # Indicadores de reservas
+    total_reservas = Reserva.objects.count()
+    reservas_confirmadas = Reserva.objects.filter(confirmado=True).count()
+    reservas_pendientes = Reserva.objects.filter(confirmado=False).count()
+    
+    # Tasa de cancelación
+    total_canceladas = ReservaEliminada.objects.count()
+    tasa_cancelacion = (total_canceladas / total_reservas) * 100 if total_reservas > 0 else 0
+
+    # Obtención de categorías y conteo de reservas por categoría
+    reservas_por_categoria = Reserva.objects.values('servicio__categoria__nombre').annotate(total=Count('id')).order_by('servicio__categoria__nombre')
+    #print(list(reservas_por_categoria))  # Esto mostrará una lista de diccionarios en la consola
+
+
     context = {
         'products': products,
         'product_count': product_count,
@@ -739,7 +758,12 @@ def dashboard(request):
         'order_count': order_count,
         'products_sold': products_sold_dict.values(),
 
-        
+        # Indicadores de reservas
+        'total_reservas': total_reservas,
+        'reservas_por_categoria': json.dumps(list(reservas_por_categoria)),
+        'reservas_confirmadas': reservas_confirmadas,
+        'reservas_pendientes': reservas_pendientes,
+        'tasa_cancelacion': tasa_cancelacion,       
     }
     return render(request, 'dashboard/dashboard.html', context)
 

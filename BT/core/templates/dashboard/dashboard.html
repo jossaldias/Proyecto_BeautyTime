@@ -8,207 +8,281 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 
 <div class="container h-100" style="padding-top: 5%; padding-bottom:3px ">
-  <h1  class="card borders custom-heading"  style="text-align: center; background-color: darkblue; color: #ffffff;  width: 50%; margin: 0 auto; ">
-  ESTADÍSTICAS GENERALES
-</h1>
-  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: #212529; margin-bottom: 10%; margin-top: 1%;  " >
-   
-    <div class="row">
-      <div class="col-md-6 my-4">
-        <div class="bg-white">
-          <div class="card-body">
-            <canvas id="myChart1" width="200" height="100"></canvas>
+    <h1  class="card borders custom-heading"  style="text-align: center; background-color: darkblue; color: #ffffff;  width: 50%; margin: 0 auto; ">
+    ESTADÍSTICAS GENERALES
+    </h1>
 
-            <script>
-                              var ctx = document.getElementById('myChart1').getContext('2d');
-                              var myChart1 = new Chart(ctx, {
-                                  type: 'bar',
-                                  data: {
-                                      labels: [
-                                          {% for product in products %}
-                                            {% if product.tipo == "producto" %}
-
-                              '{{ product.nombre }}',
-
-                                            {% endif %}
-                                          {% endfor %}
-                      ],
-                              datasets: [{
-                                  label: 'Cantidad de Productos',
-                                  data: [
-                                      {% for product in products %}
-                                  {{ product.cantidad }},
-                              {% endfor %}
-                              ],
-                                  backgroundColor: [
-                                      'rgba(255, 99, 132, 1)',
-                                      'rgba(54, 162, 235, 1)',
-                                      'rgba(255, 206, 86, 1)',
-                                      'rgba(75, 192, 192, 1)',
-                                      'rgba(153, 102, 255, 1)',
-                                      'rgba(255, 159, 64, 1)',
-                                      'rgba(255, 0, 0, 1)',
-                                      'rgba(0, 255, 0, 1)',
-                                      'rgba(0, 0, 255, 1)',
-                                      'rgba(128, 128, 0, 1)',
-                                      'rgba(128, 0, 128, 1)',
-                                      'rgba(0, 128, 128, 1)',
-                                      'rgba(128, 128, 128, 1)',
-                                      'rgba(0, 0, 0, 1)',
-                                      'rgba(255, 255, 255, 1)'
-                                  ],
-                                      borderColor: [
-                                          'rgba(255, 99, 132, 1)',
-                                          'rgba(54, 162, 235, 1)',
-                                          'rgba(255, 206, 86, 1)',
-                                          'rgba(75, 192, 192, 1)',
-                                          'rgba(153, 102, 255, 1)',
-                                          'rgba(255, 159, 64, 1)',
-                                          'rgba(255, 0, 0, 1)',
-                                          'rgba(0, 255, 0, 1)',
-                                          'rgba(0, 0, 255, 1)',
-                                          'rgba(128, 128, 0, 1)',
-                                          'rgba(128, 0, 128, 1)',
-                                          'rgba(0, 128, 128, 1)',
-                                          'rgba(128, 128, 128, 1)',
-                                          'rgba(0, 0, 0, 1)',
-                                          'rgba(255, 255, 255, 1)'
-                                      ],
-                                          borderWidth: 1
-                      }]
-                  },
-                              options: {
-                                  title: {
-                                      display: true,
-                                          text: 'Cantidad de Productos'
-                                  },
-                                  scales: {
-                                      yAxes: [{
-                                          ticks: {
-                                              beginAtZero: true
-                                          }
-                                      }]
-                                  },
+    <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: #212529; margin-bottom: 10%; margin-top: 1%;  " >   
+        <!-- Gráfico: Cantidad de Productos -->
+        <div class="col-md-6 my-4">
+            <div class="bg-white">
+            <div class="card-body">
+                <canvas id="myChart1" width="200" height="100"></canvas>
+                    <script>
+                        var ctx = document.getElementById('myChart1').getContext('2d');
+                        var myChart1 = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: [
+                                    {% for product in products %}
+                                        {% if product.tipo == "producto" %}
+                                          '{{ product.nombre }}',
+                                        {% endif %}
+                                    {% endfor %}
+                                ],
+                                datasets: [{
+                                    label: 'Cantidad de Productos',
+                                    data: [
+                                        {% for product in products %}
+                                            {{ product.cantidad }},
+                                        {% endfor %}
+                                    ],
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)',
+                                        'rgba(255, 0, 0, 1)',
+                                        'rgba(0, 255, 0, 1)',
+                                        'rgba(0, 0, 255, 1)',
+                                        'rgba(128, 128, 0, 1)',
+                                        'rgba(128, 0, 128, 1)',
+                                        'rgba(0, 128, 128, 1)',
+                                        'rgba(128, 128, 128, 1)',
+                                        'rgba(0, 0, 0, 1)',
+                                        'rgba(255, 255, 255, 1)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)',
+                                        'rgba(255, 0, 0, 1)',
+                                        'rgba(0, 255, 0, 1)',
+                                        'rgba(0, 0, 255, 1)',
+                                        'rgba(128, 128, 0, 1)',
+                                        'rgba(128, 0, 128, 1)',
+                                        'rgba(0, 128, 128, 1)',
+                                        'rgba(128, 128, 128, 1)',
+                                        'rgba(0, 0, 0, 1)',
+                                        'rgba(255, 255, 255, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                title: {
+                                    display: true,
+                                        text: 'Cantidad de Productos'
+                                },
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                },
                                 legend: {
                                     display: false // Ocultar la leyenda
                                 }
-                              }
-              });
-            </script>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 my-4">
-        <div class="bg-white">
-          <div class="card-body">
-            <canvas id="myChart" width="200" height="100"></canvas>
-            <script>
-              var ctx = document.getElementById('myChart').getContext('2d');
-              var products_sold = [{% for product_sold in products_sold %} { name: '{{ product_sold.name }}', total_quantity: {{ product_sold.total_quantity }} }, {% endfor %}];
-              var labels = products_sold.map(function(product) {
-                  return product.name;
-              });
-              var data = products_sold.map(function(product) {
-                  return product.total_quantity;
-              });
-              var colors = [
-                  'rgba(255, 99, 132, 1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)',
-                  'rgba(255, 0, 0, 1)',
-                  'rgba(0, 255, 0, 1)',
-                  'rgba(0, 0, 255, 1)',
-                  'rgba(128, 128, 0, 1)',
-                  'rgba(128, 0, 128, 1)',
-                  'rgba(0, 128, 128, 1)',
-                  'rgba(128, 128, 128, 1)',
-                  'rgba(0, 0, 0, 1)',
-                  'rgba(255, 255, 255, 1)',
-                  'rgba(255, 192, 203, 1)',
-                  'rgba(255, 165, 0, 1)',
-                  'rgba(0, 255, 255, 1)',
-                  'rgba(255, 255, 0, 1)',
-                  'rgba(0, 0, 128, 1)'
-              ];
-
-              var myChart = new Chart(ctx, {
-                  type: 'bar',
-                  data: {
-                      labels: labels,
-                      datasets: [{
-                          label: 'Cantidades de productos vendidos',
-                          data: data,
-                          backgroundColor: colors,
-                          borderColor: colors,
-                          borderWidth: 1
-                      }]
-                  },
-                  options: {
-                      title: {
-                          display: true,
-                          text: 'Productos Más Vendidos'
-                      },
-                      scales: {
-                          yAxes: [{
-                              ticks: {
-                                  beginAtZero: true
-                              }
-                          }]
-                      },
-                      legend: {
-                          display: false // Ocultar la leyenda
-                      }
-                  }
-              });
-            </script>
-          </div>
-        </div>
-      </div>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="wrapper">
-                <div class="text-left mt-4 name">
-                    Inventario de Productos
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-danger table-hover" id="tableinventario">
-                     
-                        <thead>
-                            <tr class="table-danger">
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Precio $</th>
-                                <th>Cantidad</th>
-                                <th>Productos Vendidos</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-danger">
-                            {% for producto in products %}
-                                {% if producto.tipo == "producto" %}
-                            <tr class="table-danger">
-                                <td class="table-danger">{{producto.nombre}}</td>
-                                <td class="table-danger">{{producto.categoria}}</td>
-                                <td class="table-danger">${{producto.costo}}</td>
-                                <td class="table-danger">{{producto.cantidad}}</td>
-                                <td class="table-danger">{{producto.total_quantity}}</td>
-                            </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            }
+                        });
+                    </script>
                 </div>
             </div>
-          </div>
         </div>
+        
+        <!-- Gráfico: Productos Más Vendidos -->
+        <div class="col-md-6 my-4">
+            <div class="bg-white">
+                <div class="card-body">
+                    <canvas id="myChart" width="200" height="100"></canvas>
+                        <script>
+                            var ctx = document.getElementById('myChart').getContext('2d');
+                            var products_sold = [{% for product_sold in products_sold %} { name: '{{ product_sold.name }}', total_quantity: {{ product_sold.total_quantity }} }, {% endfor %}];
+                            var labels = products_sold.map(function(product) {
+                                return product.name;
+                            });
+                            var data = products_sold.map(function(product) {
+                                return product.total_quantity;
+                            });
+                            var colors = [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(255, 0, 0, 1)',
+                                'rgba(0, 255, 0, 1)',
+                                'rgba(0, 0, 255, 1)',
+                                'rgba(128, 128, 0, 1)',
+                                'rgba(128, 0, 128, 1)',
+                                'rgba(0, 128, 128, 1)',
+                                'rgba(128, 128, 128, 1)',
+                                'rgba(0, 0, 0, 1)',
+                                'rgba(255, 255, 255, 1)',
+                                'rgba(255, 192, 203, 1)',
+                                'rgba(255, 165, 0, 1)',
+                                'rgba(0, 255, 255, 1)',
+                                'rgba(255, 255, 0, 1)',
+                                'rgba(0, 0, 128, 1)'
+                            ];
+
+                            var myChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Cantidades de productos vendidos',
+                                        data: data,
+                                        backgroundColor: colors,
+                                        borderColor: colors,
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    title: {
+                                        display: true,
+                                        text: 'Productos Más Vendidos'
+                                    },
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }]
+                                    },
+                                    legend: {
+                                        display: false // Ocultar la leyenda
+                                    }
+                                }
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        
+
+        <!-- Tabla de Inventario de Productos -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="wrapper">
+                    <div class="text-left mt-4 name">
+                        Inventario de Productos
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-danger table-hover" id="tableinventario">
+                            <thead>
+                                <tr class="table-danger">
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Precio $</th>
+                                    <th>Cantidad</th>
+                                    <th>Productos Vendidos</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-danger">
+                                {% for producto in products %}
+                                    {% if producto.tipo == "producto" %}
+                                <tr class="table-danger">
+                                    <td class="table-danger">{{producto.nombre}}</td>
+                                    <td class="table-danger">{{producto.categoria}}</td>
+                                    <td class="table-danger">${{producto.costo}}</td>
+                                    <td class="table-danger">{{producto.cantidad}}</td>
+                                    <td class="table-danger">{{producto.total_quantity}}</td>
+                                </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container">
+            <!-- Indicadores de Reservas -->
+            <div class="row mt-4">
+                <!-- Indicador: Total de Reservas -->
+                <div class="col-md-4 text-center">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Total de Reservas</h5>
+                            <p class="card-text display-4">{{ total_reservas }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indicador: Confirmadas vs Pendientes -->
+                <div class="col-md-4 text-center">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Reservas Confirmadas vs Pendientes</h5>
+                            <p class="card-text">Confirmadas: {{ reservas_confirmadas }}</p>
+                            <p class="card-text">Pendientes: {{ reservas_pendientes }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indicador: Tasa de Cancelación -->
+                <div class="col-md-4 text-center">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Tasa de Cancelación</h5>
+                            <p class="card-text">{{ tasa_cancelacion }}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico: Reservas por Categoría -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="bg-white p-3"> <!-- Contenedor con fondo blanco -->
+                        <canvas id="reservasPorCategoria" width="400" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-  </div>
-</div>
-</div>
+        <script defer>
+            const ctxReservas = document.getElementById('reservasPorCategoria').getContext('2d');
+            
+            const categorias = JSON.parse('{{ reservas_por_categoria|safe }}');
+            console.log("Cargando reservas:", '{{ reservas_por_categoria }}');
+            console.log("Datos de reservas por categoría:", categorias);
+
+            const labelsReservas = categorias.map(categoria => categoria.servicio__categoria__nombre);  // Cambiar nombre de labels
+            const dataPorCategoria = categorias.map(categoria => categoria.total);
+
+            new Chart(ctxReservas, {
+                type: 'bar',
+                data: {
+                    labels: labelsReservas,
+                    datasets: [{
+                        label: 'Reservas por Categoría',
+                        data: dataPorCategoria,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)', // Color de las barras
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+
   {% endblock %}
 

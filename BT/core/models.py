@@ -1,6 +1,7 @@
 from django.template.defaultfilters import slugify
 import os
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from django.db import models
 from django.conf import settings
@@ -353,3 +354,11 @@ class Item(models.Model):
 
     def get_precio_total(self):
         return self.costo * self.cantidad
+    
+
+class ReservaEliminada(models.Model):
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)  # Relación con la reserva eliminada
+    fecha_eliminacion = models.DateTimeField(default=timezone.now)  # Fecha de eliminación
+
+    def __str__(self):
+        return f"Reserva eliminada: {self.reserva.id} en {self.fecha_eliminacion}"
