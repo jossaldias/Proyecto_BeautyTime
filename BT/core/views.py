@@ -3,7 +3,7 @@ import requests
 import time
 import string
 
-
+from django.utils.dateparse import parse_date
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -328,7 +328,7 @@ def reservar_cita(request):
                 form.add_error(None, 'El horario de atención es de lunes a sábados de 10:00 a 20:00.')
                 return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas, 'usuario_autenticado': usuario_autenticado})
 
-            # Verificar si ya hay una reserva para la misma **categoría** en la misma hora
+            # Verificar si ya hay una reserva para la misma categoría en la misma hora
             reserva_existente = Reserva.objects.filter(
                 servicio__categoria=categoria,
                 fecha=fecha,
@@ -339,6 +339,31 @@ def reservar_cita(request):
             if reserva_existente.exists():
                 form.add_error(None, f'Ya existe una reserva para esta categoría ({categoria.nombre}) en el horario seleccionado.')
                 return render(request, 'agenda/reservar_cita.html', {'form': form, 'reservas': reservas, 'usuario_autenticado': usuario_autenticado})
+
+            # Verificar si el cliente autenticado ya tiene una reserva en otra categoría para el mismo horario
+            if usuario_autenticado:
+                conflicto_reserva = Reserva.objects.filter(
+                    cliente=request.user,
+                    fecha=fecha,
+                    hora__lt=fecha_hora_fin.time(),
+                    hora__gte=hora
+                ).exclude(servicio__categoria=categoria)
+
+                if conflicto_reserva.exists():
+                    # Añadir el error al formulario para que se muestre en la plantilla
+                    form.add_error(
+                        None,  # Error general del formulario
+                        'Ya tienes una reserva en otro servicio para el horario seleccionado. Por favor selecciona otra hora o pide modificar tu reserva en "Calendario" '
+                    )
+                    return render(request, 'agenda/reservar_cita.html', {
+                        'form': form,
+                        'reservas': reservas,
+                        'usuario_autenticado': usuario_autenticado,
+                        'nombre_usuario': nombre_usuario,
+                        'email_usuario': email_usuario,
+                        'contacto_usuario': contacto_usuario,
+                    })
+
 
             # Crear una nueva reserva
             nueva_reserva = Reserva(
@@ -718,6 +743,22 @@ def atencioncliente(request):
 
 #FUNCIÓN PARA OBTENER ESTADÍSTICAS DE STOCK PRODUCTOS Y PRODUCTOS MÁS VENDIDOS
 def dashboard(request):
+    # Obtener parámetros de fecha del cliente
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+    # Convertir fechas a formato datetime
+    if fecha_inicio and fecha_fin:
+        fecha_inicio = parse_date(fecha_inicio)
+        fecha_fin = parse_date(fecha_fin)
+    else:
+        # Si no se especifican fechas, usar todo el rango disponible
+        fecha_inicio = None
+        fecha_fin = None
+    # Filtrar reservas por fecha si se proporcionan fechas válidas
+    reservas = Reserva.objects.all()
+    if fecha_inicio and fecha_fin:
+        reservas = reservas.filter(fecha__range=(fecha_inicio, fecha_fin))
+
     products = Producto.objects.all() 
     product_count = products.count()
 
@@ -737,17 +778,17 @@ def dashboard(request):
                 product.total_quantity = 0 
 
     # Indicadores de reservas
-    total_reservas = Reserva.objects.count()
-    reservas_confirmadas = Reserva.objects.filter(confirmado=True).count()
-    reservas_pendientes = Reserva.objects.filter(confirmado=False).count()
-    
-    # Tasa de cancelación
-    total_canceladas = ReservaEliminada.objects.count()
+    total_reservas = reservas.count()
+    reservas_confirmadas = reservas.filter(confirmado=True).count()
+    reservas_pendientes = reservas.filter(confirmado=False).count()
+
+    # Tasa de cancelación (basada en reservas eliminadas dentro del rango)
+    total_canceladas = ReservaEliminada.objects.filter(fecha_eliminacion__range=(fecha_inicio, fecha_fin)).count() if fecha_inicio and fecha_fin else ReservaEliminada.objects.count()
     tasa_cancelacion = (total_canceladas / total_reservas) * 100 if total_reservas > 0 else 0
 
-    # Obtención de categorías y conteo de reservas por categoría
-    reservas_por_categoria = Reserva.objects.values('servicio__categoria__nombre').annotate(total=Count('id')).order_by('servicio__categoria__nombre')
-    #print(list(reservas_por_categoria))  # Esto mostrará una lista de diccionarios en la consola
+    # Reservas por categoría
+    reservas_por_categoria = reservas.values('servicio__categoria__nombre').annotate(total=Count('id')).order_by('servicio__categoria__nombre')
+
 
 
     context = {
@@ -764,6 +805,10 @@ def dashboard(request):
         'reservas_confirmadas': reservas_confirmadas,
         'reservas_pendientes': reservas_pendientes,
         'tasa_cancelacion': tasa_cancelacion,       
+
+        # Parámetros de fecha actuales
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
     }
     return render(request, 'dashboard/dashboard.html', context)
 

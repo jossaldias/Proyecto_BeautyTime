@@ -16,6 +16,24 @@
                 <p>Aún no has iniciado sesión. Puedes <a href="{% url 'login' %}">iniciar sesión</a> para guardar tu reserva en tu cuenta o <strong>reservar como visita</strong>.</p>
             </div>
         {% endif %}
+        <!-- Notificaciones -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                {# Mostrar errores específicos de campos #}
+                {% for field, errors in form.errors.items %}
+                    {% if field not in form.non_field_errors %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+
+
         <!-- Formulario a la izquierda -->
         <div class="col-md-4" id="form-container" style="margin-bottom: 40px;">
             <form id="reservation-form" method="post">
@@ -55,15 +73,6 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Reservar</button>
             </form>
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for field, errors in form.errors.items %}
-                        <li>{{ field }}: {{ errors|striptags }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
         </div>
 
         <!-- Calendario a la derecha -->

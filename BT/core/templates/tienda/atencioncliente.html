@@ -13,7 +13,9 @@
             <h2 class="mb-0">Por favor envíanos tu consulta!</h2>
           </div>
           <div class="card-body">
-            <form action="https://formspree.io/f/xbljjkjv" method="POST">
+            <form id="consultaForm" method="POST">
+              <div id="formFeedback" class="alert" style="display: none;"></div>
+  
               <div class="mb-3">
                 <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Tu nombre" required
                   pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+" title="El nombre solo puede contener letras y espacios (sin guiones)">
@@ -72,4 +74,47 @@
     </div>
   </div>
 </main>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  document.getElementById('consultaForm').addEventListener('submit', async function(e) {
+      e.preventDefault(); // Evitar el envío predeterminado del formulario
+  
+      const form = e.target;
+      const formData = new FormData(form);
+      const feedbackContainer = document.getElementById('formFeedback');
+  
+      try {
+          const response = await fetch('https://formspree.io/f/xbljjkjv', {
+              method: 'POST',
+              body: formData,
+              headers: { 'Accept': 'application/json' }
+          });
+  
+          if (response.ok) {
+              // Mostrar mensaje de éxito
+              feedbackContainer.className = 'alert alert-success';
+              feedbackContainer.style.display = 'block';
+              feedbackContainer.textContent = '¡Tu consulta ha sido enviada con éxito!';
+              form.reset(); // Limpiar el formulario
+          } else {
+              // Mostrar mensaje de error genérico
+              feedbackContainer.className = 'alert alert-danger';
+              feedbackContainer.style.display = 'block';
+              feedbackContainer.textContent = 'Hubo un problema al enviar tu consulta. Por favor, revisa que los campos estén correctos.';
+          }
+      } catch (error) {
+          console.error('Error al enviar el formulario:', error);
+          feedbackContainer.className = 'alert alert-danger';
+          feedbackContainer.style.display = 'block';
+          feedbackContainer.textContent = 'Error al conectar con el servidor. Intenta de nuevo más tarde.';
+      }
+  
+      // Ocultar el mensaje automáticamente después de unos segundos
+      setTimeout(() => {
+          feedbackContainer.style.display = 'none';
+      }, 5000);
+  });
+  </script>  
 {% endblock %}

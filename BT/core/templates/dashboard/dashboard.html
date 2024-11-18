@@ -207,6 +207,20 @@
 
 
         <div class="container">
+            <form method="GET" class="row mb-4">
+                <div class="col-md-4">
+                    <label for="fecha_inicio" class="form-label text-white">Fecha Inicio</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="fecha_fin" class="form-label text-white">Fecha Fin</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+            </form>
+            
             <!-- Indicadores de Reservas -->
             <div class="row mt-4">
                 <!-- Indicador: Total de Reservas -->
@@ -261,6 +275,31 @@
             const labelsReservas = categorias.map(categoria => categoria.servicio__categoria__nombre);  // Cambiar nombre de labels
             const dataPorCategoria = categorias.map(categoria => categoria.total);
 
+            // Colores personalizados para cada barra
+            const customColors = [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 0, 0, 1)',
+                'rgba(0, 255, 0, 1)',
+                'rgba(0, 0, 255, 1)',
+                'rgba(128, 128, 0, 1)',
+                'rgba(128, 0, 128, 1)',
+                'rgba(0, 128, 128, 1)',
+                'rgba(128, 128, 128, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(255, 255, 255, 1)',
+                'rgba(255, 192, 203, 1)',
+                'rgba(255, 165, 0, 1)',
+                'rgba(0, 255, 255, 1)',
+                'rgba(255, 255, 0, 1)',
+                'rgba(0, 0, 128, 1)'
+            ];
+            const borderColors = customColors.map(color => color.replace('0.6', '1')); // Bordes más opacos
+
             new Chart(ctxReservas, {
                 type: 'bar',
                 data: {
@@ -268,8 +307,8 @@
                     datasets: [{
                         label: 'Reservas por Categoría',
                         data: dataPorCategoria,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)', // Color de las barras
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: customColors.slice(0, dataPorCategoria.length), // Asigna colores según la cantidad de datos
+                        borderColor: borderColors.slice(0, dataPorCategoria.length), // Bordes según los colores
                         borderWidth: 1
                     }]
                 },
@@ -277,7 +316,21 @@
                     responsive: true,
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true, // Asegura que el eje Y comience en 0
+                            ticks: {
+                                stepSize: 1, // Ajusta los incrementos del eje Y para valores pequeños
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                autoSkip: false // Asegura que se muestren todas las categorías
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true, // Muestra la leyenda
+                            position: 'top' // Posición de la leyenda
                         }
                     }
                 }

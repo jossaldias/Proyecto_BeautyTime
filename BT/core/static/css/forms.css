@@ -104,11 +104,11 @@ body{
 
 /* Modal Styles */
 .modal-header {
-    background-color: #9817b8 !important;
+    background-color: rgba(249 ,215 ,218) !important;
 }
 
 .modal-body{
-    background-color: rgba(249 ,215 ,218) !important;
+    background-color: white !important;
     color:rgb(0, 0, 0) !important;
 }
 .modal-title {
@@ -117,7 +117,7 @@ body{
 }
 
 .modal-footer {
-    background-color:  rgba(249 ,215 ,218)  !important;
+    background-color: white !important;
     padding: 15px;
 }
 
