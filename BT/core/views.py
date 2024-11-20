@@ -3,6 +3,8 @@ import requests
 import time
 import string
 
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils.dateparse import parse_date
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
@@ -13,10 +15,10 @@ from django.contrib.auth import logout, authenticate, login as auth_login
 from django.contrib.auth import update_session_auth_hash
 import json
 
-from django.db.models import Q, F, Sum
+from django.db.models import Q, F, Sum, Count
 
 from .utils import render_to_pdf
-from django.views.generic import View, CreateView 
+from django.views.generic import View, CreateView
 from django.core.mail import send_mail
 
 from datetime import timedelta, datetime
@@ -27,8 +29,7 @@ from .models import *
 from .forms import *
 from .cart import Cart
 
-from django.db.models import Count
-from .models import ReservaEliminada
+from .models import Producto, Categoria
 
 # HOME
 
@@ -103,31 +104,38 @@ def editarPerfil(request):
     return render(request, "registration/perfil.html", context)
 
 
-    
-
-
 # EDITAR USUARIO DESDE ADMINISTRADOR GENERAL
 @login_required
 def editarUsuario(request):
+    # Obtener el usuario que se va a editar
     user = get_object_or_404(User, pk=request.POST.get("id_usuario_editar") if request.method == "POST" else request.GET.get("id_usuario_editar"))
 
     if request.method == "POST":
+        # Creamos el formulario con los datos enviados
         form_editar = editarUsuarioForm(data=request.POST, files=request.FILES, instance=user)
-        
+
         if form_editar.is_valid():
-            password = form_editar.cleaned_data.get('password')  
-            if password:  
-                user.set_password(password)  # Solo cambia la contraseña si se ingresa una nueva
-            form_editar.save()  
-            messages.success(request, 'Usuario actualizado correctamente.')  
+            # Guardamos los demás cambios
+            user = form_editar.save(commit=False)
+
+            # Comprobamos si la contraseña fue proporcionada
+            password = form_editar.cleaned_data.get('password')
+
+            # Si la contraseña no está vacía, la actualizamos
+            if password:
+                user.set_password(password)
+
+            # Guardamos los cambios en el usuario
+            user.save()
+            messages.success(request, 'Usuario actualizado correctamente.')
             return redirect("usuarios")
         else:
-            messages.error(request, 'Por favor, corrige los errores en el formulario.')  # Mensaje si hay errores en el formulario
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')
     else:
-        form_editar = editarUsuarioForm(instance=user)  
+        form_editar = editarUsuarioForm(instance=user)
 
     context = {"form_editar": form_editar}
-    return render(request, "paginas/usuarios.html", context)
+    return render(request, "registration/usuarios.html", context)
 
 
 
@@ -150,62 +158,68 @@ def usuarios(request):
 # FUNCIÓN PARA EL ADMINISTRADOR GENERAL PARA  AGREGAR UN USUARIO
 @login_required
 def agregarUsuario(request):
-
     if request.method == "POST":
-        form = editarUsuarioForm(data=request.POST, files=request.FILES)
+        form = CustomUserCreationForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             form.save()
-        return redirect("usuarios")
+            messages.success(request, "Usuario agregado correctamente.")
+            return redirect("usuarios")
+        else:
+            messages.error(request, "Error al agregar el usuario. Verifica los datos.")
     else:
-        form = editarUsuarioForm()
-        context = {"form": form}
+        form = CustomUserCreationForm()
+    
+    context = {"form": form}
     return render(request, "registration/agregarUsuario.html", context)
-
 
 # FUNCIÓN PARA EL ADMINISTRADOR GENERAL PARA ELIMINAR UN USUARIO
 @login_required
 def eliminarUsuario(request):
-    if request.POST:
-        users = User.objects.get(pk=request.POST.get("id_usuario_eliminar"))
-        users.delete()
-
+    if request.method == "POST":
+        user_id = request.POST.get("id_usuario_eliminar")
+        if not user_id:
+            messages.error(request, "No se proporcionó un ID válido para eliminar.")
+            return redirect("usuarios")
+        try:
+            user = User.objects.get(pk=user_id)
+            user.delete()
+            messages.success(request, "Usuario eliminado correctamente.")
+        except User.DoesNotExist:
+            messages.error(request, "El usuario no existe.")
+        except ValueError:
+            messages.error(request, "ID de usuario inválido.")
+        except Exception as e:
+            messages.error(request, f"Error inesperado: {e}")
     return redirect("usuarios")
 
 
+
 def servicios(request):    
-    servicios = Producto.objects.filter(
-                                    Q(tipo='servicio') 
-                                    )
+    servicios = Item.objects.filter(tipo='servicio')
     context = {
         'servicios': servicios
     }
     return render(request, 'tienda/servicios.html', context)
 
 def productos(request):    
-    productos = Producto.objects.filter(Q(tipo='producto'))
-
+    productos = Item.objects.filter(tipo='producto')
     context = {
         'productos': productos
     }
     return render(request, 'tienda/productos.html', context)
 
-def verDetalle(request, tipo, id):
-    if tipo not in ['producto', 'servicio']:
-        return render(request, '404.html') 
-    item = get_object_or_404(Producto, id=id)
-    if item.tipo != tipo:
-        return render(request, '404.html')  
+def verDetalle(request, id):
+    item = get_object_or_404(Item, id=id)
     context = {
         'item': item,
-        'tipo': tipo
+        'tipo': item.tipo,
     }
     return render(request, 'tienda/verDetalle.html', context)
 
 class verInventario(View):
 
     def get(self, request, *args, **kwargs):
-        productos = Producto.objects.all()
-        
+        productos = Item.objects.filter(tipo='producto')
         form = editarProductoForm()
 
         context = {
@@ -406,13 +420,13 @@ def reserva_exitosa(request):
 # FUNCIÓN PARA ENVIAR EL CORREO AL CLIENTE
 def enviar_correo_cliente(nombre, email_cliente, fecha_hora_inicio, servicio):
     categoria = servicio.categoria  # Obtener la categoría del servicio
-    asunto = 'Confirmación de cita en Capricho Divino'
+    asunto = 'Confirmación de cita en BeautyTime'
     mensaje = f'Estimado/a {nombre},\n\n' \
               f'¡Su cita para el servicio {categoria.nombre} - {servicio.nombre} ha sido agendada con éxito!.\n' \
               f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n' \
               f'Dirección: Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana.\n\n'\
               f'Si tienes alguna consulta, no dudes en contactarnos.\n\n' \
-              f'Saludos,\nCapricho Divino'
+              f'Saludos,\nBeautyTime'
     send_mail(
         asunto,
         mensaje,
@@ -424,7 +438,7 @@ def enviar_correo_cliente(nombre, email_cliente, fecha_hora_inicio, servicio):
 # FUNCIÓN PARA ENVIAR EL CORREO AL ADMINISTRADOR
 def enviar_correo_admin(nombre, fecha_hora_inicio, servicio):
     asunto = 'Nueva cita agendada en BeautyTime'
-    mensaje = f'Se ha agendado una nueva cita con el cliente {nombre}.\n\n' \
+    mensaje = f'Se ha agendado una nueva cita con el/la cliente {nombre}.\n\n' \
               f'Servicio: {servicio}\n' \
               f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n\n' \
               f'Recuerda revisar el calendario para más detalles.\n\n' \
@@ -448,52 +462,61 @@ def obtener_reservas(request):
     categoria_id = request.GET.get('categoria')
     user = request.user
     contexto = request.GET.get('contexto', 'calendario')  # Se agrega 'calendario' por defecto
+    mostrar_solo_proximas = request.GET.get('mostrarSoloProximas', 'false') == 'true'  # Verificar el parámetro de filtro de citas futuras
 
     # Si se proporciona una categoría, filtrar las reservas por los servicios de esa categoría
     if categoria_id:
-        reservas = Reserva.objects.filter(servicio__categoria_id=categoria_id)  # Filtrar por la categoría del servicio
+        try:
+            categoria_id = int(categoria_id)  # Convertir el ID a entero
+            reservas = Reserva.objects.filter(servicio__categoria_id=categoria_id).exclude(estado='eliminado')  # Filtrar por la categoría del servicio y excluir las eliminadas
+        except ValueError:
+            return JsonResponse({'error': 'ID de categoría no válido'}, status=400)
     else:
-        reservas = Reserva.objects.all()  # Devuelve todas las reservas si no se filtra por categoría
+        reservas = Reserva.objects.exclude(estado='eliminado')  # Excluir las reservas con estado 'eliminado'
+
+    # Filtrar por fechas si el checkbox está marcado
+    if mostrar_solo_proximas:
+        hoy = datetime.today().date()
+        reservas = reservas.filter(fecha__gte=hoy)  # Filtra las reservas con fecha igual o superior a hoy
 
     # Si el usuario es cliente y el contexto es 'calendario', mostramos solo sus citas
-    if contexto == 'calendario' and user.tipo_user != 'admin':
+    if contexto == 'calendario' and user.tipo_user != 'Administrador':
         reservas = reservas.filter(cliente=user)
 
     reservas_data = [{
         'id': reserva.id,
-        'categoria': reserva.servicio.categoria.nombre,  # Asegúrate de usar el nombre de la categoría
+        'categoria': reserva.servicio.categoria.nombre, 
         'nombre': reserva.nombre,
-        'email': reserva.email,  # Agregando el email
-        'contacto': reserva.contacto,  # Agregando el número de contacto
-        'servicio': reserva.servicio.nombre,  # Añadir el nombre del servicio
-        'hora_inicio': reserva.hora.strftime("%H:%M"),  # Hora de inicio correctamente formateada
-        'hora_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).strftime("%H:%M"),  # Hora fin
+        'email': reserva.email,  
+        'contacto': reserva.contacto,
+        'servicio': reserva.servicio.nombre,
+        'hora_inicio': reserva.hora.strftime("%H:%M"), 
+        'hora_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).strftime("%H:%M"),
         'fecha_inicio': datetime.combine(reserva.fecha, reserva.hora).isoformat(),
         'fecha_fin': (datetime.combine(reserva.fecha, reserva.hora) + timedelta(hours=1)).isoformat(),
-        'confirmado': reserva.confirmado
+        'estado': reserva.estado
     } for reserva in reservas]
 
     return JsonResponse({'reservas': reservas_data})
 
+
+
 # Eliminar cita
-#@login_required
+@login_required
 def eliminar_cita(request, id):
     if request.method == 'POST':
-        print(f"Solicitud de eliminación recibida para la cita con ID {id} con método {request.method}")
         try:
-            # Obtener la cita a eliminar:
             reserva = get_object_or_404(Reserva, id=id)
+
             cliente_email = reserva.email
             cliente_nombre = reserva.nombre
             servicio = reserva.servicio
             fecha = reserva.fecha
             hora_formateada = reserva.hora.strftime("%H:%M")
-            # Registrar la eliminación de la reserva
-            ReservaEliminada.objects.create(
-                reserva=reserva  # Relacionamos la reserva eliminada
-            )
-            # Eliminar la cita
-            reserva.delete()
+
+            # Cambiar el estado de la reserva a 'eliminado'
+            reserva.estado = 'eliminado'
+            reserva.save()
 
             # Notificar al cliente de la cancelación por correo
             try:
@@ -509,12 +532,13 @@ def eliminar_cita(request, id):
                 print(f"Error al enviar el correo: {e}")
 
             return JsonResponse({'success': True})
+
         except Reserva.DoesNotExist:
-            print(f"No se encontró la reserva con ID {id}")
             return JsonResponse({'success': False, 'message': 'Reserva no encontrada.'})
     else:
-        print(f"Se recibió un método no permitido: {request.method}")
         return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+
 
 
 # Editar cita
@@ -540,14 +564,14 @@ def editar_cita(request, id):
             # Si el administrador ha decidido notificar al cliente, enviamos el correo
             if notify_client:
                 send_mail(
-                    'Actualización de su cita en Capricho Divino',
+                    'Actualización de su cita en BeautyTime',
                     f'Estimado/a {reserva.nombre}, su cita ha sido modificada. Los detalles actualizados son:\n\n'
                     f'Categoría: {categoria.nombre}\n'
                     f'Servicio: {servicio.nombre}\n'
                     f'Fecha: {reserva.fecha}\n'
                     f'Hora: {reserva.hora}\n'
                     f'Dirección: Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana\n'
-                    f'\n\nGracias por confiar en Capricho Divino.',
+                    f'\n\nGracias por confiar en BeautyTime.',
                     'beautytimeagenda@gmail.com',
                     [reserva.email],
                     fail_silently=False,
@@ -560,15 +584,15 @@ def editar_cita(request, id):
 
 
 def obtener_categorias(request):
-    categorias = CategoriaServicio.objects.all()
+    categorias = Categoria.objects.filter(items__tipo='servicio').distinct()
     categorias_data = [{'id': categoria.id, 'nombre': categoria.nombre} for categoria in categorias]
     return JsonResponse({'categorias': categorias_data})
 
+
 def obtener_servicios(request):
     categoria_id = request.GET.get('categoria_id')
-    
     if categoria_id:
-        servicios = Servicio.objects.filter(categoria_id=categoria_id)
+        servicios = Item.objects.filter(tipo='servicio', categoria_id=categoria_id)
         servicios_data = [{'id': servicio.id, 'nombre': servicio.nombre} for servicio in servicios]
         return JsonResponse({'servicios': servicios_data})
     else:
@@ -578,7 +602,6 @@ def obtener_servicios(request):
 @login_required
 def obtener_reserva(request, id):
     user = request.user
-
     try:
         # Obtener la reserva por ID
         reserva = Reserva.objects.get(id=id)
@@ -588,7 +611,7 @@ def obtener_reserva(request, id):
             return JsonResponse({'success': False, 'message': 'Debes iniciar sesión para ver esta reserva.'}, status=403)
 
         # Verificar si el usuario es cliente y solo puede ver sus propias reservas
-        if user.tipo_user != 'admin' and reserva.cliente != user:
+        if user.tipo_user != 'Administrador' and reserva.cliente != user:
             return JsonResponse({'success': False, 'message': 'No tienes permiso para ver esta reserva.'}, status=403)
 
         # Preparar los datos de la reserva
@@ -605,8 +628,8 @@ def obtener_reserva(request, id):
             'nombre': reserva.nombre,
             'email': reserva.email,
             'contacto': reserva.contacto,
-            'confirmado': reserva.confirmado,
-            'es_admin': user.tipo_user == 'admin'  # Determina si es administrador para la lógica del frontend
+            'estado': reserva.estado,
+            'es_admin': user.tipo_user == 'Administrador'  # Determina si es administrador para la lógica del frontend
         }
 
         return JsonResponse(reserva_data)
@@ -616,26 +639,37 @@ def obtener_reserva(request, id):
 
 # Confirmar reservas ya sea por correo desde el cliente o por whatsapp desde el admin.
 def confirmar_reserva(request, reserva_id):
-    # Obtener la reserva por ID
     reserva = get_object_or_404(Reserva, id=reserva_id)
 
     if request.method == 'POST':
-        # Si es un POST, se confirma desde el admin que se contactó por whatsapp
-        reserva.confirmado = True
-        reserva.save()
-        return JsonResponse({'success': True})
+        try:
+            # Confirmar la reserva desde el admin (por WhatsApp)
+            reserva.estado = 'confirmado'
+            reserva.save()
+            print(f"Reserva {reserva_id} confirmada.")  # Agrega un print para verificar que el estado cambió
+            return JsonResponse({'success': True})
+        except Exception as e:
+            print(f"Error al confirmar la reserva: {e}")  # Imprimir cualquier error durante el guardado
+            return JsonResponse({'success': False, 'error': str(e)})
 
     elif request.method == 'GET':
-        # Si es un GET, se confirma desde el cliente por correo
+        # Confirmación desde el cliente (por correo)
         if 'accion' in request.GET and request.GET['accion'] == 'confirmar':
-            reserva.confirmado = True
-            reserva.save()
-            return render(request, 'agenda/confirmacion_exitosa.html', {'reserva': reserva})
+            try:
+                reserva.estado = 'confirmado'
+                reserva.save()
+                return render(request, 'agenda/confirmacion_exitosa.html', {'reserva': reserva})
+            except Exception as e:
+                print(f"Error al confirmar la reserva por cliente: {e}")
+                return render(request, 'agenda/confirmacion_fallida.html', {'error': str(e)})
         else:
-            return render(request, 'agenda/confirmacion_fallida.html')
+            # Si no se pasa la acción correctamente
+            return render(request, 'agenda/confirmacion_fallida.html', {'error': 'Acción no válida.'})
     
     # Si el método no es GET o POST, devolver un error
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+
 
 #CARRITO
 from django.shortcuts import render
@@ -647,7 +681,7 @@ def carrito(request):
 def cart_add(request, producto_id):
 
   cart = Cart(request)
-  producto = get_object_or_404(Producto, id=producto_id)
+  producto = get_object_or_404(Item, id=producto_id, tipo='producto')  # Filtrar por tipo producto
 
   form = CartAddProductoForm(request.POST)
   if form.is_valid():
@@ -700,16 +734,17 @@ class OrderCreateView(CreateView):
                 costo = item["costo"]
                 cantidad = item["cantidad"]
 
-                # Crear un Item para cada producto en el carrito
-                Item.objects.create(
+                # Crear un OrderItem para cada producto en el carrito
+                OrderItem.objects.create(
                     orden=order,
-                    producto=producto,
+                    item=producto,
                     costo=costo,
                     cantidad=cantidad,
                 )
 
                 # Actualizar la cantidad del producto en la base de datos
-                Producto.objects.filter(id=producto.id).update(cantidad=F('cantidad') - cantidad)
+                if isinstance(producto, Producto):  # Solo si es un producto
+                    Producto.objects.filter(id=producto.id).update(cantidad=F('cantidad') - cantidad)
 
             cart.clear()  # Limpiar el carrito después de crear la orden
             return render(self.request, 'order/ordenCreada.html', {'order': order})
@@ -759,37 +794,41 @@ def dashboard(request):
     if fecha_inicio and fecha_fin:
         reservas = reservas.filter(fecha__range=(fecha_inicio, fecha_fin))
 
+
     products = Producto.objects.all() 
     product_count = products.count()
 
     orders = Order.objects.all()
     order_count = orders.count()
 
-    products_sold = Item.objects.values('producto_id').annotate(total_quantity=Sum('cantidad')).order_by('-total_quantity')
-    product_names = Producto.objects.filter(id__in=[product_sold['producto_id'] for product_sold in products_sold])
+    products_sold = OrderItem.objects.values('item_id').annotate(total_quantity=Sum('cantidad')).order_by('-total_quantity')
+    product_names = Item.objects.filter(id__in=[product_sold['item_id'] for product_sold in products_sold])
 
-    products_sold_dict = {product_sold['producto_id']: {'total_quantity': product_sold['total_quantity'], 'name': product_name.nombre} for product_sold, product_name in zip(products_sold, product_names)}
-
+    products_sold_dict = {
+        product_sold['item_id']: {
+            'total_quantity': product_sold['total_quantity'], 
+            'name': product_name.nombre
+        } 
+        for product_sold, product_name in zip(products_sold, product_names)
+    }
 
     for product in products:
-            if product.id in products_sold_dict:
-                product.total_quantity = products_sold_dict[product.id]['total_quantity']
-            else:
-                product.total_quantity = 0 
+        if product.id in products_sold_dict:
+            product.total_quantity = products_sold_dict[product.id]['total_quantity']
+        else:
+            product.total_quantity = 0 
 
-    # Indicadores de reservas
+    # Obtener el total de reservas, confirmadas, pendientes y eliminadas
     total_reservas = reservas.count()
-    reservas_confirmadas = reservas.filter(confirmado=True).count()
-    reservas_pendientes = reservas.filter(confirmado=False).count()
+    reservas_confirmadas = reservas.filter(estado='confirmado').count()
+    reservas_pendientes = reservas.filter(estado='pendiente').count()
+    reservas_canceladas = reservas.filter(estado='eliminado').count()
 
-    # Tasa de cancelación (basada en reservas eliminadas dentro del rango)
-    total_canceladas = ReservaEliminada.objects.filter(fecha_eliminacion__range=(fecha_inicio, fecha_fin)).count() if fecha_inicio and fecha_fin else ReservaEliminada.objects.count()
-    tasa_cancelacion = (total_canceladas / total_reservas) * 100 if total_reservas > 0 else 0
+    # Tasa de cancelación (basada en el total de reservas)
+    tasa_cancelacion = (reservas_canceladas / total_reservas * 100) if total_reservas > 0 else 0
 
     # Reservas por categoría
     reservas_por_categoria = reservas.values('servicio__categoria__nombre').annotate(total=Count('id')).order_by('servicio__categoria__nombre')
-
-
 
     context = {
         'products': products,
@@ -801,14 +840,13 @@ def dashboard(request):
 
         # Indicadores de reservas
         'total_reservas': total_reservas,
-        'reservas_por_categoria': json.dumps(list(reservas_por_categoria)),
         'reservas_confirmadas': reservas_confirmadas,
         'reservas_pendientes': reservas_pendientes,
-        'tasa_cancelacion': tasa_cancelacion,       
-
-        # Parámetros de fecha actuales
+        'reservas_canceladas': reservas_canceladas,
+        'tasa_cancelacion': tasa_cancelacion,
+        'reservas_por_categoria': json.dumps(list(reservas_por_categoria)),
         'fecha_inicio': fecha_inicio,
-        'fecha_fin': fecha_fin,
+        'fecha_fin': fecha_fin,   
     }
     return render(request, 'dashboard/dashboard.html', context)
 

@@ -5,8 +5,7 @@ from transbank.error.transbank_error import TransbankError
 from transbank.webpay.webpay_plus.transaction import Transaction
 from datetime import datetime as dt
 from datetime import timedelta
-from core.models import Order, Item
-
+from core.models import Order, OrderItem
 
 # Create your views here.
 #FUNCIÓN QUE INICIA TRANSACCIÓN DE PRUEBA CON TRANSBANK
@@ -45,19 +44,20 @@ def webpay_plus_commit(request):
 
         order = Order.objects.filter(user=request.user).first()
         if order:
-            # Retrieve products from the order before deleting it
-            items = Item.objects.filter(orden=order)  # Assuming you have a related name 'orden' in Item
+            # Obtener los ítems de la orden mediante OrderItem
+            items = OrderItem.objects.filter(orden=order)  # Accede a los ítems de la orden
 
-            # Re-add products back to inventory
+            # Reagregar productos al inventario
             for item in items:
-                producto = item.producto  # Get the product from the order item
-                cantidad = item.cantidad  # Get the quantity from the order item
+                producto = item.item  # Accede al Item (producto o servicio)
                 
-                # Update the product quantity in the inventory
-                producto.cantidad += cantidad  # Increase the stock by the ordered quantity
-                producto.save()  # Save the updated product back to the database
+                # Si el producto tiene cantidad, actualiza el inventario
+                if hasattr(producto, 'cantidad'):  # Solo los productos tienen el campo 'cantidad'
+                    cantidad = item.cantidad  # Cantidad del producto
+                    producto.cantidad += cantidad  # Aumenta el stock en la cantidad ordenada
+                    producto.save()  # Guarda los cambios del producto
 
-            order.delete()  # Delete the order after re-adding products
+            order.delete()  # Elimina la orden después de reponer los productos
             print("Orden eliminada de la base de datos")
 
         return render(request, 'order/pedidoTransbankCancelado.html')
@@ -88,8 +88,3 @@ def webpay_plus_commit(request):
     except TransbankError as e:
         print(f"Error en la transacción: {e}")
         return render(request, 'order/pedidoTransbankCancelado.html')
-
-
-
-
-

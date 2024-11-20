@@ -224,32 +224,33 @@
             <!-- Indicadores de Reservas -->
             <div class="row mt-4">
                 <!-- Indicador: Total de Reservas -->
-                <div class="col-md-4 text-center">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Total de Reservas</h5>
-                            <p class="card-text display-4">{{ total_reservas }}</p>
+                <div class="col-md-4 d-flex justify-content-center">
+                    <div class="card bg-light w-100" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 150px;">
+                        <div class="card-body text-center" style="padding: 5px;">
+                            <h5 class="card-title" style="font-size: 1.5rem;">Total de Reservas</h5>
+                            <p class="card-text display-3" style="font-size: 3rem; padding: 10%;">{{ total_reservas }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Indicador: Confirmadas vs Pendientes -->
-                <div class="col-md-4 text-center">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Reservas Confirmadas vs Pendientes</h5>
-                            <p class="card-text">Confirmadas: {{ reservas_confirmadas }}</p>
-                            <p class="card-text">Pendientes: {{ reservas_pendientes }}</p>
+                <!-- Indicador: Reservas por Estado -->
+                <div class="col-md-4 d-flex justify-content-center">
+                    <div class="card bg-light w-100" style="min-height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <div class="card-body text-center" style="padding: 5px;">
+                            <h5 class="card-title" style="font-size: 1.5rem;">Reservas por Estado</h5>
+                            <p class="card-text" style="font-size: 1.2rem;">Confirmadas: {{ reservas_confirmadas }}</p>
+                            <p class="card-text" style="font-size: 1.2rem;">Pendientes: {{ reservas_pendientes }}</p>
+                            <p class="card-text" style="font-size: 1.2rem;">Canceladas: {{ reservas_canceladas }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Indicador: Tasa de Cancelación -->
-                <div class="col-md-4 text-center">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Tasa de Cancelación</h5>
-                            <p class="card-text">{{ tasa_cancelacion }}%</p>
+                <div class="col-md-4 d-flex justify-content-center">
+                    <div class="card bg-light w-100" style="min-height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <div class="card-body text-center" style="padding: 5px;">
+                            <h5 class="card-title" style="font-size: 1.5rem;">Tasa de Cancelación</h5>
+                            <p class="card-text" style="font-size: 3rem; padding: 10%;">{{ tasa_cancelacion|floatformat:2 }}%</p>
                         </div>
                     </div>
                 </div>

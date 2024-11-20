@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load static %}
-
+{% load humanize %}
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 
@@ -16,7 +16,7 @@
         <h3 class="product-title">{{producto.nombre}}</h3>
       </div>
       <div class="image-container">
-        <a title="verDetalle" href="{% url 'verDetalle' tipo='producto' id=producto.id %}">
+        <a title="verDetalle" href="{% url 'verDetalle' id=producto.id %}">
           <img src="{{ producto.picture.url }}" alt="{{ producto.nombre }}">
         </a>
       </div>
@@ -27,12 +27,12 @@
         {% if producto.descuento %}
         <h5>
           <strong>Precio</strong> 
-          <span style="text-decoration: line-through; color:grey">${{ producto.costo }}</span>&nbsp;${{ producto.costo2}}
+          <span style="text-decoration: line-through; color:grey">${{ producto.costo|floatformat:0|intcomma }}</span>&nbsp;${{ producto.costo2|floatformat:0|intcomma }}
         </h5>
-          <strong class="text-success">{{ producto.descuento|floatformat:0}}% de descuento</strong>
+          <strong class="text-success">{{ producto.descuento|floatformat:0|intcomma }}% de descuento</strong>
         {% else %}
         <h5>
-          <strong>Precio</strong> ${{ producto.costo }}
+          <strong>Precio</strong> ${{ producto.costo|floatformat:0|intcomma }}
         </h5>
         {% endif %}      </div>
        <form method="post" action="{% url 'add' producto.id %}">

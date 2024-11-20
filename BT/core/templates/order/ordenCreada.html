@@ -2,15 +2,13 @@
 
 {% load static %}
 
-
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
 {% endblock %}
 
 {% block template %}
 
-<div class="container mt-3 rounded"
-  style="background-color: rgb(249, 215, 218); padding-top:3%; padding-bottom:3%; margin-bottom:3%; ">
+<div class="container mt-3 rounded" style="background-color: rgb(249, 215, 218); padding-top:3%; padding-bottom:3%; margin-bottom:3%; ">
 
   <div class="logo">
     <img src="{% static 'img/Beauty-Time.png' %}" alt="">
@@ -50,35 +48,44 @@
           </tbody>
         </table>
         <p>Una vez realices la Transferencia, envíanos el comprobante a nuestro correo para validar tu compra.</p>
-        <a href="{% url 'pedidoListo' %}"><img class="justify-content-center align-items-center"
-            src="{% static 'img/transferencia.png' %}" height="90" alt=""><button class="btn btn-success">Finalizar
-            Pedido</button></a>
+        <a href="{% url 'pedidoListo' %}"><img class="justify-content-center align-items-center" src="{% static 'img/transferencia.png' %}" height="90" alt=""><button class="btn btn-success">Finalizar Pedido</button></a>
       </div>
     </div>
 
     <div class="col">
       <div class="card card-body">
         <h3>Transbank</h3>
-        <br>
-        <br>
-        <br>
-        <br>
-        <a href="{% url 'create' %}"><img class="justify-content-center align-items-center"
-            src="{% static 'img/webpay.png' %}" height="90" alt=""><br></a>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
+        <br><br><br><br>
+        <a href="{% url 'create' %}"><img class="justify-content-center align-items-center" src="{% static 'img/webpay.png' %}" height="90" alt=""><br></a>
+        <br><br><br><br><br><br>
       </div>
     </div>
 
   </div>
-  <br>
+
+  <h3 class="font-weight-bold mt-4">Detalles de la Orden</h3>
+  <p><strong>Orden #: </strong>{{ order.id }}</p>
+  <p><strong>Estado de la Orden:</strong> {{ order.estado_venta }}</p>
+  <p><strong>Total:</strong> ${{ order.get_precio_total }}</p>
+
+  <h4>Productos en la Orden:</h4>
+  <ul>
+    {% for order_item in order.items.all %}
+      {% if order_item.item.tipo == "producto" %}
+        <li>
+          <strong>{{ order_item.item.nombre }}</strong> - 
+          x {{ order_item.cantidad }} - 
+          ${{ order_item.costo }} c/u 
+          <strong>Total: ${{ order_item.get_precio_total }}</strong>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+
   <div class="card-footer text-muted">
-    <a class="btn btn-danger btn-lg" href="/"><i class="bi bi-x-octagon-fill"></i></i>&nbsp;&nbsp;Cancelar Compra</a>
+    <a class="btn btn-danger btn-lg" href="/"><i class="bi bi-x-octagon-fill"></i>&nbsp;&nbsp;Cancelar Compra</a>
   </div>
+
 </div>
 
 {% endblock %}

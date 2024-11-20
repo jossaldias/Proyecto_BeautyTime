@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'BT',
     'core',
     'transbank_webpay',
+    'django.contrib.humanize',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

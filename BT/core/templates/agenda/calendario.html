@@ -57,6 +57,10 @@
         <select id="filter-categoria" class="form-control">
             <option value="">Todas las categorías</option>
         </select>
+        <div class="form-check mt-2" id="filter-past-container" style="display:none;">
+            <input type="checkbox" class="form-check-input" id="filter-past" />
+            <label class="form-check-label" for="filter-past">Mostrar solo próximas citas</label>
+        </div>
     </div>
 
     <div id="calendar"></div>
@@ -108,7 +112,7 @@
                         <button id="whatsappBtn" class="btn btn-success" type="button">Enviar Mensaje por WhatsApp</button>
                     </div>                                  
                     <div class="form-group">
-                        <button id="confirmarBtn" class="btn btn-primary" style="display:none;">Confirmar Reserva</button>
+                        <button id="confirmarBtn" class="btn btn-primary" type="button" style="display:none;">Confirmar Reserva</button>
                     </div>
                     <div id="notify-client-container" class="form-group">
                         <label for="notify-client">¿Notificar cambios al cliente por correo?</label>
@@ -138,11 +142,12 @@
         var categoriaSelect = document.getElementById('filter-categoria');
         var editEventId = null; // Variable global para almacenar el ID del evento seleccionado
         var calendar;
-        var esAdmin = "{{ request.user.tipo_user }}" === "admin";
+        var esAdmin = "{{ request.user.tipo_user }}" === "Administrador";
 
         // Mostrar u ocultar el filtro al cargar la página
         if (esAdmin) {
             document.getElementById('filter-container').style.display = 'block';  // Mostrar el filtro para administradores
+            document.getElementById('filter-past-container').style.display = 'block';  // Mostrar el filtro para administradores
         } else {
             document.getElementById('filter-container').style.display = 'none';  // Ocultar el filtro para clientes
         }
@@ -248,28 +253,48 @@
         function cargarReservas(categoria) {
             var url = '/obtener_reservas/?contexto=calendario';  // Pasar el contexto del calendario
             if (categoria && esAdmin) {
-                url += '?categoria=' + categoria;  // Filtrar por categoría si es admin
+                url += '&categoria=' + categoria;  // Filtrar por categoría si es admin
+            }
+            // Verificar si el checkbox está marcado
+            var mostrarSoloProximas = document.getElementById('filter-past').checked;
+            
+            // Agregar filtro de fechas solo para próximas citas
+            if (mostrarSoloProximas) {
+                url += '&mostrarSoloProximas=true';  // Añadir el parámetro de filtro
             }
 
             fetch(url)
             .then(response => response.json())
             .then(data => {
-                var events = data.reservas.map(reserva => ({
-                    id: reserva.id,
-                    title: reserva.categoria + ' - ' + reserva.hora_inicio + ' a ' + reserva.hora_fin,
-                    start: new Date(reserva.fecha_inicio),
-                    end: new Date(reserva.fecha_fin),
-                    classNames: esAdmin ? (reserva.confirmado ? 'fc-event-confirmado' : 'fc-event-no-confirmado') : '',  // Solo aplicar clases si es admin
-                    extendedProps: {
-                        confirmado: reserva.confirmado
+                var events = data.reservas.map(reserva => {
+                    if (reserva.estado === 'eliminado') {
+                        return null;  // Si la reserva está eliminada, no mostrarla en el calendario
                     }
-                }));
-                
+
+                    var reservaFechaHora = new Date(reserva.fecha_inicio + ' ' + reserva.hora_inicio);
+                    var ahora = new Date();
+
+                    // Filtrar las reservas pasadas si el checkbox está marcado
+                    if (mostrarSoloProximas && reservaFechaHora < ahora) {
+                        return null;  // No mostrar la cita si ya pasó
+                    }
+                    
+                    return {
+                        id: reserva.id,
+                        title: reserva.categoria + ' - ' + reserva.hora_inicio + ' a ' + reserva.hora_fin,
+                        start: new Date(reserva.fecha_inicio),
+                        end: new Date(reserva.fecha_fin),
+                        classNames: esAdmin ? (reserva.estado === 'confirmado' ? 'fc-event-confirmado' : 'fc-event-no-confirmado') : '',  // Solo aplicar clases si es admin
+                        extendedProps: {
+                            estado: reserva.estado
+                        }
+                    };
+                }).filter(event => event !== null); // Eliminar los null de los eventos eliminados
 
                 if (calendar) {
-                    calendar.destroy();
+                    calendar.destroy();  // Destruir el calendario actual
                 }
-
+                // Crear un nuevo calendario con los datos actualizados
                 calendar = new FullCalendar.Calendar(calendarElement, {
                     locale: 'es',
                     initialView: 'dayGridMonth',
@@ -279,7 +304,7 @@
                         center: 'title',
                         right: 'today'
                     },
-                    events: events,
+                    events: events,  // Usar los nuevos eventos
                     eventContent: function(arg) {
                         return { html: `<div>${arg.event.title}</div>` };
                     },
@@ -290,8 +315,6 @@
                         fetch(`/obtener_reserva/${editEventId}/`)
                         .then(response => response.json())
                         .then(data => {
-                            console.log(data.confirmado);  // Esto te mostrará el valor de "confirmado" en la consola del navegador.
-
                             esAdmin = data.es_admin;  // Verifica si es administrador
                     
                             // Cargar categorías y servicios en el modal
@@ -305,10 +328,10 @@
                             document.getElementById('editEventContacto').value = data.contacto;
 
                             // Now, handle the confirmation status for the modal
-                            if (data.confirmado) {
+                            if (data.estado === 'confirmado') {
                                 document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
                                 document.getElementById('confirmarBtn').style.display = 'none'; // Hide manual confirmation button
-                            } else {
+                            } else if (data.estado === 'pendiente') {
                                 document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada.";
                                 document.getElementById('confirmarBtn').style.display = 'block'; // Show manual confirmation button
                             }
@@ -324,28 +347,47 @@
                                 document.getElementById('alertContactoCliente').style.display = 'none'; // Ocultar alerta de contacto para administradores
                     
                                 // Check confirmation status and update UI accordingly
-                                if (data.confirmado) {
+                                if (data.estado === 'confirmado') {
                                     document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
                                     document.getElementById('confirmarBtn').style.display = 'none'; // Hide manual confirmation button
-                                } else {
+                                } else if (data.estado === 'pendiente') {
                                     document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada. Puedes solicitar una confirmación al cliente por WhatsApp y después registrarla dando click en 'Confirmar Reserva'";
                                     document.getElementById('confirmarBtn').style.display = 'block'; // Show manual confirmation button
 
-                                    // Add functionality to confirm the reservation manually
-                                    document.getElementById('confirmarBtn').onclick = function() {
+                                    // Función para confirmar la reserva desde el modal
+                                    document.getElementById('confirmarBtn').onclick = function(event) {
+                                        event.preventDefault();  // Evitar que se recargue la página
+                                    
                                         fetch(`/confirmar_reserva/${editEventId}/`, {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json',
-                                                'X-CSRFToken': getCookie('csrftoken')  // Add CSRF token
+                                                'X-CSRFToken': getCookie('csrftoken')  // CSRF token
                                             }
                                         })
                                         .then(response => response.json())
                                         .then(result => {
+                                            console.log('Resultado de la confirmación:', result);  // Ver la respuesta del servidor en la consola
+                                        
                                             if (result.success) {
-                                                document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
-                                                document.getElementById('confirmarBtn').style.display = 'none'; // Hide confirmation button
-                                                window.location.reload();  // Reload the page to reflect changes
+                                                // Obtener el evento del calendario
+                                                var event = calendar.getEventById(editEventId);
+                                                if (event) {
+                                                    // Cambiar el color a verde (confirmado)
+                                                    event.setProp('classNames', ['fc-event-confirmado']);  // Cambiar el color a verde
+                                                    event.setExtendedProp('estado', 'confirmado');  // Marcar el evento como confirmado
+                                        
+                                                    // Actualizar el mensaje de confirmación
+                                                    document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
+                                                    document.getElementById('confirmarBtn').style.display = 'none';  // Ocultar el botón de confirmación
+                                        
+                                                    // Cerrar el modal
+                                                    var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+                                                    eventModal.hide();
+
+                                                    // Recargar la página para reflejar el cambio
+                                                    window.location.reload();  // Recargar la página para actualizar el calendario
+                                                }
                                             } else {
                                                 alert('Error al confirmar la reserva.');
                                             }
@@ -353,8 +395,8 @@
                                         .catch(error => {
                                             console.error('Error en la confirmación:', error);
                                             alert('Error en la confirmación.');
-                                        });
-                                    };
+                                        });                                        
+                                    };                                                                       
                                 }
                                 document.getElementById('confirmacionStatus').style.display = 'block';  // Show confirmation message
                                 
@@ -407,6 +449,10 @@
             });
         }
 
+        document.getElementById('filter-past').addEventListener('change', function() {
+            cargarReservas();  // Recargar las reservas cuando se marque el filtro
+        });
+        
         // Evento para actualizar servicios cuando se cambia la categoría en el modal
         document.getElementById('editEventCategoria').addEventListener('change', function() {
             var categoriaId = this.value;  // Obtener el ID de la categoría seleccionada
@@ -424,11 +470,33 @@
         cargarReservas();
 
         // Función para eliminar una cita
-        document.getElementById('deleteEventBtn').addEventListener('click', function() {
+        document.getElementById('deleteEventBtn').onclick = function() {
             if (editEventId !== null) {
-                eliminarCita(editEventId);
+                fetch(`/eliminar_cita/${editEventId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')  // CSRF token
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('La cita ha sido eliminada correctamente.');
+                        var event = calendar.getEventById(editEventId); // Cambiar la clase del evento a eliminado 
+                        event.remove();  // Eliminar el evento del calendario
+                        window.location.reload();  // Recargar la página para reflejar los cambios
+                    } else {
+                        console.error('Error al eliminar la cita:', result.message);
+                        alert('Error al eliminar la cita.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en la solicitud de eliminación:', error);
+                    alert('Error en la solicitud de eliminación.');
+                });
             }
-        });
+        };
+        
 
         // Función para editar una cita
         document.getElementById('saveEventBtn').addEventListener('click', function() {

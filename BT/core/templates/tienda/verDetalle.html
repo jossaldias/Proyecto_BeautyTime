@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% load static %}
+{% load humanize %}
 {% block template %}
 <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 
@@ -20,12 +21,12 @@
               {% if item.descuento %}
               <h5>
                 <strong>Precio</strong> 
-                <span style="text-decoration: line-through; color:grey">${{ item.costo }}</span>&nbsp;${{ item.costo2}}
+                <span style="text-decoration: line-through; color:grey">${{ item.costo|floatformat:0|intcomma }}</span>&nbsp;${{ item.costo2|floatformat:0|intcomma }}
               </h5>
-                <strong class="text-success">{{ item.descuento|floatformat:0}}% de descuento</strong>
+                <strong class="text-success">{{ item.descuento|floatformat:0|intcomma }}% de descuento</strong>
               {% else %}
               <h5>
-                <strong>Precio</strong> ${{ item.costo }}
+                <strong>Precio</strong> ${{ item.costo|floatformat:0|intcomma }}
               </h5>
               {% endif %}                   
               <form method="post" action="{% url 'add' item.id %}">
@@ -52,7 +53,7 @@
               <h3>{{ item.nombre }}</h3>
               <strong>Descripción</strong><br>
               <p style="text-align: justify;">{{ item.descripcion }}</p>
-              <h5><strong>Precio</strong> ${{ item.costo }}</h5>
+              <h5><strong>Precio</strong> ${{ item.costo|floatformat:0|intcomma }}</h5>
                 <a class="book_service" href="{% url 'reservar_cita' %}" >
                   <i class="bi bi-journal-bookmark-fill"></i>&nbsp;Reservar Cita
                 </a>
