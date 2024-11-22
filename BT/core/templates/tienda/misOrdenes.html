@@ -24,16 +24,16 @@
                 <tbody>
                   <tr class="table-danger">
                     <th>Nº Compra</th>
-                    <th>Fecha</th>
-                    <th>Descripción</th>
+                    <th>Fecha de Compra</th>
+                    <th>Productos Comprados</th>
                     <th>Total</th>
-                    <th>Estado</th>
+                    <th>Estado de Compra</th>
                   </tr>
                   {% for order in ordenes %}
                   <tr>
                     <td>{{order}}</td>
                     <td>{{order.created}}</td>
-                    <td>{{order.get_description}}</td>
+                    <td>{{order.description}}</td>
                     <td>${{order.get_precio_total|floatformat:0}}</td>
                     <td>{{order.estado_venta}}</td>
                   </tr>

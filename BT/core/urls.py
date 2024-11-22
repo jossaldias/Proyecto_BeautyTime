@@ -12,6 +12,8 @@ urlpatterns = [
     path("logout/", views.exit, name="exit"),
     path("registration/register", views.register, name="register"),
     path("registration/login", views.login, name="login"),
+    path("paginas/quienes-somos", views.quienes_somos, name="quienes_somos"),
+
     # PAGINAS
     path("paginas/perfil", views.perfil, name="perfil"),
     path("paginas/editarPerfil", views.editarPerfil, name="editarPerfil"),

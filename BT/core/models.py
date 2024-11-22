@@ -50,8 +50,8 @@ class Item(models.Model):
     descripcion = models.TextField(null=True, blank=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='items')
     tipo = models.CharField(max_length=50, choices=[('producto', 'Producto'), ('servicio', 'Servicio')])
-    costo = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    costo2 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    costo = models.IntegerField(default=0)
+    costo2 = models.IntegerField(default=0)
     picture = models.ImageField(upload_to='media/items/', null=True, blank=True)
     descuento = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, default=0.00)
     
@@ -70,7 +70,7 @@ class Item(models.Model):
         # Calcular descuento
         if self.descuento:
             descuento_factor = (100 - self.descuento) / 100
-            self.costo = self.costo * descuento_factor
+            self.costo2 = self.costo * descuento_factor
         super().save(*args, **kwargs)
 
 
@@ -140,7 +140,7 @@ class Order(TimeStampedModel):
         verbose_name_plural = "Ordenes"
 
     def __str__(self):
-        return 'Compra {}'.format(self.id)
+        return 'BT{}'.format(self.id)
 
     def get_precio_total(self):
         total_costo = sum(item.get_precio_total() for item in self.items.all())
@@ -149,8 +149,8 @@ class Order(TimeStampedModel):
     @property
     def description(self):
         descriptions = []
-        for order_item in self.items.all():  # accediendo a la relación de items
-            description = '{} x {}'.format(order_item.cantidad, order_item.item.nombre)  # 'item' es el producto
+        for orderitem in self.items.all():  # accediendo a la relación de items
+            description = '{} x {}'.format(orderitem.cantidad, orderitem.item.nombre)  # 'item' es el producto
             descriptions.append(description)
         return ", ".join(descriptions)
 

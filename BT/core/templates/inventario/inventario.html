@@ -46,13 +46,13 @@
                                 <td class="table-danger">{{producto.nombre}}</td>
                                 <td>{{producto.tipo|title}}</td>
                                 <td class="table-danger">{{producto.categoria}}</td>
-                                <td class="table-danger">${{producto.costo}}</td>
+                                <td class="table-danger">${{producto.costo|floatformat:0}}</td>
                                 <td class="table-danger">{{producto.cantidad}}</td>
                                 <td class="table-danger">{{producto.descuento|floatformat:0}}%</td>
-                                <td class="table-danger">${{producto.costo2}}</td>
+                                <td class="table-danger">${{producto.costo2|floatformat:0}}</td>
                                 <td>
                                     <button type="button"
-                                        onclick="editarProducto('{{producto.id}}', '{{producto.costo}}', '{{producto.descuento|floatformat:2}}')"
+                                        onclick="editarProducto('{{producto.id}}', '{{producto.costo|floatformat:0}}', '{{producto.descuento|floatformat:2}}')"
                                         class="btn btn-primary" data-toggle="modal" href="#EditarProductoModal">
                                         <i class="bi bi-pen-fill"></i>
                                     </button>

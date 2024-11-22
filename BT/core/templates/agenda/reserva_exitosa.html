@@ -1,8 +1,30 @@
-{% extends "base/base.html" %}
+{% extends "base/base.html" %} {% load widget_tweaks %}
+{% load static %}
+
+{%block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}" />
+{% endblock %}
 
 {% block template %}
-<div class="container mt-5">
-    <h2 class="text-center">¡Reserva exitosa!</h2>
-    <p class="text-center">Tu cita ha sido reservada correctamente. Recibirás un correo de confirmación.</p>
+
+<div class="container h-100" style="padding-top:5%;">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: rgba(249 ,215 ,218) ; margin-bottom:10% ">
+    <div class="row">
+      <div class="container">
+        <div class="d-flex justify-content-center">
+          <h1 >¡Reserva exitosa!</h1>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <p>Tu cita ha sido reservada correctamente. Recibirás un correo de confirmación.</p>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <img src="{% static 'img/reserva.png'%}" height="200" class="reserva" alt="">
+
+        </div><br><br><br>
+        <br><br><br>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -186,7 +186,7 @@ class agregarProductoForm(forms.ModelForm):
 
 
 class editarProductoForm(forms.ModelForm):
-    costo = forms.IntegerField(widget=forms.NumberInput(attrs={'type': 'number'}),required=True, label='Costo')
+    costo = forms.DecimalField(widget=forms.NumberInput(attrs={'type': 'number'}),required=True, label='Costo')
     descuento = forms.DecimalField(widget=forms.NumberInput(attrs={'type': 'number'}), max_digits=4, decimal_places=2, required=True, label='Descuento')
 
     class Meta:

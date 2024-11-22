@@ -850,4 +850,5 @@ def dashboard(request):
     }
     return render(request, 'dashboard/dashboard.html', context)
 
-
+def quienes_somos(request):
+    return render(request, 'tienda/quienessomos.html')

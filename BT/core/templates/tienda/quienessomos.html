@@ -1,0 +1,86 @@
+{% extends "base/base.html" %} 
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+
+{% endblock %}
+{% block template %}
+<main>
+    <div class="container mt-5">
+
+        <section class="my-5 p-4 rounded" style="background-color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+            <h2 class="text-center text-secondary fw-bold mb-4">¿Quiénes somos?</h2>
+            <p class="fs-5 text-justify">
+                En <strong>Beauty Time</strong>, somos más que un salón de belleza; somos un espacio dedicado al cuidado personal, 
+                la relajación y la transformación. Nuestra misión es resaltar tu belleza única, ayudándote a sentirte y verte 
+                increíble en cada visita. Creemos que la verdadera belleza comienza desde el interior, y por eso nos esforzamos 
+                por ofrecer un ambiente que inspire confianza, tranquilidad y bienestar.
+            </p>
+            <p class="fs-5 text-justify">
+                Desde nuestros inicios, nos hemos comprometido a brindar servicios de calidad excepcional, utilizando productos 
+                de alta gama y las técnicas más avanzadas del sector. Nuestro equipo está compuesto por profesionales apasionados 
+                y altamente capacitados que entienden que cada cliente es único. Es por ello que personalizamos cada tratamiento 
+                para adaptarnos a tus necesidades y preferencias, creando una experiencia que va más allá de lo convencional.
+            </p>
+            <p class="fs-5 text-justify">
+                En <strong>Beauty Time</strong>, no solo encontrarás servicios de belleza, sino también una comunidad que valora la excelencia, 
+                la atención al detalle y la innovación. Nuestro compromiso con la sostenibilidad y el bienestar de nuestros clientes 
+                nos impulsa a elegir productos respetuosos con el medio ambiente y a mantener los más altos estándares de higiene y seguridad.
+            </p>
+            <p class="fs-5 text-justify">
+                Nuestro objetivo es que cada cliente salga de nuestro salón sintiéndose renovado, confiado y con una sonrisa en el rostro. 
+                Te invitamos a formar parte de la familia Beauty Time, donde cada visita se convierte en un momento para celebrar tu belleza natural.
+            </p>
+        </section>
+
+        <section class="my-5 p-4 rounded" style="background-color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+            <h2 class="text-center text-secondary fw-bold mb-4">¿Por qué elegirnos?</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-3 text-center mb-3">
+                    <i class="fas fa-user-check fa-3x text-primary mb-3"></i>
+                    <h5 class="fw-bold">Servicios personalizados</h5>
+                    <p>Nos adaptamos a tus necesidades y gustos.</p>
+                </div>
+                <div class="col-md-6 col-lg-3 text-center mb-3">
+                    <i class="fas fa-spa fa-3x text-primary mb-3"></i>
+                    <h5 class="fw-bold">Ambiente relajante</h5>
+                    <p>Te ofrecemos un espacio cómodo para que te sientas como en casa.</p>
+                </div>
+                <div class="col-md-6 col-lg-3 text-center mb-3">
+                    <i class="fas fa-user-tie fa-3x text-primary mb-3"></i>
+                    <h5 class="fw-bold">Profesionales experimentados</h5>
+                    <p>Contamos con expertos en belleza.</p>
+                </div>
+                <div class="col-md-6 col-lg-3 text-center mb-3">
+                    <i class="fas fa-gem fa-3x text-primary mb-3"></i>
+                    <h5 class="fw-bold">Calidad y detalle</h5>
+                    <p>Productos de alta gama para superar tus expectativas.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="my-5 p-4 rounded" style="background-color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+            <h2 class="text-center text-secondary fw-bold mb-4">Visítanos</h2>
+            <div class="text-center">
+                <p class="fs-5">
+                    Estamos ubicados en el corazón de la ciudad, con fácil acceso y estacionamiento disponible.
+                    Aquí encontrarás un ambiente moderno y acogedor para todos tus tratamientos de belleza.
+                </p>
+                <p><strong>Dirección:</strong> Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana</p>
+                <p><strong>Teléfono:</strong> +56 9 7486 2722</p>
+                <p><strong>Email:</strong> beautytimeagenda@gmail.com</p>
+            </div>
+
+            <div class="text-center">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13309.556691412728!2d-70.5400394!3d-33.4912505!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d1b097c1146b%3A0xc1abefa9ffaeb04d!2sSal%C3%B3n%20Capricho%20Divino!5e0!3m2!1ses-419!2scl!4v1732285743506!5m2!1ses-419!2scl" 
+                    width="100%" height="450" style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

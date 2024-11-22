@@ -1,10 +1,30 @@
-{% extends "base/base.html" %}
+{% extends "base/base.html" %} {% load widget_tweaks %}
+{% load static %}
+
+{%block css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}" />
+{% endblock %}
 
 {% block template %}
 
-<div class="container mt-5">
-    <h1 class="text-center">Error en la Confirmación</h1>
-    <p class="text-center">Lo sentimos, algo salió mal y no pudimos confirmar tu asistencia. Por favor, intenta nuevamente o contacta con el salón.</p>
-</div>
+<div class="container h-100" style="padding-top:5%;">
+  <div class="row d-flex justify-content-center align-items-center h-500 rounded" style="background: rgba(249 ,215 ,218); margin-bottom:10% ">
+    <div class="row">
+      <div class="container">
+        <div class="d-flex justify-content-center">
+          <h1>Error en la Confirmación</h1>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <p>Lo sentimos, algo salió mal y no pudimos confirmar tu asistencia. Por favor, intenta nuevamente o contacta con el salón.</p>
+        </div><br><br>
+        <div class="d-flex justify-content-center">
+          <img src="{% static 'img/reserva_cancelada.png'%}" height="100" class="carro" alt="">
 
+        </div><br><br><br>
+        <br><br><br>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
