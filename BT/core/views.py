@@ -420,13 +420,13 @@ def reserva_exitosa(request):
 # FUNCIÓN PARA ENVIAR EL CORREO AL CLIENTE
 def enviar_correo_cliente(nombre, email_cliente, fecha_hora_inicio, servicio):
     categoria = servicio.categoria  # Obtener la categoría del servicio
-    asunto = 'Confirmación de cita en BeautyTime'
+    asunto = 'Confirmación de cita en Capricho Divino'
     mensaje = f'Estimado/a {nombre},\n\n' \
               f'¡Su cita para el servicio {categoria.nombre} - {servicio.nombre} ha sido agendada con éxito!.\n' \
               f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n' \
               f'Dirección: Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana.\n\n'\
               f'Si tienes alguna consulta, no dudes en contactarnos.\n\n' \
-              f'Saludos,\nBeautyTime'
+              f'Saludos,\nCapricho Divino'
     send_mail(
         asunto,
         mensaje,
@@ -437,12 +437,12 @@ def enviar_correo_cliente(nombre, email_cliente, fecha_hora_inicio, servicio):
 
 # FUNCIÓN PARA ENVIAR EL CORREO AL ADMINISTRADOR
 def enviar_correo_admin(nombre, fecha_hora_inicio, servicio):
-    asunto = 'Nueva cita agendada en BeautyTime'
+    asunto = 'Nueva cita agendada en Capricho Divino'
     mensaje = f'Se ha agendado una nueva cita con el/la cliente {nombre}.\n\n' \
               f'Servicio: {servicio}\n' \
               f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n\n' \
               f'Recuerda revisar el calendario para más detalles.\n\n' \
-              f'Saludos,\nBeautyTime'
+              f'Saludos,\nCapricho Divino'
     send_mail(
         asunto,
         mensaje,
@@ -521,8 +521,8 @@ def eliminar_cita(request, id):
             # Notificar al cliente de la cancelación por correo
             try:
                 send_mail(
-                    'Cancelación de su cita en BeautyTime',
-                    f'Estimado/a {cliente_nombre}, lamentamos informarle que su cita para el servicio {servicio}, programada para el {fecha} a las {hora_formateada}, ha sido cancelada.\n\nGracias por confiar en BeautyTime.',
+                    'Cancelación de su cita en Capricho Divino',
+                    f'Estimado/a {cliente_nombre}, lamentamos informarle que su cita para el servicio {servicio}, programada para el {fecha} a las {hora_formateada}, ha sido cancelada.\n\nGracias por confiar en Capricho Divino.',
                     'beautytimeagenda@gmail.com',
                     [cliente_email],
                     fail_silently=False,
@@ -564,14 +564,14 @@ def editar_cita(request, id):
             # Si el administrador ha decidido notificar al cliente, enviamos el correo
             if notify_client:
                 send_mail(
-                    'Actualización de su cita en BeautyTime',
+                    'Actualización de su cita en Capricho Divino',
                     f'Estimado/a {reserva.nombre}, su cita ha sido modificada. Los detalles actualizados son:\n\n'
                     f'Categoría: {categoria.nombre}\n'
                     f'Servicio: {servicio.nombre}\n'
                     f'Fecha: {reserva.fecha}\n'
                     f'Hora: {reserva.hora}\n'
                     f'Dirección: Av. Las Perdices 2900 Local 33, Peñalolén, Región Metropolitana\n'
-                    f'\n\nGracias por confiar en BeautyTime.',
+                    f'\n\nGracias por confiar en Capricho Divino.',
                     'beautytimeagenda@gmail.com',
                     [reserva.email],
                     fail_silently=False,
