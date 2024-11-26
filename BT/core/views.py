@@ -3,6 +3,7 @@ import requests
 import time
 import string
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.dateparse import parse_date
@@ -295,7 +296,7 @@ def calendario(request):
 
 # FUNCIÓN PARA AGENDAR UNA CITA
 def reservar_cita(request):
-    reservas = Reserva.objects.all()
+    reservas = Reserva.objects.exclude(estado='eliminado')
 
     # Verificar si el usuario está autenticado
     usuario_autenticado = request.user.is_authenticated
@@ -348,7 +349,7 @@ def reservar_cita(request):
                 fecha=fecha,
                 hora__lt=(fecha_hora_fin.time()),  # Compara con la hora final
                 hora__gte=hora  # Compara con la hora de inicio
-            )
+            ).exclude(estado='eliminado')
 
             if reserva_existente.exists():
                 form.add_error(None, f'Ya existe una reserva para esta categoría ({categoria.nombre}) en el horario seleccionado.')
@@ -361,7 +362,7 @@ def reservar_cita(request):
                     fecha=fecha,
                     hora__lt=fecha_hora_fin.time(),
                     hora__gte=hora
-                ).exclude(servicio__categoria=categoria)
+                ).exclude(servicio__categoria=categoria).exclude(estado='eliminado')
 
                 if conflicto_reserva.exists():
                     # Añadir el error al formulario para que se muestre en la plantilla
@@ -439,7 +440,7 @@ def enviar_correo_cliente(nombre, email_cliente, fecha_hora_inicio, servicio):
 def enviar_correo_admin(nombre, fecha_hora_inicio, servicio):
     asunto = 'Nueva cita agendada en Capricho Divino'
     mensaje = f'Se ha agendado una nueva cita con el/la cliente {nombre}.\n\n' \
-              f'Servicio: {servicio}\n' \
+              f'Servicio: {servicio.nombre}\n' \
               f'Fecha y hora: {fecha_hora_inicio.strftime("%Y-%m-%d %H:%M")}\n\n' \
               f'Recuerda revisar el calendario para más detalles.\n\n' \
               f'Saludos,\nCapricho Divino'
@@ -522,7 +523,7 @@ def eliminar_cita(request, id):
             try:
                 send_mail(
                     'Cancelación de su cita en Capricho Divino',
-                    f'Estimado/a {cliente_nombre}, lamentamos informarle que su cita para el servicio {servicio}, programada para el {fecha} a las {hora_formateada}, ha sido cancelada.\n\nGracias por confiar en Capricho Divino.',
+                    f'Estimado/a {cliente_nombre}, lamentamos informarle que su cita para el servicio {servicio.nombre}, programada para el {fecha} a las {hora_formateada}, ha sido cancelada.\n\nGracias por confiar en Capricho Divino.',
                     'beautytimeagenda@gmail.com',
                     [cliente_email],
                     fail_silently=False,
@@ -715,11 +716,16 @@ def cart_detalle(request):
 
 
 # FUNCIÓN QUE CREA LA COMPRA PARA EL CLIENTE
-class OrderCreateView(CreateView):
+class OrderCreateView(LoginRequiredMixin, CreateView):
     model = Order
     form_class = OrderCreateForm
     template_name = "order/order_form.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+    
     # FUNCIÓN PARA AGREGAR DATOS DEL CLIENTE A LA COMPRA
     def form_valid(self, form):
         cart = Cart(self.request)

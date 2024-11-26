@@ -245,64 +245,54 @@ class CartAddProductoForm(forms.Form):
 class OrderCreateForm(forms.ModelForm):
     region = forms.ChoiceField(choices=REGIONES)
     comuna = forms.ChoiceField(choices=COMUNAS)
+    nombre = forms.CharField(
+        max_length=255,
+        required=False,
+        label="Nombre",
+        widget=forms.TextInput(attrs={"readonly": "readonly", "class": "form-control"})
+    )
+
     class Meta:
         model = Order
         fields = [
-        
-        "email",
-        "direccion",
-        "telefono",
-        "observaciones",
-        "region",
-        "comuna",
+            "nombre",
+            "email",
+            "direccion",
+            "telefono",
+            "observaciones",
+            "region",
+            "comuna",
         ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        if user is not None:
+            # Inicializa los campos con los datos del usuario autenticado
+            self.fields["nombre"].initial = f"{user.first_name} {user.last_name}".strip()
+            self.fields["email"].initial = user.email
+            self.fields["region"].initial = user.region
+            self.fields["comuna"].initial = user.comuna
+            self.fields["direccion"].initial = user.direccion
+            self.fields["telefono"].initial = user.telefono
+        
+        # Configuración de Crispy Forms
         self.helper = FormHelper()
         self.helper.form_method = "post"
-        self.helper.form_action = "."
         self.helper.layout = Layout(
-        Fieldset(
-            Div(
-            Field("nombre", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            Div(
-            Field("email", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            Div(
-            Field("region", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            Div(
-            Field("comuna", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            Div(
-            Field("direccion", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            Div(
-            Field("telefono", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            Div(
-            Field("observaciones", css_class="form-control", wrapper_class="col"),
-            css_class="row",
-            ),
-            css_class="border-bottom mb-3",
-        ),
-        ButtonHolder(
-                Submit(
-                    "submit",
-                    "Siguiente",
-                    css_class="btn btn-success btn-lg btn-block"
-                ),
+            Field("nombre", css_class="form-control"),
+            Field("email", css_class="form-control"),
+            Field("region", css_class="form-control"),
+            Field("comuna", css_class="form-control"),
+            Field("direccion", css_class="form-control"),
+            Field("telefono", css_class="form-control"),
+            Field("observaciones", css_class="form-control"),
+            ButtonHolder(
+                Submit("submit", "Siguiente", css_class="btn btn-success btn-lg btn-block"),
                 HTML('<a href="/clear/" class="btn btn-danger btn-lg btn-block">Cancelar compra</a>'),
-                css_class="button-holder")
+            )
         )
+
+
 
         PRODUCTO_CANTIDAD_CHOICES = [
         (i, str(i)) for i in range(1, settings.PROVIDER_ITEM_MAX_CANTIDAD + 1)
