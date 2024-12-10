@@ -130,13 +130,25 @@
             fetch('/obtener_reservas/?contexto=reservar&categoria=' + categoria)  // Pasar el contexto de reserva
             .then(response => response.json())
             .then(data => {
-                var events = data.reservas.map(reserva => ({
-                    title: 'Reservado: ' + reserva.servicio,  // Añadir el servicio en el título
-                    start: reserva.fecha_inicio,
-                    end: reserva.fecha_fin,
-                    color: 'red',
-                    displayEventTime: false
-                }));
+                var events = data.reservas.map(reserva => {
+                    if (reserva.estado === 'bloqueado') {
+                        return {
+                            title: 'NO DISPONIBLE',
+                            start: reserva.fecha_inicio,
+                            end: reserva.fecha_fin,
+                            color: 'gray',
+                            displayEventTime: false
+                        };
+                    } else {
+                        return {
+                            title: 'RESERVADO: ' + reserva.servicio,
+                            start: reserva.fecha_inicio,
+                            end: reserva.fecha_fin,
+                            color: 'red',
+                            displayEventTime: false
+                        };
+                    }
+                });
         
                 var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                     locale: 'es',
@@ -175,7 +187,7 @@
                     },
                     displayEventTime: false,
                     eventContent: function(arg) {
-                        return { html: '<div>Reservado</div>' };
+                        return { html: `<div style="font-weight: bold;">${arg.event.title}</div>` };
                     }
                 });
         

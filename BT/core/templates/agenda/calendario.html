@@ -40,12 +40,20 @@
     .fc-event-confirmado {
         background-color: #28a745 !important; /* Verde para confirmados */
         color: white; /* Texto blanco */
+        font-weight: bold;
     }
     
     .fc-event-no-confirmado {
         background-color: #ffc107 !important; /* Amarillo para no confirmados */
-        color: white; /* Texto blanco */
+        color: black; /* Texto blanco */
+        font-weight: bold;
     }
+
+    .fc-event-enConflicto {
+        background-color: #dc3545 !important; /* Rojo */
+        color: white;
+        font-weight: bold; 
+    }    
       
 </style>
 
@@ -54,6 +62,10 @@
 
     <!-- Dropdown para filtrar por categoría -->
     <div id="filter-container" class="form-group mb-3">
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#bloqueoModal">Añadir Bloqueo</button>
+            <button id="verBloqueosActivos" class="btn btn-primary">Ver Bloqueos Activos</button>
+        </div>        
         <select id="filter-categoria" class="form-control">
             <option value="">Todas las categorías</option>
         </select>
@@ -133,10 +145,95 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="bloqueoModal" tabindex="-1" aria-labelledby="bloqueoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bloqueoModalLabel">Agregar Bloqueo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formBloqueo">
+                    <div class="form-group">
+                        <label for="bloqueoCategoria">Categoría</label>
+                        <select id="bloqueoCategoria" name="categoria" class="form-control">
+                            <!-- Las categorías se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bloqueoFechaInicio">Fecha Inicio</label>
+                        <input type="datetime-local" id="bloqueoFechaInicio" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="bloqueoFechaFin">Fecha Fin</label>
+                        <input type="datetime-local" id="bloqueoFechaFin" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="bloqueoMotivo">Motivo</label>
+                        <textarea id="bloqueoMotivo" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="guardarBloqueo">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="verBloqueosModal" tabindex="-1" aria-labelledby="verBloqueosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verBloqueosModalLabel">Bloqueos Activos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Motivo</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bloqueosActivosTabla">
+                        <!-- Bloqueos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // Función para obtener el CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
     document.addEventListener('DOMContentLoaded', function() {
         var calendarElement = document.getElementById('calendar');
         var categoriaSelect = document.getElementById('filter-categoria');
@@ -144,15 +241,18 @@
         var calendar;
         var esAdmin = "{{ request.user.tipo_user }}" === "Administrador";
 
-        // Mostrar u ocultar el filtro al cargar la página
+        // -------------------------------
+        // Mostrar/Ocultar Filtros
+        // -------------------------------
         if (esAdmin) {
             document.getElementById('filter-container').style.display = 'block';  // Mostrar el filtro para administradores
             document.getElementById('filter-past-container').style.display = 'block';  // Mostrar el filtro para administradores
         } else {
             document.getElementById('filter-container').style.display = 'none';  // Ocultar el filtro para clientes
         }
-    
-        // Función para validar si una hora está dentro del horario laboral
+        // -------------------------------
+        // Validaciones
+        // -------------------------------
         function validarHoraLaboral(hora) {
             const [horaSeleccionada, minutos] = hora.split(':');
             const horaInt = parseInt(horaSeleccionada);
@@ -182,7 +282,6 @@
             return diaSemana !== 6; // Retornar true si es de Lunes a Sábado (0-5)
         }
 
-        // Función para cargar las categorías en el modal
         function cargarCategoriasDisponibles(categoriaSeleccionada) {
             fetch('/obtener_categorias/')
             .then(response => response.json())
@@ -208,20 +307,30 @@
         // Función para cargar las categorías en el filtro (solo para admin)
         function cargarCategorias() {
             fetch('/obtener_categorias/')
-            .then(response => response.json())
-            .then(data => {
-                categoriaSelect.innerHTML = '<option value="">Todas las categorías</option>';  // Resetear las opciones
-                data.categorias.forEach(categoria => {
-                    var option = document.createElement('option');
-                    option.value = categoria.id;  // Usar el ID numérico
-                    option.text = categoria.nombre;
-                    categoriaSelect.appendChild(option);
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error en la solicitud: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Datos recibidos de /obtener_categorias/:', data);
+                    if (!data.categorias || !Array.isArray(data.categorias)) {
+                        throw new Error('La respuesta no contiene una lista válida de categorías');
+                    }
+                    categoriaSelect.innerHTML = '<option value="">Todas las categorías</option>'; // Resetear opciones
+                    data.categorias.forEach(categoria => {
+                        const option = document.createElement('option');
+                        option.value = categoria.id; // Usar el ID numérico
+                        option.textContent = categoria.nombre;
+                        categoriaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar las categorías:', error);
                 });
-            })
-            .catch(error => {
-                console.error('Error al cargar las categorías:', error);
-            });
         }
+        
 
         // Función para cargar los servicios de la categoría seleccionada en el modal
         function cargarServiciosDisponibles(categoriaId, servicioSeleccionado) {
@@ -248,8 +357,155 @@
                 console.error('Error al cargar los servicios:', error);
             });
         }
+        // -------------------------------
+        // BLOQUEO DE HORARIOS
+        // -------------------------------
+        const bloqueoCategoriaSelect = document.getElementById('bloqueoCategoria');
+        const verBloqueosActivosBtn = document.getElementById('verBloqueosActivos');
+        const guardarBloqueoBtn = document.getElementById('guardarBloqueo');
 
-        // Función para cargar reservas (clientes solo ven sus citas, admin ve todas y filtra por categoría)
+        // Cargar categorías para el modal de bloqueo
+        function cargarCategoriasParaBloqueo() {
+            fetch('/obtener_categorias/')
+                .then(response => response.json())
+                .then(data => {
+                    bloqueoCategoriaSelect.innerHTML = '<option value="">Seleccionar Categoría</option>';
+                    data.categorias.forEach(categoria => {
+                        const option = document.createElement('option');
+                        option.value = categoria.id;
+                        option.text = categoria.nombre;
+                        bloqueoCategoriaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error al cargar categorías:', error));
+        }
+
+        // Guardar bloqueo
+        guardarBloqueoBtn.addEventListener('click', function () {
+            const modalTitle = document.getElementById('bloqueoModalLabel').textContent;
+        
+            // Obtener valores del formulario
+            const categoria = parseInt(bloqueoCategoriaSelect.value); // Convertir a entero
+            const fechaInicio = document.getElementById('bloqueoFechaInicio').value;
+            const fechaFin = document.getElementById('bloqueoFechaFin').value;
+            const motivo = document.getElementById('bloqueoMotivo').value;
+        
+            // Validaciones
+            if (!categoria) {
+                alert('Por favor, selecciona una categoría válida.');
+                return;
+            }
+            if (!fechaInicio || !fechaFin) {
+                alert('Por favor completa todos los campos.');
+                return;
+            }
+        
+            // Datos a enviar
+            const bloqueoData = {
+                categoria: categoria, // Ya es un número entero
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin,
+                motivo: motivo
+            };
+        
+            if (modalTitle === 'Agregar Bloqueo') {
+                // Lógica para agregar bloqueo
+                fetch('/gestionar_bloqueos/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // CSRF token
+                    },
+                    body: JSON.stringify(bloqueoData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Bloqueo creado exitosamente.');
+                            window.location.reload(); // Recargar la página para reflejar el bloqueo
+                        } else {
+                            console.error('Error en el backend:', data.message);
+                            alert('Error al crear el bloqueo: ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error al guardar el bloqueo:', error));
+            } else if (modalTitle === 'Editar Bloqueo') {
+                // Lógica para editar bloqueo
+                const bloqueoId = guardarBloqueoBtn.getAttribute('data-bloqueo-id'); // Obtener el ID del bloqueo desde el atributo del botón
+                if (!bloqueoId) {
+                    console.error('No se encontró el ID del bloqueo para editar.');
+                    return;
+                }
+        
+                fetch(`/gestionar_bloqueos/${bloqueoId}/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // CSRF token
+                    },
+                    body: JSON.stringify(bloqueoData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Bloqueo actualizado correctamente.');
+                            window.location.reload(); // Recargar la página para reflejar los cambios
+                        } else {
+                            console.error('Error al actualizar el bloqueo:', data.message);
+                            alert('Error al actualizar el bloqueo.');
+                        }
+                    })
+                    .catch(error => console.error('Error al actualizar el bloqueo:', error));
+            }
+        });
+        
+        // Mostrar bloqueos activos en el calendario
+        verBloqueosActivosBtn.addEventListener('click', function () {
+            fetch('/obtener_bloqueos/') // Cambia esta ruta según el backend
+                .then(response => response.json())
+                .then(data => {
+                    const tabla = document.getElementById('bloqueosActivosTabla');
+                    tabla.innerHTML = ''; // Limpiar contenido previo
+        
+                    if (data.bloqueos && data.bloqueos.length > 0) {
+                        data.bloqueos.forEach(bloqueo => {
+                            const fila = document.createElement('tr');
+                            fila.innerHTML = `
+                                <td>${bloqueo.categoria}</td>
+                                <td>${bloqueo.motivo}</td>
+                                <td>${new Date(bloqueo.fecha_inicio).toLocaleString()}</td>
+                                <td>${new Date(bloqueo.fecha_fin).toLocaleString()}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="eliminarBloqueo(${bloqueo.id})">Eliminar</button>
+                                    <button class="btn btn-primary btn-sm" onclick="editarBloqueo(${bloqueo.id})">Editar</button>
+                                </td>
+                            `;
+                            tabla.appendChild(fila);
+                        });
+                    } else {
+                        const fila = document.createElement('tr');
+                        fila.innerHTML = `<td colspan="5" class="text-center">No hay bloqueos activos</td>`;
+                        tabla.appendChild(fila);
+                    }
+        
+                    // Mostrar el modal
+                    const modal = new bootstrap.Modal(document.getElementById('verBloqueosModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error al cargar bloqueos activos:', error);
+                    alert('Error al cargar bloqueos activos.');
+                });
+        });
+        
+        
+        // Cargar las categorías al abrir el modal
+        document.getElementById('bloqueoModal').addEventListener('show.bs.modal', cargarCategoriasParaBloqueo);
+        
+        // -------------------------------
+        // Cargar Reservas
+        // -------------------------------
+
         function cargarReservas(categoria) {
             var url = '/obtener_reservas/?contexto=calendario';  // Pasar el contexto del calendario
             if (categoria && esAdmin) {
@@ -257,17 +513,15 @@
             }
             // Verificar si el checkbox está marcado
             var mostrarSoloProximas = document.getElementById('filter-past').checked;
-            
-            // Agregar filtro de fechas solo para próximas citas
             if (mostrarSoloProximas) {
-                url += '&mostrarSoloProximas=true';  // Añadir el parámetro de filtro
+                url += '&mostrarSoloProximas=true';  // Filtrar próximas reservas
             }
 
             fetch(url)
             .then(response => response.json())
             .then(data => {
                 var events = data.reservas.map(reserva => {
-                    if (reserva.estado === 'eliminado') {
+                    if (reserva.estado === 'eliminado ') {
                         return null;  // Si la reserva está eliminada, no mostrarla en el calendario
                     }
 
@@ -278,22 +532,55 @@
                     if (mostrarSoloProximas && reservaFechaHora < ahora) {
                         return null;  // No mostrar la cita si ya pasó
                     }
+
+                    // Determinar si hay conflicto con bloqueos
+                    var enConflicto = Array.isArray(data.bloqueos) && data.bloqueos.some(bloqueo => {
+                        var bloqueoInicio = new Date(bloqueo.fecha_inicio);
+                        var bloqueoFin = new Date(bloqueo.fecha_fin);
+                        return reservaFechaHora < bloqueoFin && new Date(reserva.fecha_fin) > bloqueoInicio;
+                    });                    
+                    
+                    // Determinar clase CSS
+                    var classNames = '';
+                    if (reserva.estado === 'enConflicto') {
+                        classNames = 'fc-event-enConflicto'; // Clase roja para conflictos
+                    } else if (reserva.estado === 'confirmado') {
+                        classNames = 'fc-event-confirmado'; // Clase verde para confirmados
+                    } else if (reserva.estado === 'pendiente') {
+                        classNames = 'fc-event-no-confirmado'; // Clase amarilla para pendientes
+                    }
                     
                     return {
                         id: reserva.id,
                         title: reserva.categoria + ' - ' + reserva.hora_inicio + ' a ' + reserva.hora_fin,
                         start: new Date(reserva.fecha_inicio),
                         end: new Date(reserva.fecha_fin),
-                        classNames: esAdmin ? (reserva.estado === 'confirmado' ? 'fc-event-confirmado' : 'fc-event-no-confirmado') : '',  // Solo aplicar clases si es admin
+                        classNames: esAdmin ? classNames : '',
                         extendedProps: {
-                            estado: reserva.estado
+                            estado: reserva.estado,
                         }
                     };
                 }).filter(event => event !== null); // Eliminar los null de los eventos eliminados
+                
+                // Agregar bloqueos al calendario
+                var bloqueos = Array.isArray(data.bloqueos)
+                    ? data.bloqueos.map(bloqueo => ({
+                        id: `bloqueo-${bloqueo.id}`,
+                        title: `Bloqueo: ${bloqueo.motivo}`,
+                        start: bloqueo.fecha_inicio,
+                        end: bloqueo.fecha_fin,
+                        color: 'red',
+                        extendedProps: {
+                            motivo: bloqueo.motivo
+                        }
+                    }))
+                    : [];
 
+                
                 if (calendar) {
                     calendar.destroy();  // Destruir el calendario actual
                 }
+                
                 // Crear un nuevo calendario con los datos actualizados
                 calendar = new FullCalendar.Calendar(calendarElement, {
                     locale: 'es',
@@ -304,144 +591,141 @@
                         center: 'title',
                         right: 'today'
                     },
-                    events: events,  // Usar los nuevos eventos
+                    events: [...events, ...bloqueos],  // Combinar reservas y bloqueos
                     eventContent: function(arg) {
                         return { html: `<div>${arg.event.title}</div>` };
                     },
                     eventClick: function(info) {
                         var eventObj = info.event;
                         editEventId = eventObj.id;  // Asignar el ID del evento seleccionado
+                        if (eventObj.id.startsWith('bloqueo-')) {
+                            // Mostrar detalles del bloqueo
+                            alert(`Motivo del bloqueo: ${eventObj.extendedProps.motivo}`);
+                        } else {
+                            // Manejar detalles de la reserva
+                            fetch(`/obtener_reserva/${editEventId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                esAdmin = data.es_admin;  // Verifica si es administrador
                     
-                        fetch(`/obtener_reserva/${editEventId}/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            esAdmin = data.es_admin;  // Verifica si es administrador
-                    
-                            // Cargar categorías y servicios en el modal
-                            cargarCategoriasDisponibles(data.categoria);
-                            cargarServiciosDisponibles(data.categoria, data.servicio);
-                    
-                            document.getElementById('editEventFecha').value = data.fecha_inicio.split("T")[0];
-                            document.getElementById('editEventHora').value = data.hora_inicio;
-                            document.getElementById('editEventNombre').value = data.nombre;
-                            document.getElementById('editEventEmail').value = data.email;
-                            document.getElementById('editEventContacto').value = data.contacto;
+                                // Cargar categorías y servicios en el modal
+                                cargarCategoriasDisponibles(data.categoria);
+                                cargarServiciosDisponibles(data.categoria, data.servicio);
+                        
+                                document.getElementById('editEventFecha').value = data.fecha_inicio.split("T")[0];
+                                document.getElementById('editEventHora').value = data.hora_inicio;
+                                document.getElementById('editEventNombre').value = data.nombre;
+                                document.getElementById('editEventEmail').value = data.email;
+                                document.getElementById('editEventContacto').value = data.contacto;
 
-                            // Now, handle the confirmation status for the modal
-                            if (data.estado === 'confirmado') {
-                                document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
-                                document.getElementById('confirmarBtn').style.display = 'none'; // Hide manual confirmation button
-                            } else if (data.estado === 'pendiente') {
-                                document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada.";
-                                document.getElementById('confirmarBtn').style.display = 'block'; // Show manual confirmation button
-                            }
-                            document.getElementById('confirmacionStatus').style.display = 'block';  // Show the confirmation message
+                                // Mostrar u ocultar features según Usuario Admin/Cli
+                                if (esAdmin) {
+                                    document.getElementById('info-cliente').style.display = 'block';  // Mostrar la información para administradores
+                                    document.getElementById('notify-client-container').style.display = 'block'; // Mostrar la opción de notificaciones para administradores
+                                    document.getElementById('mapsBtn').style.display = 'none'; // Ocultar dirección por maps
+                                    document.getElementById('notify-client').checked = true; // Marcar el checkbox por defecto para administradores             
+                                    document.getElementById('alertContactoCliente').style.display = 'none'; // Ocultar alerta de contacto para administradores
+                        
+                                    // Check confirmation status and update UI accordingly
+                                    if (data.estado === 'confirmado') {
+                                        document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
+                                        document.getElementById('confirmarBtn').style.display = 'none'; 
+                                    } else if (data.estado === 'enConflicto') {
+                                        document.getElementById('confirmacionStatus').textContent = "Esta reserva se encuentra en conflicto con un bloqueo y necesita ser reagendada urgentemente, por favor comunicarse con el cliente.";
+                                        document.getElementById('confirmarBtn').style.display = 'none'; 
+                                    } else if (data.estado === 'pendiente') {
+                                        document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada. Puedes solicitar una confirmación al cliente por WhatsApp y después registrarla dando click en 'Confirmar Reserva'";
+                                        document.getElementById('confirmarBtn').style.display = 'block'; 
 
-
-                            // Mostrar u ocultar features según Usuario Admin/Cli
-                            if (esAdmin) {
-                                document.getElementById('info-cliente').style.display = 'block';  // Mostrar la información para administradores
-                                document.getElementById('notify-client-container').style.display = 'block'; // Mostrar la opción de notificaciones para administradores
-                                document.getElementById('mapsBtn').style.display = 'none'; // Ocultar dirección por maps
-                                document.getElementById('notify-client').checked = true; // Marcar el checkbox por defecto para administradores             
-                                document.getElementById('alertContactoCliente').style.display = 'none'; // Ocultar alerta de contacto para administradores
-                    
-                                // Check confirmation status and update UI accordingly
-                                if (data.estado === 'confirmado') {
-                                    document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
-                                    document.getElementById('confirmarBtn').style.display = 'none'; // Hide manual confirmation button
-                                } else if (data.estado === 'pendiente') {
-                                    document.getElementById('confirmacionStatus').textContent = "Esta reserva aún no ha sido confirmada. Puedes solicitar una confirmación al cliente por WhatsApp y después registrarla dando click en 'Confirmar Reserva'";
-                                    document.getElementById('confirmarBtn').style.display = 'block'; // Show manual confirmation button
-
-                                    // Función para confirmar la reserva desde el modal
-                                    document.getElementById('confirmarBtn').onclick = function(event) {
-                                        event.preventDefault();  // Evitar que se recargue la página
-                                    
-                                        fetch(`/confirmar_reserva/${editEventId}/`, {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRFToken': getCookie('csrftoken')  // CSRF token
-                                            }
-                                        })
-                                        .then(response => response.json())
-                                        .then(result => {
-                                            console.log('Resultado de la confirmación:', result);  // Ver la respuesta del servidor en la consola
+                                        // Función para confirmar la reserva desde el modal
+                                        document.getElementById('confirmarBtn').onclick = function(event) {
+                                            event.preventDefault();  // Evitar que se recargue la página
                                         
-                                            if (result.success) {
-                                                // Obtener el evento del calendario
-                                                var event = calendar.getEventById(editEventId);
-                                                if (event) {
-                                                    // Cambiar el color a verde (confirmado)
-                                                    event.setProp('classNames', ['fc-event-confirmado']);  // Cambiar el color a verde
-                                                    event.setExtendedProp('estado', 'confirmado');  // Marcar el evento como confirmado
-                                        
-                                                    // Actualizar el mensaje de confirmación
-                                                    document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
-                                                    document.getElementById('confirmarBtn').style.display = 'none';  // Ocultar el botón de confirmación
-                                        
-                                                    // Cerrar el modal
-                                                    var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
-                                                    eventModal.hide();
-
-                                                    // Recargar la página para reflejar el cambio
-                                                    window.location.reload();  // Recargar la página para actualizar el calendario
+                                            fetch(`/confirmar_reserva/${editEventId}/`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRFToken': getCookie('csrftoken')  // CSRF token
                                                 }
-                                            } else {
-                                                alert('Error al confirmar la reserva.');
-                                            }
-                                        })
-                                        .catch(error => {
-                                            console.error('Error en la confirmación:', error);
-                                            alert('Error en la confirmación.');
-                                        });                                        
-                                    };                                                                       
+                                            })
+                                            .then(response => response.json())
+                                            .then(result => {
+                                                console.log('Resultado de la confirmación:', result);  // Ver la respuesta del servidor en la consola
+                                            
+                                                if (result.success) {
+                                                    // Obtener el evento del calendario
+                                                    var event = calendar.getEventById(editEventId);
+                                                    if (event) {
+                                                        // Cambiar el color a verde (confirmado)
+                                                        event.setProp('classNames', ['fc-event-confirmado']);  // Cambiar el color a verde
+                                                        event.setExtendedProp('estado', 'confirmado');  // Marcar el evento como confirmado
+                                            
+                                                        // Actualizar el mensaje de confirmación
+                                                        document.getElementById('confirmacionStatus').textContent = "Esta reserva ha sido confirmada.";
+                                                        document.getElementById('confirmarBtn').style.display = 'none';  // Ocultar el botón de confirmación
+                                            
+                                                        // Cerrar el modal
+                                                        var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+                                                        eventModal.hide();
+
+                                                        // Recargar la página para reflejar el cambio
+                                                        window.location.reload();  // Recargar la página para actualizar el calendario
+                                                    }
+                                                } else {
+                                                    alert('Error al confirmar la reserva.');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                console.error('Error en la confirmación:', error);
+                                                alert('Error en la confirmación.');
+                                            });                                        
+                                        };                                                                       
+                                    }
+                                    document.getElementById('confirmacionStatus').style.display = 'block';  // Show confirmation message
+                                    
+                                } else {
+                                    document.getElementById('editEventCategoria').disabled = true; // Deshabilitar datos de la cita 
+                                    document.getElementById('editEventServicio').disabled = true;
+                                    document.getElementById('editEventFecha').disabled = true;
+                                    document.getElementById('editEventHora').disabled = true;
+                                    document.getElementById('deleteEventBtn').style.display = 'none'; // Ocultar botones
+                                    document.getElementById('saveEventBtn').style.display = 'none'; 
+                                    document.getElementById('info-cliente').style.display = 'none';  // Ocultar la información para clientes
+                                    document.getElementById('notify-client-container').style.display = 'none'; // Ocultar la opción de notificaciones para clientes                                
+                                    document.getElementById('confirmacionStatus').style.display = 'none'; // Ocultar el mensaje
+                                    document.getElementById('confirmarBtn').style.display = 'none'; // Ocultar el mensaje
+                                    
                                 }
-                                document.getElementById('confirmacionStatus').style.display = 'block';  // Show confirmation message
                                 
-                            } else {
-                                document.getElementById('editEventCategoria').disabled = true; // Deshabilitar datos de la cita 
-                                document.getElementById('editEventServicio').disabled = true;
-                                document.getElementById('editEventFecha').disabled = true;
-                                document.getElementById('editEventHora').disabled = true;
-                                document.getElementById('deleteEventBtn').style.display = 'none'; // Ocultar botones
-                                document.getElementById('saveEventBtn').style.display = 'none'; 
-                                document.getElementById('info-cliente').style.display = 'none';  // Ocultar la información para clientes
-                                document.getElementById('notify-client-container').style.display = 'none'; // Ocultar la opción de notificaciones para clientes                                
-                                document.getElementById('confirmacionStatus').style.display = 'none'; // Ocultar el mensaje
-                                document.getElementById('confirmarBtn').style.display = 'none'; // Ocultar el mensaje
-                                
-                            }
-                    
-                            // Ajustar el mensaje automático de WhatsApp para el cliente o el administrador
-                            var whatsappBtn = document.getElementById('whatsappBtn');
-                            if (esAdmin) {
-                                whatsappBtn.onclick = function() {
-                                    var mensajeAdmin = `¡Empezó la cuenta regresiva! ${data.nombre}, te esperamos en *Avenida Las Perdices 2990, Local 33, Peñalolén.* Nuestra cita es el ${data.fecha_inicio.split("T")[0]} a las ${data.hora_inicio} horas. *¿Confirmas tu cita? Favor de responder sí o no.*`;
-                                    var numeroCliente = document.getElementById('editEventContacto').value.replace(/\s+/g, '');  // Elimina todos los espacios en el número
-                                    window.open(`https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensajeAdmin)}`);
+                                // Ajustar el mensaje automático de WhatsApp para el cliente o el administrador
+                                var whatsappBtn = document.getElementById('whatsappBtn');
+                                if (esAdmin) {
+                                    whatsappBtn.onclick = function() {
+                                        var mensajeAdmin = `¡Empezó la cuenta regresiva! ${data.nombre}, te esperamos en *Avenida Las Perdices 2990, Local 33, Peñalolén.* Nuestra cita es el ${data.fecha_inicio.split("T")[0]} a las ${data.hora_inicio} horas. *¿Confirmas tu cita? Favor de responder sí o no.*`;
+                                        var numeroCliente = document.getElementById('editEventContacto').value.replace(/\s+/g, '');  // Elimina todos los espacios en el número
+                                        window.open(`https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensajeAdmin)}`);
+                                    };
+                                } else {
+                                    whatsappBtn.onclick = function() {
+                                        var mensajeCliente = `Hola, soy ${data.nombre} y necesito ayuda con mi cita para ${data.categoria_nombre} - ${data.servicio_nombre}, con fecha: ${data.fecha_inicio.split("T")[0]}, Hora: ${data.hora_inicio}.`;
+                                        window.open(`https://wa.me/56974862722?text=${encodeURIComponent(mensajeCliente)}`);
+                                    };
+                                }
+                        
+                                // Agregar funcionalidad para Google Maps
+                                var mapsBtn = document.getElementById('mapsBtn');
+                                mapsBtn.onclick = function() {
+                                    window.open('https://www.google.com/maps/place/Salón+Capricho+Divino/@-33.4911126,-70.5399623,19.92z/data=!4m14!1m7!3m6!1s0x9662d1ed068f6a27:0xf8ddbd4f5be42129!2sAv.+Las+Perdices+2900,+Local+33,+Peñalolén,+Región+Metropolitana!3b1!8m2!3d-33.4902708!4d-70.5401966!3m5!1s0x9662d1b097c1146b:0xc1abefa9ffaeb04d!8m2!3d-33.4912505!4d-70.5400394!16s%2Fg%2F11vprzckfs?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D');
                                 };
-                            } else {
-                                whatsappBtn.onclick = function() {
-                                    var mensajeCliente = `Hola, soy ${data.nombre} y necesito ayuda con mi cita para ${data.categoria_nombre} - ${data.servicio_nombre}, con fecha: ${data.fecha_inicio.split("T")[0]}, Hora: ${data.hora_inicio}.`;
-                                    window.open(`https://wa.me/56974862722?text=${encodeURIComponent(mensajeCliente)}`);
-                                };
-                            }
-                    
-                            // Agregar funcionalidad para Google Maps
-                            var mapsBtn = document.getElementById('mapsBtn');
-                            mapsBtn.onclick = function() {
-                                window.open('https://www.google.com/maps/place/Salón+Capricho+Divino/@-33.4911126,-70.5399623,19.92z/data=!4m14!1m7!3m6!1s0x9662d1ed068f6a27:0xf8ddbd4f5be42129!2sAv.+Las+Perdices+2900,+Local+33,+Peñalolén,+Región+Metropolitana!3b1!8m2!3d-33.4902708!4d-70.5401966!3m5!1s0x9662d1b097c1146b:0xc1abefa9ffaeb04d!8m2!3d-33.4912505!4d-70.5400394!16s%2Fg%2F11vprzckfs?entry=ttu&g_ep=EgoyMDI0MTAyMi4wIKXMDSoASAFQAw%3D%3D');
-                            };
-                    
-                            // Mostrar el modal
-                            var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), {});
-                            eventModal.show();
-                        })
-                        .catch(error => {
-                            console.error('Error al obtener los detalles de la reserva:', error);
-                        });
+                        
+                                // Mostrar el modal
+                                var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), {});
+                                eventModal.show();
+                            })
+                            .catch(error => {
+                                console.error('Error al obtener los detalles de la reserva:', error);
+                            });
+                        }
                     }
                 });
 
@@ -612,22 +896,180 @@
                 alert('Error en la solicitud de eliminación.');
             });
         }
-
-        // Función para obtener el CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }     
     });
+
+    function eliminarBloqueo(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este bloqueo?')) {
+            return;
+        }
+    
+        const csrfToken = getCookie('csrftoken'); // Recuperar el token CSRF
+    
+        fetch(`/gestionar_bloqueos/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken // Agregar el token CSRF al encabezado
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al eliminar el bloqueo.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Bloqueo eliminado correctamente.');
+                window.location.reload(); // Recargar la página para reflejar los cambios
+            } else {
+                console.error('Error al eliminar el bloqueo:', data.message);
+                alert('Error al eliminar el bloqueo.');
+            }
+        })
+        .catch(error => console.error('Error al eliminar el bloqueo:', error));
+    }    
+
+    function editarBloqueo(id) {
+        // Cargar datos del bloqueo para editar
+        fetch(`/gestionar_bloqueos/${id}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.bloqueo) {
+                    console.log('Categoría del bloqueo a editar:', data.bloqueo.categoria); // Depuración
+    
+                    // Cerrar el modal de "Ver Bloqueos Activos"
+                    const verBloqueosModal = bootstrap.Modal.getInstance(document.getElementById('verBloqueosModal'));
+                    if (verBloqueosModal) {
+                        verBloqueosModal.hide();
+                    }
+    
+                    // Cargar categorías y establecer la seleccionada
+                    fetch('/obtener_categorias/')
+                        .then(response => response.json())
+                        .then(categoriasData => {
+                            const bloqueoCategoriaSelect = document.getElementById('bloqueoCategoria');
+                            bloqueoCategoriaSelect.innerHTML = ''; // Limpiar las opciones actuales
+    
+                            categoriasData.categorias.forEach(categoria => {
+                                const option = document.createElement('option');
+                                option.value = categoria.id; // Usar el ID de la categoría como valor
+                                option.text = categoria.nombre;
+                                bloqueoCategoriaSelect.appendChild(option);
+                            });
+    
+                            // Seleccionar la categoría correspondiente al bloqueo
+                            const categoriaBloqueoId = parseInt(data.bloqueo.categoria); // Convertir a entero
+                            bloqueoCategoriaSelect.value = categoriaBloqueoId.toString(); // Asegurarse de usar string
+    
+                            // Depuración: Verificar categorías y selección
+                            console.log('Categoría esperada:', categoriaBloqueoId);
+                            console.log(
+                                'Opciones disponibles:',
+                                Array.from(bloqueoCategoriaSelect.options).map(opt => ({
+                                    value: opt.value,
+                                    text: opt.text,
+                                }))
+                            );
+    
+                            // Forzar selección si el valor no se establece correctamente
+                            if (bloqueoCategoriaSelect.value !== categoriaBloqueoId.toString()) {
+                                Array.from(bloqueoCategoriaSelect.options).forEach(option => {
+                                    if (parseInt(option.value) === categoriaBloqueoId) {
+                                        option.selected = true; // Marcar explícitamente la opción
+                                    }
+                                });
+                                console.warn(
+                                    `Forzando selección manual para la categoría ID: ${categoriaBloqueoId}`
+                                );
+                            }
+    
+                            // Forzar un render del select (para navegadores que no actualizan inmediatamente)
+                            bloqueoCategoriaSelect.dispatchEvent(new Event('change'));
+                            bloqueoCategoriaSelect.focus();
+    
+                            // Como último recurso, agregar un timeout para asegurar el render
+                            setTimeout(() => {
+                                bloqueoCategoriaSelect.value = categoriaBloqueoId.toString();
+                                bloqueoCategoriaSelect.dispatchEvent(new Event('change'));
+                                console.log(
+                                    'Valor del select después del timeout:',
+                                    bloqueoCategoriaSelect.value
+                                );
+                            }, 100);
+                        })
+                        .catch(error => console.error('Error al cargar categorías:', error));
+    
+                    // Formatear las fechas para los campos de tipo datetime-local
+                    const fechaInicio = new Date(data.bloqueo.fecha_inicio);
+                    const fechaFin = new Date(data.bloqueo.fecha_fin);
+    
+                    document.getElementById('bloqueoFechaInicio').value = fechaInicio
+                        .toISOString()
+                        .slice(0, 16);
+                    document.getElementById('bloqueoFechaFin').value = fechaFin.toISOString().slice(0, 16);
+                    document.getElementById('bloqueoMotivo').value = data.bloqueo.motivo;
+    
+                    // Cambiar el título del modal
+                    document.getElementById('bloqueoModalLabel').textContent = 'Editar Bloqueo';
+    
+                    // Asignar el ID del bloqueo al botón "Guardar"
+                    document.getElementById('guardarBloqueo').setAttribute('data-bloqueo-id', id);
+    
+                    // Mostrar el modal
+                    const modal = new bootstrap.Modal(document.getElementById('bloqueoModal'));
+                    modal.show();
+    
+                    // Remover eventos previos del botón "Guardar"
+                    const guardarBtn = document.getElementById('guardarBloqueo');
+                    const nuevoGuardarBtn = guardarBtn.cloneNode(true);
+                    guardarBtn.parentNode.replaceChild(nuevoGuardarBtn, guardarBtn);
+    
+                    // Asignar nuevo evento al botón "Guardar" para editar
+                    nuevoGuardarBtn.addEventListener('click', function () {
+                        const categoria = document.getElementById('bloqueoCategoria').value;
+                        const fechaInicio = document.getElementById('bloqueoFechaInicio').value;
+                        const fechaFin = document.getElementById('bloqueoFechaFin').value;
+                        const motivo = document.getElementById('bloqueoMotivo').value;
+    
+                        if (!categoria || !fechaInicio || !fechaFin) {
+                            alert('Por favor completa todos los campos.');
+                            return;
+                        }
+    
+                        const bloqueoData = {
+                            categoria: parseInt(categoria),
+                            fecha_inicio: fechaInicio,
+                            fecha_fin: fechaFin,
+                            motivo: motivo,
+                        };
+    
+                        fetch(`/gestionar_bloqueos/${id}/`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken'), // Incluir el token CSRF
+                            },
+                            body: JSON.stringify(bloqueoData),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    alert('Bloqueo actualizado correctamente.');
+                                    window.location.reload(); // Recargar la página para reflejar los cambios
+                                } else {
+                                    console.error('Error al actualizar el bloqueo:', data.message);
+                                    alert('Error al actualizar el bloqueo.');
+                                }
+                            })
+                            .catch(error => console.error('Error al actualizar el bloqueo:', error));
+                    });
+                } else {
+                    alert('No se pudo cargar la información del bloqueo.');
+                }
+            })
+            .catch(error => console.error('Error al cargar el bloqueo para edición:', error));
+    }       
+    
 </script>
 {% endblock %}

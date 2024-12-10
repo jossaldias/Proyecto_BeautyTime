@@ -30,7 +30,8 @@ from .models import *
 from .forms import *
 from .cart import Cart
 
-from .models import Producto, Categoria
+from .models import Producto, Categoria, BloqueoHorario
+from django.views.decorators.csrf import csrf_exempt
 
 # HOME
 
@@ -498,6 +499,25 @@ def obtener_reservas(request):
         'estado': reserva.estado
     } for reserva in reservas]
 
+    # Incluir bloqueos si el contexto es 'reservar'
+    if contexto == 'reservar':
+        categoria_id = request.GET.get('categoria')
+        bloqueos = BloqueoHorario.objects.filter(categoria_id=categoria_id)
+        bloqueos_data = [{
+            'id': f'bloqueo-{bloqueo.id}',
+            'categoria': bloqueo.categoria.nombre,
+            'nombre': 'Horario bloqueado',
+            'email': None,
+            'contacto': None,
+            'servicio': None,
+            'hora_inicio': bloqueo.fecha_inicio.time().strftime("%H:%M"),
+            'hora_fin': bloqueo.fecha_fin.time().strftime("%H:%M"),
+            'fecha_inicio': bloqueo.fecha_inicio.isoformat(),
+            'fecha_fin': bloqueo.fecha_fin.isoformat(),
+            'estado': 'bloqueado'
+        } for bloqueo in bloqueos]
+        reservas_data.extend(bloqueos_data)
+
     return JsonResponse({'reservas': reservas_data})
 
 
@@ -639,6 +659,7 @@ def obtener_reserva(request, id):
         return JsonResponse({'success': False, 'message': 'Reserva no encontrada.'}, status=404)
 
 # Confirmar reservas ya sea por correo desde el cliente o por whatsapp desde el admin.
+@login_required
 def confirmar_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id)
 
@@ -767,7 +788,6 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
 #FUNCIÓN QUE DEVUELVE AL USUARIO A LA PÁGINA INDICANDO PEDIDO LISTO
 @login_required
 def pedidoListo(request):
-    
     return render(request, 'order/pedidoListo.html')
 
 
@@ -777,8 +797,8 @@ def misOrdenes(request):
     ordenes = Order.objects.filter(user=request.user)
     print(ordenes)
     return render(request, 'tienda/misOrdenes.html',  {'ordenes': ordenes} )
-#ATENCION CLIENTE
 
+#ATENCION CLIENTE
 def atencioncliente(request):
     return render(request, 'tienda/atencioncliente.html')
 
@@ -858,3 +878,100 @@ def dashboard(request):
 
 def quienes_somos(request):
     return render(request, 'tienda/quienessomos.html')
+
+
+
+# Gestionar Bloqueos
+@csrf_exempt
+def gestionar_bloqueos(request):
+    if request.method == 'GET':
+        bloqueos = BloqueoHorario.objects.select_related('categoria').all()
+        data = [
+            {
+                'id': bloqueo.id,
+                'categoria': bloqueo.categoria.nombre if bloqueo.categoria else "Sin categoría",
+                'fecha_inicio': bloqueo.fecha_inicio.isoformat(),
+                'fecha_fin': bloqueo.fecha_fin.isoformat(),
+                'motivo': bloqueo.motivo,
+            }
+            for bloqueo in bloqueos
+        ]
+        return JsonResponse({'bloqueos': data})
+
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Cargar JSON desde el cuerpo de la solicitud
+            categoria_id = data.get('categoria')
+            fecha_inicio = data.get('fecha_inicio')
+            fecha_fin = data.get('fecha_fin')
+            motivo = data.get('motivo', '')
+
+            if not all([categoria_id, fecha_inicio, fecha_fin]):
+                return JsonResponse({'status': 'error', 'message': 'Todos los campos son obligatorios'}, status=400)
+
+            BloqueoHorario.objects.create(
+                categoria_id=categoria_id,
+                fecha_inicio=fecha_inicio,
+                fecha_fin=fecha_fin,
+                motivo=motivo
+            )
+            return JsonResponse({'status': 'success', 'message': 'Bloqueo creado exitosamente.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Formato de JSON inválido'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+
+@csrf_exempt
+def gestionar_bloqueo_detalle(request, id):
+    try:
+        bloqueo = BloqueoHorario.objects.get(id=id)
+
+        if request.method == 'GET':
+            return JsonResponse({
+                'bloqueo': {
+                    'id': bloqueo.id,
+                    'categoria': bloqueo.categoria.id if bloqueo.categoria else None,
+                    'fecha_inicio': bloqueo.fecha_inicio.isoformat(),
+                    'fecha_fin': bloqueo.fecha_fin.isoformat(),
+                    'motivo': bloqueo.motivo
+                }
+            })
+
+        elif request.method == 'PUT':
+            data = json.loads(request.body)
+            bloqueo.categoria_id = data.get('categoria')
+            bloqueo.fecha_inicio = data.get('fecha_inicio')
+            bloqueo.fecha_fin = data.get('fecha_fin')
+            bloqueo.motivo = data.get('motivo', '')
+            bloqueo.save()
+            return JsonResponse({'status': 'success', 'message': 'Bloqueo actualizado correctamente.'})
+
+        elif request.method == 'DELETE':
+            bloqueo.delete()
+            return JsonResponse({'status': 'success', 'message': 'Bloqueo eliminado correctamente.'})
+
+    except BloqueoHorario.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'El bloqueo no existe.'}, status=404)
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
+
+
+
+def obtener_bloqueos(request):
+    bloqueos = BloqueoHorario.objects.select_related('categoria').all()
+    data = [
+        {
+            'id': bloqueo.id,
+            'categoria': bloqueo.categoria.nombre if bloqueo.categoria else "Sin categoría",
+            'fecha_inicio': bloqueo.fecha_inicio.isoformat(),
+            'fecha_fin': bloqueo.fecha_fin.isoformat(),
+            'motivo': bloqueo.motivo,
+        }
+        for bloqueo in bloqueos
+    ]
+    return JsonResponse({'bloqueos': data})
+
+

@@ -43,6 +43,9 @@ urlpatterns = [
     path('obtener_categorias/', views.obtener_categorias, name='obtener_categorias'),
     path('obtener_reserva/<int:id>/', views.obtener_reserva, name='obtener_reserva'),
     path('confirmar_reserva/<int:reserva_id>/', views.confirmar_reserva, name='confirmar_reserva'),
+    path('gestionar_bloqueos/', views.gestionar_bloqueos, name='gestionar_bloqueos'),
+    path('gestionar_bloqueos/<int:id>/', views.gestionar_bloqueo_detalle, name='gestionar_bloqueo_detalle'),
+    path('obtener_bloqueos/', views.obtener_bloqueos, name='obtener_bloqueos'),
 
     path('paginas/carrito/', views.cart_detalle, name='carrito'),
     path("add/<int:producto_id>/", views.cart_add, name="add"),
