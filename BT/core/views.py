@@ -578,8 +578,8 @@ def editar_cita(request, id):
 
             # Actualizar la reserva
             reserva.servicio = servicio
-            reserva.fecha = fecha
-            reserva.hora = hora
+            reserva.fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+            reserva.hora = datetime.strptime(hora, '%H:%M').time()
             reserva.save()
 
             # Si el administrador ha decidido notificar al cliente, enviamos el correo
