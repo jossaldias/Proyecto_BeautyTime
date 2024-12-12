@@ -18,7 +18,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Fecha de mañana (local): {manana_local.date()}")
 
         # Filtrar reservas que están programadas para mañana (zona horaria local) y que no han sido confirmadas
-        reservas = Reserva.objects.filter(fecha=manana_local.date(), confirmado=False)
+        reservas = Reserva.objects.filter(fecha=manana_local.date(), estado='pendiente')
         self.stdout.write(f"Reservas encontradas: {reservas.count()}")
 
         # Enviar un correo a cada cliente con una reserva para mañana
